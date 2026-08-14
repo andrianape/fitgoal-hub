@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: fitgoal-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: fitgoal_db
+      POSTGRES_USER: fitgoal_user
+      POSTGRES_PASSWORD: fitgoal_password
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - fitgoal_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U fitgoal_user -d fitgoal_db
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  fitgoal_postgres_data:
