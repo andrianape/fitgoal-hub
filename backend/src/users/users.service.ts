@@ -128,9 +128,6 @@ export class UsersService {
             user.phoneNumber = updateUserDto.phoneNumber.trim();
         }
 
-        if(updateUserDto.role !== undefined) {
-            user.role = updateUserDto.role;
-        }
 
         await this.userRepository.save(user);
 
