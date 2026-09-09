@@ -134,6 +134,32 @@ export class UsersService {
         return this.findOne(id);
     }
 
+    async updateRole(
+  id: number,
+  role: UserRole,
+): Promise<User> {
+  const user = await this.findOne(id);
+
+  user.role = role;
+
+  await this.userRepository.save(user);
+
+  return this.findOne(id);
+}
+
+async updateStatus(
+  id: number,
+  isActive: boolean,
+): Promise<User> {
+  const user = await this.findOne(id);
+
+  user.isActive = isActive;
+
+  await this.userRepository.save(user);
+
+  return this.findOne(id);
+}
+
     async remove(id: number): Promise<void> {
         const user = await this.findOne(id);
 

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,6 +17,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from './enums/user-role.enum';
 import { UsersService } from './users.service';
@@ -41,6 +44,50 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Patch(':id/role')
+  @Roles(UserRole.ADMIN)
+  updateRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserRoleDto: UpdateUserRoleDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
+  ) {
+    if (
+      id === currentUser.id &&
+      updateUserRoleDto.role !== UserRole.ADMIN
+    ) {
+      throw new BadRequestException(
+        'Administrator ne može sam sebi ukloniti administratorsku ulogu.',
+      );
+    }
+
+    return this.usersService.updateRole(
+      id,
+      updateUserRoleDto.role,
+    );
+  }
+
+  @Patch(':id/status')
+  @Roles(UserRole.ADMIN)
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserStatusDto: UpdateUserStatusDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
+  ) {
+    if (
+      id === currentUser.id &&
+      updateUserStatusDto.isActive === false
+    ) {
+      throw new BadRequestException(
+        'Administrator ne može deaktivirati sopstveni nalog.',
+      );
+    }
+
+    return this.usersService.updateStatus(
+      id,
+      updateUserStatusDto.isActive,
+    );
+  }
+
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -55,7 +102,16 @@ export class UsersController {
   @Delete(':id')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: AuthenticatedUser,
+  ) {
+    if (id === currentUser.id) {
+      throw new BadRequestException(
+        'Administrator ne može obrisati sopstveni nalog.',
+      );
+    }
+
     return this.usersService.remove(id);
   }
 
