@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -18,6 +19,7 @@ import { CreateProfessionalProfileDto } from './dto/create-professional-profile.
 import { UpdateProfessionalProfileDto } from './dto/update-professional-profile.dto';
 import { UpdateVerificationDto } from './dto/update-verification.dto';
 import { ProfessionalsService } from './professionals.service';
+import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
 
 @Controller('professionals')
 export class ProfessionalsController {
@@ -26,10 +28,12 @@ export class ProfessionalsController {
       ProfessionalsService,
   ) {}
 
-  @Get()
-  findAll() {
-    return this.professionalsService.findAll();
-  }
+ @Get()
+findAll(
+  @Query() filters: FilterProfessionalsDto,
+) {
+  return this.professionalsService.findAll(filters);
+}
 
   @Get('profile/me')
   @UseGuards(JwtAuthGuard, RolesGuard)

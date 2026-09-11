@@ -9,6 +9,7 @@ import { User } from '../users/entities/user.entity';
 import { CreateProfessionalProfileDto } from './dto/create-professional-profile.dto';
 import { UpdateProfessionalProfileDto } from './dto/update-professional-profile.dto';
 import { ProfessionalProfile } from './entities/professional-profile.entity';
+import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
 
 @Injectable()
 export class ProfessionalsService {
@@ -21,21 +22,82 @@ export class ProfessionalsService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  findAll(): Promise<ProfessionalProfile[]> {
-    return this.profileRepository.find({
-      where: {
-        isVerified: true,
-      },
-      relations: {
-        user: {
-          city: true,
-        },
-      },
-      order: {
-        createdAt: 'DESC',
-      },
+  async findAll(filters: FilterProfessionalsDto) {
+  const page = filters.page;
+  const limit = filters.limit;
+  const skip = (page - 1) * limit;
+
+  const query = this.profileRepository
+    .createQueryBuilder('profile')
+    .leftJoinAndSelect('profile.user', 'user')
+    .leftJoinAndSelect('user.city', 'city')
+    .where('profile.isVerified = :isVerified', {
+      isVerified: true,
+    });
+
+  if (filters.role !== undefined) {
+    query.andWhere('user.role = :role', {
+      role: filters.role,
     });
   }
+
+  if (filters.cityId !== undefined) {
+    query.andWhere('city.id = :cityId', {
+      cityId: filters.cityId,
+    });
+  }
+
+  if (filters.specialty !== undefined) {
+    query.andWhere(
+      `EXISTS (
+        SELECT 1
+        FROM unnest(profile.specialties) AS specialty
+        WHERE LOWER(specialty) LIKE LOWER(:specialty)
+      )`,
+      {
+        specialty: `%${filters.specialty.trim()}%`,
+      },
+    );
+  }
+
+  if (filters.maxPrice !== undefined) {
+    query.andWhere(
+      'profile.pricePerSession <= :maxPrice',
+      {
+        maxPrice: filters.maxPrice,
+      },
+    );
+  }
+
+  if (filters.search !== undefined) {
+    const search = `%${filters.search.trim()}%`;
+
+    query.andWhere(
+      `(
+        LOWER(user.firstName) LIKE LOWER(:search)
+        OR LOWER(user.lastName) LIKE LOWER(:search)
+        OR LOWER(CONCAT(user.firstName, ' ', user.lastName))
+          LIKE LOWER(:search)
+      )`,
+      { search },
+    );
+  }
+
+  query
+    .orderBy('profile.createdAt', 'DESC')
+    .skip(skip)
+    .take(limit);
+
+  const [data, total] = await query.getManyAndCount();
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
 
   async findOne(id: number): Promise<ProfessionalProfile> {
     const profile = await this.profileRepository.findOne({
