@@ -7,6 +7,7 @@ import { CitiesModule } from './cities/cities.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfessionalsModule } from './professionals/professionals.module';
+import { AvailabilityModule } from './availability/availability.module';
 
 @Module({
   imports: [
@@ -39,6 +40,8 @@ import { ProfessionalsModule } from './professionals/professionals.module';
     AuthModule,
 
     ProfessionalsModule,
+
+    AvailabilityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
