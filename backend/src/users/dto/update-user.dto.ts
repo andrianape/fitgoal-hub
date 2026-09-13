@@ -1,9 +1,11 @@
 import {
   IsEmail,
+  IsInt,
   IsOptional,
   IsString,
   Length,
   Matches,
+  Min,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -27,4 +29,9 @@ export class UpdateUserDto {
     message: 'Broj telefona nije u ispravnom formatu.',
   })
   phoneNumber?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  cityId?: number | null;
 }

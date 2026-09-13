@@ -17,6 +17,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -26,12 +27,26 @@ import { UsersService } from './users.service';
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+  ) {}
 
   @Get()
   @Roles(UserRole.ADMIN)
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Patch('me/password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  changePassword(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(
+      currentUser.id,
+      dto,
+    );
   }
 
   @Get(':id')
@@ -96,7 +111,10 @@ export class UsersController {
   ) {
     this.checkOwnerOrAdmin(id, currentUser);
 
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(
+      id,
+      updateUserDto,
+    );
   }
 
   @Delete(':id')
@@ -119,8 +137,11 @@ export class UsersController {
     requestedUserId: number,
     currentUser: AuthenticatedUser,
   ): void {
-    const isOwner = currentUser.id === requestedUserId;
-    const isAdmin = currentUser.role === UserRole.ADMIN;
+    const isOwner =
+      currentUser.id === requestedUserId;
+
+    const isAdmin =
+      currentUser.role === UserRole.ADMIN;
 
     if (!isOwner && !isAdmin) {
       throw new ForbiddenException(
