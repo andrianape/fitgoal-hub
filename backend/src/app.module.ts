@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProfessionalsModule } from './professionals/professionals.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -45,6 +46,8 @@ import { AppointmentsModule } from './appointments/appointments.module';
     AvailabilityModule,
 
     AppointmentsModule,
+
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
