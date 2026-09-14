@@ -10,6 +10,7 @@ import { ProfessionalsModule } from './professionals/professionals.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { PlansModule } from './plans/plans.module';
 
 @Module({
   imports: [
@@ -48,6 +49,8 @@ import { ReviewsModule } from './reviews/reviews.module';
     AppointmentsModule,
 
     ReviewsModule,
+
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [AppService],
