@@ -12,7 +12,7 @@ export class City {
   id!: number;
 
   @Column({
-    type:'varchar',
+    type: 'varchar',
     length: 100,
     unique: true,
   })

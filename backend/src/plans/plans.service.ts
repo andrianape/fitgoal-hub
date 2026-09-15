@@ -20,20 +20,16 @@ import { PlanType } from './enums/plan-type.enum';
 export class PlansService {
   constructor(
     @InjectRepository(Plan)
-    private readonly planRepository:
-      Repository<Plan>,
+    private readonly planRepository: Repository<Plan>,
 
     @InjectRepository(User)
-    private readonly userRepository:
-      Repository<User>,
+    private readonly userRepository: Repository<User>,
 
     @InjectRepository(ProfessionalProfile)
-    private readonly profileRepository:
-      Repository<ProfessionalProfile>,
+    private readonly profileRepository: Repository<ProfessionalProfile>,
 
     @InjectRepository(Appointment)
-    private readonly appointmentRepository:
-      Repository<Appointment>,
+    private readonly appointmentRepository: Repository<Appointment>,
   ) {}
 
   async create(
@@ -41,23 +37,19 @@ export class PlansService {
     professionalRole: UserRole,
     dto: CreatePlanDto,
   ): Promise<Plan> {
-    this.validatePlanType(
-      professionalRole,
-      dto.type,
-    );
+    this.validatePlanType(professionalRole, dto.type);
 
-    const professional =
-      await this.profileRepository.findOne({
-        where: {
-          user: {
-            id: professionalUserId,
-          },
-          isVerified: true,
+    const professional = await this.profileRepository.findOne({
+      where: {
+        user: {
+          id: professionalUserId,
         },
-        relations: {
-          user: true,
-        },
-      });
+        isVerified: true,
+      },
+      relations: {
+        user: true,
+      },
+    });
 
     if (!professional) {
       throw new NotFoundException(
@@ -74,34 +66,31 @@ export class PlansService {
     });
 
     if (!client) {
-      throw new NotFoundException(
-        'Aktivan klijentski nalog ne postoji.',
-      );
+      throw new NotFoundException('Aktivan klijentski nalog ne postoji.');
     }
 
-    const previousAppointment =
-      await this.appointmentRepository.findOne({
-        where: [
-          {
-            client: {
-              id: client.id,
-            },
-            professional: {
-              id: professional.id,
-            },
-            status: AppointmentStatus.CONFIRMED,
+    const previousAppointment = await this.appointmentRepository.findOne({
+      where: [
+        {
+          client: {
+            id: client.id,
           },
-          {
-            client: {
-              id: client.id,
-            },
-            professional: {
-              id: professional.id,
-            },
-            status: AppointmentStatus.COMPLETED,
+          professional: {
+            id: professional.id,
           },
-        ],
-      });
+          status: AppointmentStatus.CONFIRMED,
+        },
+        {
+          client: {
+            id: client.id,
+          },
+          professional: {
+            id: professional.id,
+          },
+          status: AppointmentStatus.COMPLETED,
+        },
+      ],
+    });
 
     if (!previousAppointment) {
       throw new ForbiddenException(
@@ -109,34 +98,26 @@ export class PlansService {
       );
     }
 
-    const dates = this.validateAndNormalizeDates(
-      dto.startDate,
-      dto.endDate,
-    );
+    const dates = this.validateAndNormalizeDates(dto.startDate, dto.endDate);
 
     const plan = this.planRepository.create({
       client,
       professional,
       type: dto.type,
       title: dto.title.trim(),
-      description:
-        dto.description?.trim() ?? null,
+      description: dto.description?.trim() ?? null,
       content: dto.content,
       startDate: dates.startDate,
       endDate: dates.endDate,
       isActive: true,
     });
 
-    const savedPlan =
-      await this.planRepository.save(plan);
+    const savedPlan = await this.planRepository.save(plan);
 
     return this.findOneDetailed(savedPlan.id);
   }
 
-  async findMine(
-    userId: number,
-    role: UserRole,
-  ): Promise<Plan[]> {
+  async findMine(userId: number, role: UserRole): Promise<Plan[]> {
     if (role === UserRole.CLIENT) {
       return this.planRepository.find({
         where: {
@@ -160,10 +141,7 @@ export class PlansService {
       });
     }
 
-    if (
-      role === UserRole.TRAINER ||
-      role === UserRole.NUTRITIONIST
-    ) {
+    if (role === UserRole.TRAINER || role === UserRole.NUTRITIONIST) {
       return this.planRepository.find({
         where: {
           professional: {
@@ -220,19 +198,14 @@ export class PlansService {
   ): Promise<Plan> {
     const plan = await this.findOneDetailed(id);
 
-    const isClient =
-      plan.client.id === currentUserId;
+    const isClient = plan.client.id === currentUserId;
 
-    const isAuthor =
-      plan.professional.user.id === currentUserId;
+    const isAuthor = plan.professional.user.id === currentUserId;
 
-    const isAdmin =
-      currentUserRole === UserRole.ADMIN;
+    const isAdmin = currentUserRole === UserRole.ADMIN;
 
     if (!isClient && !isAuthor && !isAdmin) {
-      throw new ForbiddenException(
-        'Nemate dozvolu da vidite ovaj plan.',
-      );
+      throw new ForbiddenException('Nemate dozvolu da vidite ovaj plan.');
     }
 
     return plan;
@@ -245,10 +218,7 @@ export class PlansService {
   ): Promise<Plan> {
     const plan = await this.findOneDetailed(id);
 
-    if (
-      plan.professional.user.id !==
-      professionalUserId
-    ) {
+    if (plan.professional.user.id !== professionalUserId) {
       throw new ForbiddenException(
         'Možete menjati samo planove koje ste napravili.',
       );
@@ -266,22 +236,12 @@ export class PlansService {
       plan.content = dto.content;
     }
 
-    if (
-      dto.startDate !== undefined ||
-      dto.endDate !== undefined
-    ) {
-      const startDate =
-        dto.startDate ?? plan.startDate;
+    if (dto.startDate !== undefined || dto.endDate !== undefined) {
+      const startDate = dto.startDate ?? plan.startDate;
 
-      const endDate =
-        dto.endDate !== undefined
-          ? dto.endDate
-          : plan.endDate;
+      const endDate = dto.endDate !== undefined ? dto.endDate : plan.endDate;
 
-      const dates = this.validateAndNormalizeDates(
-        startDate,
-        endDate,
-      );
+      const dates = this.validateAndNormalizeDates(startDate, endDate);
 
       plan.startDate = dates.startDate;
       plan.endDate = dates.endDate;
@@ -303,38 +263,25 @@ export class PlansService {
   ): Promise<void> {
     const plan = await this.findOneDetailed(id);
 
-    const isAuthor =
-      plan.professional.user.id === currentUserId;
+    const isAuthor = plan.professional.user.id === currentUserId;
 
-    const isAdmin =
-      currentUserRole === UserRole.ADMIN;
+    const isAdmin = currentUserRole === UserRole.ADMIN;
 
     if (!isAuthor && !isAdmin) {
-      throw new ForbiddenException(
-        'Nemate dozvolu da obrišete ovaj plan.',
-      );
+      throw new ForbiddenException('Nemate dozvolu da obrišete ovaj plan.');
     }
 
     await this.planRepository.remove(plan);
   }
 
-  private validatePlanType(
-    role: UserRole,
-    type: PlanType,
-  ): void {
-    if (
-      role === UserRole.TRAINER &&
-      type !== PlanType.WORKOUT
-    ) {
+  private validatePlanType(role: UserRole, type: PlanType): void {
+    if (role === UserRole.TRAINER && type !== PlanType.WORKOUT) {
       throw new ForbiddenException(
         'Trener može praviti samo planove treninga.',
       );
     }
 
-    if (
-      role === UserRole.NUTRITIONIST &&
-      type !== PlanType.NUTRITION
-    ) {
+    if (role === UserRole.NUTRITIONIST && type !== PlanType.NUTRITION) {
       throw new ForbiddenException(
         'Nutricionista može praviti samo planove ishrane.',
       );
@@ -348,16 +295,11 @@ export class PlansService {
     startDate: string;
     endDate: string | null;
   } {
-    const normalizedStartDate =
-      startDate.slice(0, 10);
+    const normalizedStartDate = startDate.slice(0, 10);
 
-    const normalizedEndDate =
-      endDate?.slice(0, 10) ?? null;
+    const normalizedEndDate = endDate?.slice(0, 10) ?? null;
 
-    if (
-      normalizedEndDate !== null &&
-      normalizedEndDate < normalizedStartDate
-    ) {
+    if (normalizedEndDate !== null && normalizedEndDate < normalizedStartDate) {
       throw new BadRequestException(
         'Datum završetka ne može biti pre datuma početka.',
       );
@@ -369,9 +311,7 @@ export class PlansService {
     };
   }
 
-  private async findOneDetailed(
-    id: number,
-  ): Promise<Plan> {
+  private async findOneDetailed(id: number): Promise<Plan> {
     const plan = await this.planRepository.findOne({
       where: {
         id,
@@ -389,9 +329,7 @@ export class PlansService {
     });
 
     if (!plan) {
-      throw new NotFoundException(
-        'Plan ne postoji.',
-      );
+      throw new NotFoundException('Plan ne postoji.');
     }
 
     return plan;

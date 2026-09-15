@@ -21,10 +21,7 @@ import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto'
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AppointmentsController {
-  constructor(
-    private readonly appointmentsService:
-      AppointmentsService,
-  ) {}
+  constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
   @Roles(UserRole.CLIENT)
@@ -32,20 +29,12 @@ export class AppointmentsController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: CreateAppointmentDto,
   ) {
-    return this.appointmentsService.create(
-      currentUser.id,
-      dto,
-    );
+    return this.appointmentsService.create(currentUser.id, dto);
   }
 
   @Get('me')
-  findMine(
-    @CurrentUser() currentUser: AuthenticatedUser,
-  ) {
-    return this.appointmentsService.findMine(
-      currentUser.id,
-      currentUser.role,
-    );
+  findMine(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.appointmentsService.findMine(currentUser.id, currentUser.role);
   }
 
   @Get()
@@ -60,26 +49,16 @@ export class AppointmentsController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: AuthenticatedUser,
   ) {
-    return this.appointmentsService.cancel(
-      id,
-      currentUser.id,
-    );
+    return this.appointmentsService.cancel(id, currentUser.id);
   }
 
   @Patch(':id/status')
-  @Roles(
-    UserRole.TRAINER,
-    UserRole.NUTRITIONIST,
-  )
+  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: UpdateAppointmentStatusDto,
   ) {
-    return this.appointmentsService.updateStatus(
-      id,
-      currentUser.id,
-      dto,
-    );
+    return this.appointmentsService.updateStatus(id, currentUser.id, dto);
   }
 }

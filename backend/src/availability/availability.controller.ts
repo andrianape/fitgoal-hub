@@ -21,29 +21,21 @@ import { AvailabilityService } from './availability.service';
 
 @Controller('availability')
 export class AvailabilityController {
-  constructor(
-    private readonly availabilityService:
-      AvailabilityService,
-  ) {}
+  constructor(private readonly availabilityService: AvailabilityService) {}
 
   @Get('professional/:professionalId')
   findAvailableByProfessional(
     @Param('professionalId', ParseIntPipe)
     professionalId: number,
   ) {
-    return this.availabilityService
-      .findAvailableByProfessional(professionalId);
+    return this.availabilityService.findAvailableByProfessional(professionalId);
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
-  findOwn(
-    @CurrentUser() currentUser: AuthenticatedUser,
-  ) {
-    return this.availabilityService.findOwn(
-      currentUser.id,
-    );
+  findOwn(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.availabilityService.findOwn(currentUser.id);
   }
 
   @Post()
@@ -53,10 +45,7 @@ export class AvailabilityController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: CreateAvailabilitySlotDto,
   ) {
-    return this.availabilityService.create(
-      currentUser.id,
-      dto,
-    );
+    return this.availabilityService.create(currentUser.id, dto);
   }
 
   @Delete(':id')
@@ -67,9 +56,6 @@ export class AvailabilityController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.availabilityService.remove(
-      currentUser.id,
-      id,
-    );
+    return this.availabilityService.remove(currentUser.id, id);
   }
 }

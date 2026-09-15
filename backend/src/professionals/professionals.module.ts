@@ -6,12 +6,7 @@ import { ProfessionalsController } from './professionals.controller';
 import { ProfessionalsService } from './professionals.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      ProfessionalProfile,
-      User,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([ProfessionalProfile, User])],
   controllers: [ProfessionalsController],
   providers: [ProfessionalsService],
   exports: [ProfessionalsService],

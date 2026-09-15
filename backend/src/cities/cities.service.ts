@@ -28,9 +28,7 @@ export class CitiesService {
     const city = await this.cityRepository.findOneBy({ id });
 
     if (!city) {
-      throw new NotFoundException(
-        `Grad sa ID vrednošću ${id} ne postoji.`,
-      );
+      throw new NotFoundException(`Grad sa ID vrednošću ${id} ne postoji.`);
     }
 
     return city;
@@ -44,9 +42,7 @@ export class CitiesService {
     });
 
     if (existingCity) {
-      throw new ConflictException(
-        `Grad "${normalizedName}" već postoji.`,
-      );
+      throw new ConflictException(`Grad "${normalizedName}" već postoji.`);
     }
 
     const city = this.cityRepository.create({
@@ -57,10 +53,7 @@ export class CitiesService {
     return this.cityRepository.save(city);
   }
 
-  async update(
-    id: number,
-    updateCityDto: UpdateCityDto,
-  ): Promise<City> {
+  async update(id: number, updateCityDto: UpdateCityDto): Promise<City> {
     const city = await this.findOne(id);
 
     if (updateCityDto.name !== undefined) {
@@ -71,9 +64,7 @@ export class CitiesService {
       });
 
       if (cityWithSameName && cityWithSameName.id !== id) {
-        throw new ConflictException(
-          `Grad "${normalizedName}" već postoji.`,
-        );
+        throw new ConflictException(`Grad "${normalizedName}" već postoji.`);
       }
 
       city.name = normalizedName;

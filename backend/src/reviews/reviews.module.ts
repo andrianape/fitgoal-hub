@@ -8,11 +8,7 @@ import { ReviewsService } from './reviews.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Review,
-      Appointment,
-      ProfessionalProfile,
-    ]),
+    TypeOrmModule.forFeature([Review, Appointment, ProfessionalProfile]),
   ],
   controllers: [ReviewsController],
   providers: [ReviewsService],

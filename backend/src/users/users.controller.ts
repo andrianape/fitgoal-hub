@@ -27,9 +27,7 @@ import { UsersService } from './users.service';
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get()
   @Roles(UserRole.ADMIN)
@@ -43,10 +41,7 @@ export class UsersController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: ChangePasswordDto,
   ) {
-    return this.usersService.changePassword(
-      currentUser.id,
-      dto,
-    );
+    return this.usersService.changePassword(currentUser.id, dto);
   }
 
   @Get(':id')
@@ -66,19 +61,13 @@ export class UsersController {
     @Body() updateUserRoleDto: UpdateUserRoleDto,
     @CurrentUser() currentUser: AuthenticatedUser,
   ) {
-    if (
-      id === currentUser.id &&
-      updateUserRoleDto.role !== UserRole.ADMIN
-    ) {
+    if (id === currentUser.id && updateUserRoleDto.role !== UserRole.ADMIN) {
       throw new BadRequestException(
         'Administrator ne može sam sebi ukloniti administratorsku ulogu.',
       );
     }
 
-    return this.usersService.updateRole(
-      id,
-      updateUserRoleDto.role,
-    );
+    return this.usersService.updateRole(id, updateUserRoleDto.role);
   }
 
   @Patch(':id/status')
@@ -88,19 +77,13 @@ export class UsersController {
     @Body() updateUserStatusDto: UpdateUserStatusDto,
     @CurrentUser() currentUser: AuthenticatedUser,
   ) {
-    if (
-      id === currentUser.id &&
-      updateUserStatusDto.isActive === false
-    ) {
+    if (id === currentUser.id && updateUserStatusDto.isActive === false) {
       throw new BadRequestException(
         'Administrator ne može deaktivirati sopstveni nalog.',
       );
     }
 
-    return this.usersService.updateStatus(
-      id,
-      updateUserStatusDto.isActive,
-    );
+    return this.usersService.updateStatus(id, updateUserStatusDto.isActive);
   }
 
   @Patch(':id')
@@ -111,10 +94,7 @@ export class UsersController {
   ) {
     this.checkOwnerOrAdmin(id, currentUser);
 
-    return this.usersService.update(
-      id,
-      updateUserDto,
-    );
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
@@ -137,11 +117,9 @@ export class UsersController {
     requestedUserId: number,
     currentUser: AuthenticatedUser,
   ): void {
-    const isOwner =
-      currentUser.id === requestedUserId;
+    const isOwner = currentUser.id === requestedUserId;
 
-    const isAdmin =
-      currentUser.role === UserRole.ADMIN;
+    const isAdmin = currentUser.role === UserRole.ADMIN;
 
     if (!isOwner && !isAdmin) {
       throw new ForbiddenException(

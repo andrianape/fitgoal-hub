@@ -31,8 +31,7 @@ import { PlansModule } from './plans/plans.module';
         autoLoadEntities: true,
 
         // Koristimo samo tokom lokalnog razvoja.
-        synchronize:
-          configService.get<string>('NODE_ENV') === 'development',
+        synchronize: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),
 

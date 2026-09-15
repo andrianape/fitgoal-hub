@@ -24,34 +24,20 @@ import { PlansService } from './plans.service';
 @Controller('plans')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PlansController {
-  constructor(
-    private readonly plansService: PlansService,
-  ) {}
+  constructor(private readonly plansService: PlansService) {}
 
   @Post()
-  @Roles(
-    UserRole.TRAINER,
-    UserRole.NUTRITIONIST,
-  )
+  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
   create(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: CreatePlanDto,
   ) {
-    return this.plansService.create(
-      currentUser.id,
-      currentUser.role,
-      dto,
-    );
+    return this.plansService.create(currentUser.id, currentUser.role, dto);
   }
 
   @Get('me')
-  findMine(
-    @CurrentUser() currentUser: AuthenticatedUser,
-  ) {
-    return this.plansService.findMine(
-      currentUser.id,
-      currentUser.role,
-    );
+  findMine(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.plansService.findMine(currentUser.id, currentUser.role);
   }
 
   @Get()
@@ -73,37 +59,22 @@ export class PlansController {
   }
 
   @Patch(':id')
-  @Roles(
-    UserRole.TRAINER,
-    UserRole.NUTRITIONIST,
-  )
+  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
   update(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: UpdatePlanDto,
   ) {
-    return this.plansService.update(
-      id,
-      currentUser.id,
-      dto,
-    );
+    return this.plansService.update(id, currentUser.id, dto);
   }
 
   @Delete(':id')
-  @Roles(
-    UserRole.TRAINER,
-    UserRole.NUTRITIONIST,
-    UserRole.ADMIN,
-  )
+  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST, UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: AuthenticatedUser,
   ) {
-    return this.plansService.remove(
-      id,
-      currentUser.id,
-      currentUser.role,
-    );
+    return this.plansService.remove(id, currentUser.id, currentUser.role);
   }
 }

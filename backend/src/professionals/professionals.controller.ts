@@ -23,27 +23,18 @@ import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
 
 @Controller('professionals')
 export class ProfessionalsController {
-  constructor(
-    private readonly professionalsService:
-      ProfessionalsService,
-  ) {}
+  constructor(private readonly professionalsService: ProfessionalsService) {}
 
- @Get()
-findAll(
-  @Query() filters: FilterProfessionalsDto,
-) {
-  return this.professionalsService.findAll(filters);
-}
+  @Get()
+  findAll(@Query() filters: FilterProfessionalsDto) {
+    return this.professionalsService.findAll(filters);
+  }
 
   @Get('profile/me')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
-  findOwn(
-    @CurrentUser() currentUser: AuthenticatedUser,
-  ) {
-    return this.professionalsService.findOwn(
-      currentUser.id,
-    );
+  findOwn(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.professionalsService.findOwn(currentUser.id);
   }
 
   @Get(':id')
@@ -58,10 +49,7 @@ findAll(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: CreateProfessionalProfileDto,
   ) {
-    return this.professionalsService.create(
-      currentUser.id,
-      dto,
-    );
+    return this.professionalsService.create(currentUser.id, dto);
   }
 
   @Patch('profile')
@@ -71,10 +59,7 @@ findAll(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: UpdateProfessionalProfileDto,
   ) {
-    return this.professionalsService.update(
-      currentUser.id,
-      dto,
-    );
+    return this.professionalsService.update(currentUser.id, dto);
   }
 
   @Patch(':id/verification')
@@ -84,9 +69,6 @@ findAll(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateVerificationDto,
   ) {
-    return this.professionalsService.updateVerification(
-      id,
-      dto.isVerified,
-    );
+    return this.professionalsService.updateVerification(id, dto.isVerified);
   }
 }

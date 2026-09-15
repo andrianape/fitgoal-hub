@@ -6,12 +6,7 @@ import { AvailabilityService } from './availability.service';
 import { AvailabilitySlot } from './entities/availability-slot.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      AvailabilitySlot,
-      ProfessionalProfile,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([AvailabilitySlot, ProfessionalProfile])],
   controllers: [AvailabilityController],
   providers: [AvailabilityService],
   exports: [AvailabilityService],

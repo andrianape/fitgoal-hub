@@ -15,89 +15,82 @@ import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
 export class ProfessionalsService {
   constructor(
     @InjectRepository(ProfessionalProfile)
-    private readonly profileRepository:
-      Repository<ProfessionalProfile>,
+    private readonly profileRepository: Repository<ProfessionalProfile>,
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
   async findAll(filters: FilterProfessionalsDto) {
-  const page = filters.page;
-  const limit = filters.limit;
-  const skip = (page - 1) * limit;
+    const page = filters.page;
+    const limit = filters.limit;
+    const skip = (page - 1) * limit;
 
-  const query = this.profileRepository
-    .createQueryBuilder('profile')
-    .leftJoinAndSelect('profile.user', 'user')
-    .leftJoinAndSelect('user.city', 'city')
-    .where('profile.isVerified = :isVerified', {
-      isVerified: true,
-    });
+    const query = this.profileRepository
+      .createQueryBuilder('profile')
+      .leftJoinAndSelect('profile.user', 'user')
+      .leftJoinAndSelect('user.city', 'city')
+      .where('profile.isVerified = :isVerified', {
+        isVerified: true,
+      });
 
-  if (filters.role !== undefined) {
-    query.andWhere('user.role = :role', {
-      role: filters.role,
-    });
-  }
+    if (filters.role !== undefined) {
+      query.andWhere('user.role = :role', {
+        role: filters.role,
+      });
+    }
 
-  if (filters.cityId !== undefined) {
-    query.andWhere('city.id = :cityId', {
-      cityId: filters.cityId,
-    });
-  }
+    if (filters.cityId !== undefined) {
+      query.andWhere('city.id = :cityId', {
+        cityId: filters.cityId,
+      });
+    }
 
-  if (filters.specialty !== undefined) {
-    query.andWhere(
-      `EXISTS (
+    if (filters.specialty !== undefined) {
+      query.andWhere(
+        `EXISTS (
         SELECT 1
         FROM unnest(profile.specialties) AS specialty
         WHERE LOWER(specialty) LIKE LOWER(:specialty)
       )`,
-      {
-        specialty: `%${filters.specialty.trim()}%`,
-      },
-    );
-  }
+        {
+          specialty: `%${filters.specialty.trim()}%`,
+        },
+      );
+    }
 
-  if (filters.maxPrice !== undefined) {
-    query.andWhere(
-      'profile.pricePerSession <= :maxPrice',
-      {
+    if (filters.maxPrice !== undefined) {
+      query.andWhere('profile.pricePerSession <= :maxPrice', {
         maxPrice: filters.maxPrice,
-      },
-    );
-  }
+      });
+    }
 
-  if (filters.search !== undefined) {
-    const search = `%${filters.search.trim()}%`;
+    if (filters.search !== undefined) {
+      const search = `%${filters.search.trim()}%`;
 
-    query.andWhere(
-      `(
+      query.andWhere(
+        `(
         LOWER(user.firstName) LIKE LOWER(:search)
         OR LOWER(user.lastName) LIKE LOWER(:search)
         OR LOWER(CONCAT(user.firstName, ' ', user.lastName))
           LIKE LOWER(:search)
       )`,
-      { search },
-    );
+        { search },
+      );
+    }
+
+    query.orderBy('profile.createdAt', 'DESC').skip(skip).take(limit);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
-
-  query
-    .orderBy('profile.createdAt', 'DESC')
-    .skip(skip)
-    .take(limit);
-
-  const [data, total] = await query.getManyAndCount();
-
-  return {
-    data,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
-}
 
   async findOne(id: number): Promise<ProfessionalProfile> {
     const profile = await this.profileRepository.findOne({
@@ -121,9 +114,7 @@ export class ProfessionalsService {
     return profile;
   }
 
-  async findOwn(
-    userId: number,
-  ): Promise<ProfessionalProfile> {
+  async findOwn(userId: number): Promise<ProfessionalProfile> {
     const profile = await this.profileRepository.findOne({
       where: {
         user: {
@@ -138,9 +129,7 @@ export class ProfessionalsService {
     });
 
     if (!profile) {
-      throw new NotFoundException(
-        'Nemate napravljen profesionalni profil.',
-      );
+      throw new NotFoundException('Nemate napravljen profesionalni profil.');
     }
 
     return profile;
@@ -155,24 +144,19 @@ export class ProfessionalsService {
     });
 
     if (!user) {
-      throw new NotFoundException(
-        'Korisnički nalog ne postoji.',
-      );
+      throw new NotFoundException('Korisnički nalog ne postoji.');
     }
 
-    const existingProfile =
-      await this.profileRepository.findOne({
-        where: {
-          user: {
-            id: userId,
-          },
+    const existingProfile = await this.profileRepository.findOne({
+      where: {
+        user: {
+          id: userId,
         },
-      });
+      },
+    });
 
     if (existingProfile) {
-      throw new ConflictException(
-        'Već imate napravljen profesionalni profil.',
-      );
+      throw new ConflictException('Već imate napravljen profesionalni profil.');
     }
 
     const profile = this.profileRepository.create({
@@ -180,14 +164,11 @@ export class ProfessionalsService {
       biography: dto.biography.trim(),
       yearsOfExperience: dto.yearsOfExperience,
       pricePerSession: dto.pricePerSession,
-      specialties: dto.specialties.map((specialty) =>
-        specialty.trim(),
-      ),
+      specialties: dto.specialties.map((specialty) => specialty.trim()),
       isVerified: false,
     });
 
-    const savedProfile =
-      await this.profileRepository.save(profile);
+    const savedProfile = await this.profileRepository.save(profile);
 
     return this.findOwn(savedProfile.user.id);
   }
@@ -203,8 +184,7 @@ export class ProfessionalsService {
     }
 
     if (dto.yearsOfExperience !== undefined) {
-      profile.yearsOfExperience =
-        dto.yearsOfExperience;
+      profile.yearsOfExperience = dto.yearsOfExperience;
     }
 
     if (dto.pricePerSession !== undefined) {
@@ -212,8 +192,8 @@ export class ProfessionalsService {
     }
 
     if (dto.specialties !== undefined) {
-      profile.specialties = dto.specialties.map(
-        (specialty) => specialty.trim(),
+      profile.specialties = dto.specialties.map((specialty) =>
+        specialty.trim(),
       );
     }
 

@@ -9,12 +9,7 @@ import { PlansService } from './plans.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Plan,
-      User,
-      ProfessionalProfile,
-      Appointment,
-    ]),
+    TypeOrmModule.forFeature([Plan, User, ProfessionalProfile, Appointment]),
   ],
   controllers: [PlansController],
   providers: [PlansService],

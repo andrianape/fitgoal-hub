@@ -47,25 +47,19 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(
-        `Korisnik sa ID vrednošću ${id} ne postoji.`,
-      );
+      throw new NotFoundException(`Korisnik sa ID vrednošću ${id} ne postoji.`);
     }
 
     return user;
   }
 
-  async findByEmail(
-    email: string,
-  ): Promise<User | null> {
+  async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOneBy({
       email: email.trim().toLowerCase(),
     });
   }
 
-  async findByEmailWithPassword(
-    email: string,
-  ): Promise<User | null> {
+  async findByEmailWithPassword(email: string): Promise<User | null> {
     return this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.passwordHash')
@@ -82,11 +76,9 @@ export class UsersService {
     passwordHash: string;
     phoneNumber?: string;
   }): Promise<User> {
-    const normalizedEmail =
-      data.email.trim().toLowerCase();
+    const normalizedEmail = data.email.trim().toLowerCase();
 
-    const existingUser =
-      await this.findByEmail(normalizedEmail);
+    const existingUser = await this.findByEmail(normalizedEmail);
 
     if (existingUser) {
       throw new ConflictException(
@@ -99,38 +91,28 @@ export class UsersService {
       lastName: data.lastName.trim(),
       email: normalizedEmail,
       passwordHash: data.passwordHash,
-      phoneNumber:
-        data.phoneNumber?.trim() ?? null,
+      phoneNumber: data.phoneNumber?.trim() ?? null,
       role: UserRole.CLIENT,
       isActive: true,
       city: null,
     });
 
-    const savedUser =
-      await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
 
     return this.findOne(savedUser.id);
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
     if (updateUserDto.email !== undefined) {
-      const normalizedEmail =
-        updateUserDto.email.trim().toLowerCase();
+      const normalizedEmail = updateUserDto.email.trim().toLowerCase();
 
-      const userWithSameEmail =
-        await this.userRepository.findOneBy({
-          email: normalizedEmail,
-        });
+      const userWithSameEmail = await this.userRepository.findOneBy({
+        email: normalizedEmail,
+      });
 
-      if (
-        userWithSameEmail &&
-        userWithSameEmail.id !== id
-      ) {
+      if (userWithSameEmail && userWithSameEmail.id !== id) {
         throw new ConflictException(
           'Korisnik sa ovom email adresom već postoji.',
         );
@@ -140,28 +122,24 @@ export class UsersService {
     }
 
     if (updateUserDto.firstName !== undefined) {
-      user.firstName =
-        updateUserDto.firstName.trim();
+      user.firstName = updateUserDto.firstName.trim();
     }
 
     if (updateUserDto.lastName !== undefined) {
-      user.lastName =
-        updateUserDto.lastName.trim();
+      user.lastName = updateUserDto.lastName.trim();
     }
 
     if (updateUserDto.phoneNumber !== undefined) {
-      user.phoneNumber =
-        updateUserDto.phoneNumber.trim();
+      user.phoneNumber = updateUserDto.phoneNumber.trim();
     }
 
     if (updateUserDto.cityId !== undefined) {
       if (updateUserDto.cityId === null) {
         user.city = null;
       } else {
-        const city =
-          await this.cityRepository.findOneBy({
-            id: updateUserDto.cityId,
-          });
+        const city = await this.cityRepository.findOneBy({
+          id: updateUserDto.cityId,
+        });
 
         if (!city) {
           throw new NotFoundException(
@@ -178,10 +156,7 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  async changePassword(
-    userId: number,
-    dto: ChangePasswordDto,
-  ): Promise<void> {
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<void> {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.passwordHash')
@@ -191,28 +166,22 @@ export class UsersService {
       .getOne();
 
     if (!user) {
-      throw new NotFoundException(
-        'Korisnički nalog ne postoji.',
-      );
+      throw new NotFoundException('Korisnički nalog ne postoji.');
     }
 
-    const currentPasswordMatches =
-      await bcrypt.compare(
-        dto.currentPassword,
-        user.passwordHash,
-      );
+    const currentPasswordMatches = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
 
     if (!currentPasswordMatches) {
-      throw new UnauthorizedException(
-        'Trenutna lozinka nije ispravna.',
-      );
+      throw new UnauthorizedException('Trenutna lozinka nije ispravna.');
     }
 
-    const newPasswordMatchesOld =
-      await bcrypt.compare(
-        dto.newPassword,
-        user.passwordHash,
-      );
+    const newPasswordMatchesOld = await bcrypt.compare(
+      dto.newPassword,
+      user.passwordHash,
+    );
 
     if (newPasswordMatchesOld) {
       throw new BadRequestException(
@@ -220,18 +189,12 @@ export class UsersService {
       );
     }
 
-    user.passwordHash = await bcrypt.hash(
-      dto.newPassword,
-      12,
-    );
+    user.passwordHash = await bcrypt.hash(dto.newPassword, 12);
 
     await this.userRepository.save(user);
   }
 
-  async updateRole(
-    id: number,
-    role: UserRole,
-  ): Promise<User> {
+  async updateRole(id: number, role: UserRole): Promise<User> {
     const user = await this.findOne(id);
 
     user.role = role;
@@ -241,10 +204,7 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  async updateStatus(
-    id: number,
-    isActive: boolean,
-  ): Promise<User> {
+  async updateStatus(id: number, isActive: boolean): Promise<User> {
     const user = await this.findOne(id);
 
     user.isActive = isActive;

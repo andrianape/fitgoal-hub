@@ -18,69 +18,52 @@ import { Review } from './entities/review.entity';
 export class ReviewsService {
   constructor(
     @InjectRepository(Review)
-    private readonly reviewRepository:
-      Repository<Review>,
+    private readonly reviewRepository: Repository<Review>,
 
     @InjectRepository(Appointment)
-    private readonly appointmentRepository:
-      Repository<Appointment>,
+    private readonly appointmentRepository: Repository<Appointment>,
 
     @InjectRepository(ProfessionalProfile)
-    private readonly profileRepository:
-      Repository<ProfessionalProfile>,
+    private readonly profileRepository: Repository<ProfessionalProfile>,
   ) {}
 
-  async create(
-    clientId: number,
-    dto: CreateReviewDto,
-  ): Promise<Review> {
-    const appointment =
-      await this.appointmentRepository.findOne({
-        where: {
-          id: dto.appointmentId,
+  async create(clientId: number, dto: CreateReviewDto): Promise<Review> {
+    const appointment = await this.appointmentRepository.findOne({
+      where: {
+        id: dto.appointmentId,
+      },
+      relations: {
+        client: true,
+        professional: {
+          user: true,
         },
-        relations: {
-          client: true,
-          professional: {
-            user: true,
-          },
-        },
-      });
+      },
+    });
 
     if (!appointment) {
-      throw new NotFoundException(
-        'Rezervacija ne postoji.',
-      );
+      throw new NotFoundException('Rezervacija ne postoji.');
     }
 
     if (appointment.client.id !== clientId) {
-      throw new ForbiddenException(
-        'Možete oceniti samo svoj termin.',
-      );
+      throw new ForbiddenException('Možete oceniti samo svoj termin.');
     }
 
-    if (
-      appointment.status !==
-      AppointmentStatus.COMPLETED
-    ) {
+    if (appointment.status !== AppointmentStatus.COMPLETED) {
       throw new ConflictException(
         'Recenziju možete ostaviti samo nakon završenog termina.',
       );
     }
 
-    const existingReview =
-      await this.reviewRepository.findOne({
-        where: {
-          appointment: {
-            id: appointment.id,
-          },
+    const existingReview = await this.reviewRepository.findOne({
+      where: {
+        appointment: {
+          id: appointment.id,
         },
-      });
+      },
+    });
 
     if (existingReview) {
-      throw new ConflictException(
-        'Za ovaj termin već postoji recenzija.',
-      );
+      throw new ConflictException('Za ovaj termin već postoji recenzija.');
     }
 
     const review = this.reviewRepository.create({
@@ -94,14 +77,11 @@ export class ReviewsService {
     return this.reviewRepository.save(review);
   }
 
-  async findByProfessional(
-    professionalId: number,
-  ) {
-    const profile =
-      await this.profileRepository.findOneBy({
-        id: professionalId,
-        isVerified: true,
-      });
+  async findByProfessional(professionalId: number) {
+    const profile = await this.profileRepository.findOneBy({
+      id: professionalId,
+      isVerified: true,
+    });
 
     if (!profile) {
       throw new NotFoundException(
@@ -128,10 +108,7 @@ export class ReviewsService {
     const averageRating =
       total === 0
         ? 0
-        : reviews.reduce(
-            (sum, review) => sum + review.rating,
-            0,
-          ) / total;
+        : reviews.reduce((sum, review) => sum + review.rating, 0) / total;
 
     return {
       data: reviews.map((review) => ({
@@ -147,8 +124,7 @@ export class ReviewsService {
         updatedAt: review.updatedAt,
       })),
       total,
-      averageRating:
-        Math.round(averageRating * 10) / 10,
+      averageRating: Math.round(averageRating * 10) / 10,
     };
   }
 
@@ -157,28 +133,23 @@ export class ReviewsService {
     clientId: number,
     dto: UpdateReviewDto,
   ): Promise<Review> {
-    const review =
-      await this.reviewRepository.findOne({
-        where: {
-          id: reviewId,
-        },
-        relations: {
-          client: true,
-          professional: true,
-          appointment: true,
-        },
-      });
+    const review = await this.reviewRepository.findOne({
+      where: {
+        id: reviewId,
+      },
+      relations: {
+        client: true,
+        professional: true,
+        appointment: true,
+      },
+    });
 
     if (!review) {
-      throw new NotFoundException(
-        'Recenzija ne postoji.',
-      );
+      throw new NotFoundException('Recenzija ne postoji.');
     }
 
     if (review.client.id !== clientId) {
-      throw new ForbiddenException(
-        'Možete menjati samo svoju recenziju.',
-      );
+      throw new ForbiddenException('Možete menjati samo svoju recenziju.');
     }
 
     if (dto.rating !== undefined) {
@@ -197,32 +168,25 @@ export class ReviewsService {
     currentUserId: number,
     currentUserRole: UserRole,
   ): Promise<void> {
-    const review =
-      await this.reviewRepository.findOne({
-        where: {
-          id: reviewId,
-        },
-        relations: {
-          client: true,
-        },
-      });
+    const review = await this.reviewRepository.findOne({
+      where: {
+        id: reviewId,
+      },
+      relations: {
+        client: true,
+      },
+    });
 
     if (!review) {
-      throw new NotFoundException(
-        'Recenzija ne postoji.',
-      );
+      throw new NotFoundException('Recenzija ne postoji.');
     }
 
-    const isOwner =
-      review.client.id === currentUserId;
+    const isOwner = review.client.id === currentUserId;
 
-    const isAdmin =
-      currentUserRole === UserRole.ADMIN;
+    const isAdmin = currentUserRole === UserRole.ADMIN;
 
     if (!isOwner && !isAdmin) {
-      throw new ForbiddenException(
-        'Nemate dozvolu da obrišete ovu recenziju.',
-      );
+      throw new ForbiddenException('Nemate dozvolu da obrišete ovu recenziju.');
     }
 
     await this.reviewRepository.remove(review);

@@ -23,18 +23,14 @@ import { ReviewsService } from './reviews.service';
 
 @Controller('reviews')
 export class ReviewsController {
-  constructor(
-    private readonly reviewsService: ReviewsService,
-  ) {}
+  constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get('professional/:professionalId')
   findByProfessional(
     @Param('professionalId', ParseIntPipe)
     professionalId: number,
   ) {
-    return this.reviewsService.findByProfessional(
-      professionalId,
-    );
+    return this.reviewsService.findByProfessional(professionalId);
   }
 
   @Post()
@@ -44,10 +40,7 @@ export class ReviewsController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: CreateReviewDto,
   ) {
-    return this.reviewsService.create(
-      currentUser.id,
-      dto,
-    );
+    return this.reviewsService.create(currentUser.id, dto);
   }
 
   @Patch(':id')
@@ -58,11 +51,7 @@ export class ReviewsController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() dto: UpdateReviewDto,
   ) {
-    return this.reviewsService.update(
-      id,
-      currentUser.id,
-      dto,
-    );
+    return this.reviewsService.update(id, currentUser.id, dto);
   }
 
   @Delete(':id')
@@ -73,10 +62,6 @@ export class ReviewsController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: AuthenticatedUser,
   ) {
-    return this.reviewsService.remove(
-      id,
-      currentUser.id,
-      currentUser.role,
-    );
+    return this.reviewsService.remove(id, currentUser.id, currentUser.role);
   }
 }

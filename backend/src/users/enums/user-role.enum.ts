@@ -1,6 +1,6 @@
 export enum UserRole {
-    CLIENT= 'client',
-    TRAINER = 'trainer',
-    NUTRITIONIST = 'nutritionist',
-    ADMIN = 'admin',
+  CLIENT = 'client',
+  TRAINER = 'trainer',
+  NUTRITIONIST = 'nutritionist',
+  ADMIN = 'admin',
 }

@@ -14,22 +14,19 @@ import { AvailabilitySlot } from './entities/availability-slot.entity';
 export class AvailabilityService {
   constructor(
     @InjectRepository(AvailabilitySlot)
-    private readonly slotRepository:
-      Repository<AvailabilitySlot>,
+    private readonly slotRepository: Repository<AvailabilitySlot>,
 
     @InjectRepository(ProfessionalProfile)
-    private readonly profileRepository:
-      Repository<ProfessionalProfile>,
+    private readonly profileRepository: Repository<ProfessionalProfile>,
   ) {}
 
   async findAvailableByProfessional(
     professionalId: number,
   ): Promise<AvailabilitySlot[]> {
-    const professional =
-      await this.profileRepository.findOneBy({
-        id: professionalId,
-        isVerified: true,
-      });
+    const professional = await this.profileRepository.findOneBy({
+      id: professionalId,
+      isVerified: true,
+    });
 
     if (!professional) {
       throw new NotFoundException(
@@ -78,26 +75,19 @@ export class AvailabilityService {
     const now = new Date();
 
     if (startsAt <= now) {
-      throw new BadRequestException(
-        'Početak termina mora biti u budućnosti.',
-      );
+      throw new BadRequestException('Početak termina mora biti u budućnosti.');
     }
 
     if (endsAt <= startsAt) {
-      throw new BadRequestException(
-        'Kraj termina mora biti posle početka.',
-      );
+      throw new BadRequestException('Kraj termina mora biti posle početka.');
     }
 
-    const durationInMilliseconds =
-      endsAt.getTime() - startsAt.getTime();
+    const durationInMilliseconds = endsAt.getTime() - startsAt.getTime();
 
     const maximumDuration = 8 * 60 * 60 * 1000;
 
     if (durationInMilliseconds > maximumDuration) {
-      throw new BadRequestException(
-        'Termin ne može trajati duže od 8 sati.',
-      );
+      throw new BadRequestException('Termin ne može trajati duže od 8 sati.');
     }
 
     const overlappingSlot = await this.slotRepository
@@ -129,10 +119,7 @@ export class AvailabilityService {
     return this.slotRepository.save(slot);
   }
 
-  async remove(
-    userId: number,
-    slotId: number,
-  ): Promise<void> {
+  async remove(userId: number, slotId: number): Promise<void> {
     const profile = await this.findProfileByUserId(userId);
 
     const slot = await this.slotRepository.findOne({
@@ -145,15 +132,11 @@ export class AvailabilityService {
     });
 
     if (!slot) {
-      throw new NotFoundException(
-        'Slobodan termin ne postoji.',
-      );
+      throw new NotFoundException('Slobodan termin ne postoji.');
     }
 
     if (slot.isBooked) {
-      throw new ConflictException(
-        'Rezervisan termin ne može biti obrisan.',
-      );
+      throw new ConflictException('Rezervisan termin ne može biti obrisan.');
     }
 
     await this.slotRepository.remove(slot);
@@ -171,9 +154,7 @@ export class AvailabilityService {
     });
 
     if (!profile) {
-      throw new NotFoundException(
-        'Nemate napravljen profesionalni profil.',
-      );
+      throw new NotFoundException('Nemate napravljen profesionalni profil.');
     }
 
     return profile;

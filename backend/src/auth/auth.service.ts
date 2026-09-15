@@ -18,11 +18,9 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const normalizedEmail =
-      registerDto.email.trim().toLowerCase();
+    const normalizedEmail = registerDto.email.trim().toLowerCase();
 
-    const existingUser =
-      await this.usersService.findByEmail(normalizedEmail);
+    const existingUser = await this.usersService.findByEmail(normalizedEmail);
 
     if (existingUser) {
       throw new ConflictException(
@@ -30,10 +28,7 @@ export class AuthService {
       );
     }
 
-    const passwordHash = await bcrypt.hash(
-      registerDto.password,
-      12,
-    );
+    const passwordHash = await bcrypt.hash(registerDto.password, 12);
 
     const user = await this.usersService.create({
       firstName: registerDto.firstName,
@@ -50,15 +45,12 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user =
-      await this.usersService.findByEmailWithPassword(
-        loginDto.email,
-      );
+    const user = await this.usersService.findByEmailWithPassword(
+      loginDto.email,
+    );
 
     if (!user) {
-      throw new UnauthorizedException(
-        'Email ili lozinka nisu ispravni.',
-      );
+      throw new UnauthorizedException('Email ili lozinka nisu ispravni.');
     }
 
     const passwordMatches = await bcrypt.compare(
@@ -67,15 +59,11 @@ export class AuthService {
     );
 
     if (!passwordMatches) {
-      throw new UnauthorizedException(
-        'Email ili lozinka nisu ispravni.',
-      );
+      throw new UnauthorizedException('Email ili lozinka nisu ispravni.');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException(
-        'Korisnički nalog nije aktivan.',
-      );
+      throw new UnauthorizedException('Korisnički nalog nije aktivan.');
     }
 
     const safeUser = await this.usersService.findOne(user.id);
