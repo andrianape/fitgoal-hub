@@ -1,0 +1,256 @@
+<section class="hero">
+  <div class="container hero__container">
+    <div class="hero__content">
+      <span class="hero__eyebrow">
+        <span class="hero__eyebrow-dot"></span>
+        Stručna podrška za tvoj cilj
+      </span>
+
+      <h1>
+        Ne moraš sama do
+        <span>najbolje verzije sebe.</span>
+      </h1>
+
+      <p class="hero__description">
+        Poveži se sa verifikovanim trenerima i nutricionistima,
+        rezerviši termin za nekoliko minuta i prati plan napravljen
+        baš za tebe.
+      </p>
+
+      <form class="search">
+        <label class="search__field">
+          <span aria-hidden="true">⌕</span>
+
+          <input
+            type="search"
+            placeholder="Ime ili specijalnost"
+            aria-label="Ime ili specijalnost"
+          />
+        </label>
+
+        <label class="search__field search__field--city">
+          <span aria-hidden="true">⌖</span>
+
+          <select aria-label="Izaberite grad">
+            <option value="">Svi gradovi</option>
+
+            @for (city of cities(); track city.id) {
+              <option [value]="city.id">
+                {{ city.name }}
+              </option>
+            } 
+          </select>
+        </label>
+
+        <a
+          class="primary-button search__button"
+          routerLink="/professionals"
+        >
+          Pronađi stručnjaka
+        </a>
+      </form>
+
+      <div class="hero__trust">
+        <div class="hero__avatars">
+          <span>AM</span>
+          <span>MJ</span>
+          <span>NP</span>
+        </div>
+
+        <div>
+          <strong>Verifikovani stručnjaci</strong>
+          <small>Treneri i nutricionisti</small>
+        </div>
+
+        <div>
+          <strong>Jednostavno zakazivanje</strong>
+          <small>Izaberi slobodan termin</small>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="hero__visual"
+      aria-label="Primer rezervacije termina"
+    >
+      <div class="hero__shape">
+        <div class="hero__main-icon" aria-hidden="true">
+          ✦
+        </div>
+      </div>
+
+      <article class="availability-preview">
+        <div class="availability-preview__header">
+          <strong>Slobodni termini</strong>
+          <small>Septembar</small>
+        </div>
+
+        <div class="availability-preview__days">
+          <button type="button">
+            <small>UTO</small>
+            <strong>16</strong>
+          </button>
+
+          <button
+            class="availability-preview__day--selected"
+            type="button"
+          >
+            <small>ČET</small>
+            <strong>18</strong>
+          </button>
+
+          <button type="button">
+            <small>PET</small>
+            <strong>19</strong>
+          </button>
+
+          <button type="button">
+            <small>PON</small>
+            <strong>22</strong>
+          </button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="goals">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <span>Pronađi pravu podršku</span>
+        <h2>Šta želiš da postigneš?</h2>
+
+        <p>
+          Izaberi oblast i pronađi stručnjaka koji
+          odgovara tvojim potrebama.
+        </p>
+      </div>
+
+      <a routerLink="/professionals">
+        Pogledaj sve profesionalce →
+      </a>
+    </div>
+
+    <div class="goals__grid">
+      <a
+        class="goal-card"
+        routerLink="/professionals"
+      >
+        <span class="goal-card__icon">↗</span>
+
+        <div>
+          <strong>Snaga i kondicija</strong>
+          <small>Lični treneri</small>
+        </div>
+      </a>
+
+      <a
+        class="goal-card"
+        routerLink="/professionals"
+      >
+        <span class="goal-card__icon">◇</span>
+
+        <div>
+          <strong>Plan ishrane</strong>
+          <small>Nutricionisti</small>
+        </div>
+      </a>
+
+      <a
+        class="goal-card"
+        routerLink="/professionals"
+      >
+        <span class="goal-card__icon">⌁</span>
+
+        <div>
+          <strong>Regulacija težine</strong>
+          <small>Individualni pristup</small>
+        </div>
+      </a>
+
+      <a
+        class="goal-card"
+        routerLink="/professionals"
+      >
+        <span class="goal-card__icon">♡</span>
+
+        <div>
+          <strong>Zdrave navike</strong>
+          <small>Dugoročna podrška</small>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="container">
+    <div class="how-it-works__heading">
+      <span>Jednostavan proces</span>
+      <h2>Do stručne podrške u tri koraka</h2>
+    </div>
+
+    <div class="how-it-works__grid">
+      <article class="step-card">
+        <span class="step-card__number">01</span>
+        <h3>Pronađi profesionalca</h3>
+
+        <p>
+          Pretraži trenere i nutricioniste prema gradu,
+          oblasti rada, iskustvu i ceni termina.
+        </p>
+      </article>
+
+      <article class="step-card">
+        <span class="step-card__number">02</span>
+        <h3>Rezerviši termin</h3>
+
+        <p>
+          Pogledaj slobodne termine profesionalca i
+          izaberi vreme koje ti odgovara.
+        </p>
+      </article>
+
+      <article class="step-card">
+        <span class="step-card__number">03</span>
+        <h3>Prati svoj plan</h3>
+
+        <p>
+          Na korisničkom nalogu pregledaj zakazane
+          termine i personalizovane planove.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="call-to-action">
+  <div class="container">
+    <div class="call-to-action__content">
+      <div>
+        <span>Spremna za prvi korak?</span>
+
+        <h2>
+          Pronađi stručnjaka koji razume tvoj cilj.
+        </h2>
+      </div>
+
+      <div class="call-to-action__actions">
+        <a
+          class="call-to-action__primary"
+          routerLink="/register"
+        >
+          Napravi besplatan nalog
+        </a>
+
+        <a
+          class="call-to-action__secondary"
+          routerLink="/professionals"
+        >
+          Pregledaj profesionalce
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

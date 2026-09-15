@@ -1,0 +1,132 @@
+:host {
+  display: block;
+  position: sticky;
+  z-index: 100;
+  top: 0;
+}
+
+.header {
+  height: var(--header-height);
+  border-bottom: 1px solid rgb(228 229 222 / 80%);
+  background: rgb(255 255 255 / 92%);
+  backdrop-filter: blur(14px);
+}
+
+.header__container {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.header__logo-mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50% 50% 50% 16%;
+  color: #ffffff;
+  background: var(--color-primary);
+  box-shadow: 0 10px 24px rgb(19 63 52 / 20%);
+}
+
+.header__navigation {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+
+  a {
+    position: relative;
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 180ms ease;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.header__navigation .header__link--active {
+  color: var(--color-primary);
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header__login {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.header__menu-button {
+  display: none;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: 0;
+  background: transparent;
+
+  span {
+    display: block;
+    width: 23px;
+    height: 2px;
+    margin: 5px auto;
+    border-radius: 2px;
+    background: var(--color-primary);
+  }
+}
+
+@media (max-width: 900px) {
+  .header__menu-button {
+    display: block;
+    margin-left: auto;
+  }
+
+  .header__navigation {
+    position: absolute;
+    top: var(--header-height);
+    right: 0;
+    left: 0;
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px 20px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-medium);
+
+    a {
+      padding: 14px;
+      border-radius: 10px;
+
+      &:hover {
+        background: var(--color-primary-soft);
+      }
+    }
+  }
+
+  .header__navigation--open {
+    display: flex;
+  }
+
+  .header__actions {
+    display: none;
+  }
+}

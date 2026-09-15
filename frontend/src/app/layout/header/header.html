@@ -1,0 +1,81 @@
+<header class="header">
+  <div class="container header__container">
+    <a
+      class="header__logo"
+      routerLink="/"
+      aria-label="FitGoal Hub početna stranica"
+      (click)="closeMenu()"
+    >
+      <span class="header__logo-mark">F</span>
+
+      <span>FitGoal Hub</span>
+    </a>
+
+    <button
+      class="header__menu-button"
+      type="button"
+      aria-label="Otvori ili zatvori navigaciju"
+      [attr.aria-expanded]="isMenuOpen()"
+      (click)="toggleMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav
+      class="header__navigation"
+      [class.header__navigation--open]="isMenuOpen()"
+      aria-label="Glavna navigacija"
+    >
+      <a
+        routerLink="/"
+        routerLinkActive="header__link--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMenu()"
+      >
+        Početna
+      </a>
+
+      <a
+        routerLink="/professionals"
+        routerLinkActive="header__link--active"
+        (click)="closeMenu()"
+      >
+        Profesionalci
+      </a>
+
+      <a
+        routerLink="/trainers"
+        routerLinkActive="header__link--active"
+        (click)="closeMenu()"
+      >
+        Treneri
+      </a>
+
+      <a
+        routerLink="/nutritionists"
+        routerLinkActive="header__link--active"
+        (click)="closeMenu()"
+      >
+        Nutricionisti
+      </a>
+    </nav>
+
+    <div class="header__actions">
+      <a
+        class="header__login"
+        routerLink="/login"
+      >
+        Prijavi se
+      </a>
+
+      <a
+        class="primary-button"
+        routerLink="/register"
+      >
+        Napravi nalog
+      </a>
+    </div>
+  </div>
+</header>
