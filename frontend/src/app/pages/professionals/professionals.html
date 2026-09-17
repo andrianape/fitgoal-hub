@@ -1,0 +1,278 @@
+<section class="professionals-page">
+  <div class="container">
+    <header class="professionals-page__heading">
+      <span>Verifikovani stručnjaci</span>
+
+      <h1>Pronađi podršku za svoj cilj</h1>
+
+      <p>
+        Pregledaj verifikovane trenere i nutricioniste,
+        istraži njihove specijalnosti i pronađi osobu
+        koja odgovara tvojim potrebama.
+      </p>
+    </header>
+
+    <div class="role-filter">
+      <button
+        type="button"
+        [class.role-filter__button--active]="
+          selectedRole === ''
+        "
+        (click)="selectRole('')"
+      >
+        Svi profesionalci
+      </button>
+
+      <button
+        type="button"
+        [class.role-filter__button--active]="
+          selectedRole === 'trainer'
+        "
+        (click)="selectRole('trainer')"
+      >
+        Treneri
+      </button>
+
+      <button
+        type="button"
+        [class.role-filter__button--active]="
+          selectedRole === 'nutritionist'
+        "
+        (click)="selectRole('nutritionist')"
+      >
+        Nutricionisti
+      </button>
+    </div>
+
+    <form
+      class="filters"
+      (ngSubmit)="applyFilters()"
+    >
+      <label class="filters__field">
+        <span>Ime ili prezime</span>
+
+        <input
+          type="search"
+          name="search"
+          placeholder="Pretraži profesionalce"
+          [(ngModel)]="search"
+        />
+      </label>
+
+      <label class="filters__field">
+        <span>Grad</span>
+
+        <select
+          name="cityId"
+          [(ngModel)]="selectedCityId"
+        >
+          <option value="">
+            Svi gradovi
+          </option>
+
+          @for (
+            city of cities();
+            track city.id
+          ) {
+            <option [value]="city.id">
+              {{ city.name }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <div class="filters__actions">
+        <button
+          class="primary-button"
+          type="submit"
+        >
+          Primeni filtere
+        </button>
+
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="clearFilters()"
+        >
+          Očisti
+        </button>
+      </div>
+    </form>
+
+    <div class="results-heading">
+      <div>
+        <h2>Profesionalci</h2>
+
+        @if (!loading()) {
+          <p>
+            Pronađeno rezultata:
+            <strong>{{ total() }}</strong>
+          </p>
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="status-message">
+        <span class="loader"></span>
+        <p>Učitavanje profesionalaca...</p>
+      </div>
+    } @else if (error()) {
+      <div class="status-message status-message--error">
+        <h2>Došlo je do greške</h2>
+        <p>{{ error() }}</p>
+
+        <button
+          class="primary-button"
+          type="button"
+          (click)="applyFilters()"
+        >
+          Pokušaj ponovo
+        </button>
+      </div>
+    } @else if (professionals().length === 0) {
+      <div class="status-message">
+        <h2>Nema pronađenih profesionalaca</h2>
+
+        <p>
+          Pokušaj da promeniš ili ukloniš
+          izabrane filtere.
+        </p>
+
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="clearFilters()"
+        >
+          Ukloni filtere
+        </button>
+      </div>
+    } @else {
+      <div class="professionals-grid">
+        @for (
+          professional of professionals();
+          track professional.id
+        ) {
+          <article class="professional-card">
+            <div class="professional-card__header">
+              <span class="professional-card__avatar">
+                {{
+                  getInitials(
+                    professional.user.firstName,
+                    professional.user.lastName
+                  )
+                }}
+              </span>
+
+              <div>
+                <span class="professional-card__role">
+                  {{
+                    getRoleLabel(
+                      professional.user.role
+                    )
+                  }}
+                </span>
+
+                <h2>
+                  {{ professional.user.firstName }}
+                  {{ professional.user.lastName }}
+                </h2>
+
+                <p>
+                  {{
+                    professional.user.city?.name ??
+                      'Grad nije naveden'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <p class="professional-card__biography">
+              {{ professional.biography }}
+            </p>
+
+            <div class="professional-card__specialties">
+              @for (
+                specialty of professional.specialties;
+                track specialty
+              ) {
+                <span>{{ specialty }}</span>
+              }
+            </div>
+
+            <dl class="professional-card__details">
+              <div>
+                <dt>Iskustvo</dt>
+                <dd>
+                  {{
+                    professional.yearsOfExperience
+                  }}
+                  god.
+                </dd>
+              </div>
+
+              <div>
+                <dt>Cena termina</dt>
+                <dd>
+                  {{
+                    professional.pricePerSession
+                  }}
+                  RSD
+                </dd>
+              </div>
+            </dl>
+
+            <a
+              class="primary-button professional-card__link"
+              [routerLink]="[
+                '/professionals',
+                professional.id
+              ]"
+            >
+              Pogledaj profil
+            </a>
+          </article>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav
+          class="pagination"
+          aria-label="Stranice rezultata"
+        >
+          <button
+            class="secondary-button"
+            type="button"
+            [disabled]="
+              currentFilters().page === 1
+            "
+            (click)="previousPage()"
+          >
+            ← Prethodna
+          </button>
+
+          <span>
+            Stranica
+            <strong>
+              {{ currentFilters().page }}
+            </strong>
+            od
+            <strong>{{ totalPages() }}</strong>
+          </span>
+
+          <button
+            class="secondary-button"
+            type="button"
+            [disabled]="
+              currentFilters().page ===
+              totalPages()
+            "
+            (click)="nextPage()"
+          >
+            Sledeća →
+          </button>
+        </nav>
+      }
+    }
+  </div>
+</section>

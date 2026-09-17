@@ -22,46 +22,29 @@
       <span></span>
       <span></span>
     </button>
-
-    <nav
-      class="header__navigation"
-      [class.header__navigation--open]="isMenuOpen()"
-      aria-label="Glavna navigacija"
+  <nav
+    class="header__navigation"
+    [class.header__navigation--open]="isMenuOpen()"
+    aria-label="Glavna navigacija"
+  >
+    <a
+      routerLink="/"
+      routerLinkActive="header__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="closeMenu()"
     >
-      <a
-        routerLink="/"
-        routerLinkActive="header__link--active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        (click)="closeMenu()"
-      >
-        Početna
-      </a>
+      Početna
+    </a>
 
-      <a
-        routerLink="/professionals"
-        routerLinkActive="header__link--active"
-        (click)="closeMenu()"
-      >
-        Profesionalci
-      </a>
-
-      <a
-        routerLink="/trainers"
-        routerLinkActive="header__link--active"
-        (click)="closeMenu()"
-      >
-        Treneri
-      </a>
-
-      <a
-        routerLink="/nutritionists"
-        routerLinkActive="header__link--active"
-        (click)="closeMenu()"
-      >
-        Nutricionisti
-      </a>
-    </nav>
-
+    <a
+      routerLink="/professionals"
+      routerLinkActive="header__link--active"
+      (click)="closeMenu()"
+    >
+      Profesionalci
+    </a>
+  </nav>
+    
     <div class="header__actions">
       <a
         class="header__login"

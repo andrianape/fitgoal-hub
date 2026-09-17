@@ -10,6 +10,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'professionals',
+    title: 'Profesionalci | FitGoal Hub',
+    loadComponent: () =>
+      import(
+        './pages/professionals/professionals'
+      ).then(
+        (component) => component.Professionals,
+      ),
+  },
+  {
     path: '**',
     title: 'Stranica nije pronađena',
     loadComponent: () =>

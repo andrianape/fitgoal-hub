@@ -4,16 +4,22 @@ import {
   isDevMode,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideEffects } from '@ngrx/effects';
+import {
+  provideEffects,
+} from '@ngrx/effects';
 import {
   provideState,
   provideStore,
 } from '@ngrx/store';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
+import {
+  provideStoreDevtools,
+} from '@ngrx/store-devtools';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { CitiesEffects } from './store/cities/cities.effects';
 import { citiesFeature } from './store/cities/cities.reducer';
+import { ProfessionalsEffects } from './store/professionals/professionals.effects';
+import { professionalsFeature } from './store/professionals/professionals.reducer';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,7 +33,12 @@ export const appConfig: ApplicationConfig = {
 
     provideState(citiesFeature),
 
-    provideEffects(CitiesEffects),
+    provideState(professionalsFeature),
+
+    provideEffects(
+      CitiesEffects,
+      ProfessionalsEffects,
+    ),
 
     provideStoreDevtools({
       maxAge: 25,
