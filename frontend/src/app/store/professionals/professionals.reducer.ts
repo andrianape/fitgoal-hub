@@ -49,6 +49,49 @@ export const professionalsFeature =
       ),
 
       on(
+        ProfessionalsActions.loadProfessional,
+        (state) => ({
+          ...state,
+          selectedProfessional: null,
+          selectedProfessionalLoading: true,
+          selectedProfessionalError: null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .loadProfessionalSuccess,
+        (state, { professional }) => ({
+          ...state,
+          selectedProfessional: professional,
+          selectedProfessionalLoading: false,
+          selectedProfessionalError: null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .loadProfessionalFailure,
+        (state, { error }) => ({
+          ...state,
+          selectedProfessional: null,
+          selectedProfessionalLoading: false,
+          selectedProfessionalError: error,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .clearSelectedProfessional,
+        (state) => ({
+          ...state,
+          selectedProfessional: null,
+          selectedProfessionalLoading: false,
+          selectedProfessionalError: null,
+        }),
+      ),
+
+      on(
         ProfessionalsActions.clearProfessionals,
         () => initialProfessionalsState,
       ),

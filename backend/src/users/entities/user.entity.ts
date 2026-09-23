@@ -60,6 +60,14 @@ export class User {
   phoneNumber!: string | null;
 
   @Column({
+  name: 'profile_image_url',
+  type: 'varchar',
+  length: 500,
+  nullable: true,
+})
+profileImageUrl!: string | null;
+
+  @Column({
     name: 'is_active',
     type: 'boolean',
     default: true,

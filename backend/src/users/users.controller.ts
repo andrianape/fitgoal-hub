@@ -11,6 +11,9 @@ import {
   ParseIntPipe,
   Patch,
   UseGuards,
+  Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -23,11 +26,53 @@ import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from './enums/user-role.enum';
 import { UsersService } from './users.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { profileImageUploadOptions } from './config/profile-image-upload.config';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('me/profile-image')
+@UseInterceptors(
+  FileInterceptor(
+    'file',
+    profileImageUploadOptions,
+  ),
+)
+uploadProfileImage(
+  @CurrentUser()
+  currentUser: AuthenticatedUser,
+
+  @UploadedFile()
+  file?: Express.Multer.File,
+) {
+  if (!file) {
+    throw new BadRequestException(
+      'Profilna fotografija nije poslata.',
+    );
+  }
+
+  const profileImageUrl =
+    `/uploads/profile-images/${file.filename}`;
+
+  return this.usersService.updateProfileImage(
+    currentUser.id,
+    profileImageUrl,
+  );
+}
+
+@Delete('me/profile-image')
+@HttpCode(HttpStatus.NO_CONTENT)
+removeProfileImage(
+  @CurrentUser()
+  currentUser: AuthenticatedUser,
+) {
+  return this.usersService.removeProfileImage(
+    currentUser.id,
+  );
+}
 
   @Get()
   @Roles(UserRole.ADMIN)

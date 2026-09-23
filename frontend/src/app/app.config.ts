@@ -1,12 +1,13 @@
-import { provideHttpClient } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import {
   ApplicationConfig,
   isDevMode,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import {
-  provideEffects,
-} from '@ngrx/effects';
+import { provideEffects } from '@ngrx/effects';
 import {
   provideState,
   provideStore,
@@ -16,6 +17,11 @@ import {
 } from '@ngrx/store-devtools';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { AvailabilityEffects } from './store/availability/availability.effects';
+import { availabilityFeature } from './store/availability/availability.reducer';
+import { AuthEffects } from './store/auth/auth.effects';
+import { authFeature } from './store/auth/auth.reducer';
 import { CitiesEffects } from './store/cities/cities.effects';
 import { citiesFeature } from './store/cities/cities.reducer';
 import { ProfessionalsEffects } from './store/professionals/professionals.effects';
@@ -27,7 +33,11 @@ export const appConfig: ApplicationConfig = {
 
     provideRouter(routes),
 
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([
+        authInterceptor,
+      ]),
+    ),
 
     provideStore(),
 
@@ -35,9 +45,15 @@ export const appConfig: ApplicationConfig = {
 
     provideState(professionalsFeature),
 
+    provideState(availabilityFeature),
+
+    provideState(authFeature),
+
     provideEffects(
       CitiesEffects,
       ProfessionalsEffects,
+      AvailabilityEffects,
+      AuthEffects,
     ),
 
     provideStoreDevtools({

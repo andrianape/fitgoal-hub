@@ -9,4 +9,7 @@ export const {
   selectLoading,
   selectLoaded,
   selectError,
+  selectSelectedProfessional,
+  selectSelectedProfessionalLoading,
+  selectSelectedProfessionalError,
 } = professionalsFeature;

@@ -179,4 +179,31 @@ export class Professionals implements OnInit {
       }),
     );
   }
+
+getProfileImageUrl(
+  profileImageUrl: string | null,
+): string | null {
+  if (!profileImageUrl) {
+    return null;
+  }
+
+  if (profileImageUrl.startsWith('http')) {
+    return profileImageUrl;
+  }
+
+  return `http://localhost:3000${profileImageUrl}`;
+}
+
+handleImageError(event: Event): void {
+  const image = event.target as HTMLImageElement;
+
+  image.style.display = 'none';
+
+  const initials = image.nextElementSibling as HTMLElement | null;
+
+  if (initials) {
+    initials.style.display = 'grid';
+  }
+}
+
 }

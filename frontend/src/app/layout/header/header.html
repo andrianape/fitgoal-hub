@@ -22,43 +22,77 @@
       <span></span>
       <span></span>
     </button>
-  <nav
-    class="header__navigation"
-    [class.header__navigation--open]="isMenuOpen()"
-    aria-label="Glavna navigacija"
-  >
-    <a
-      routerLink="/"
-      routerLinkActive="header__link--active"
-      [routerLinkActiveOptions]="{ exact: true }"
-      (click)="closeMenu()"
-    >
-      Početna
-    </a>
 
-    <a
-      routerLink="/professionals"
-      routerLinkActive="header__link--active"
-      (click)="closeMenu()"
+    <nav
+      class="header__navigation"
+      [class.header__navigation--open]="
+        isMenuOpen()
+      "
+      aria-label="Glavna navigacija"
     >
-      Profesionalci
-    </a>
-  </nav>
-    
+      <a
+        routerLink="/"
+        routerLinkActive="header__link--active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }"
+        (click)="closeMenu()"
+      >
+        Početna
+      </a>
+
+      <a
+        routerLink="/professionals"
+        routerLinkActive="header__link--active"
+        (click)="closeMenu()"
+      >
+        Profesionalci
+      </a>
+    </nav>
+
     <div class="header__actions">
-      <a
-        class="header__login"
-        routerLink="/login"
-      >
-        Prijavi se
-      </a>
+      @if (
+        isAuthenticated() &&
+        currentUser();
+        as user
+      ) {
+        <div class="header__user">
+          <span class="header__user-avatar">
+            {{ user.firstName.charAt(0) }}
+            {{ user.lastName.charAt(0) }}
+          </span>
 
-      <a
-        class="primary-button"
-        routerLink="/register"
-      >
-        Napravi nalog
-      </a>
+          <div class="header__user-details">
+            <strong>
+              {{ user.firstName }}
+            </strong>
+
+            <small>{{ user.role }}</small>
+          </div>
+        </div>
+
+        <button
+          class="header__logout"
+          type="button"
+          (click)="logout()"
+        >
+          Odjavi se
+        </button>
+      } @else {
+        <a
+          class="header__login"
+          routerLink="/login"
+        >
+          Prijavi se
+        </a>
+
+        <a
+          class="primary-button"
+          routerLink="/register"
+        >
+          Napravi nalog
+        </a>
+      }
     </div>
   </div>
 </header>

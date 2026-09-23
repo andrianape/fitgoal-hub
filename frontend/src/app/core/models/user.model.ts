@@ -12,6 +12,7 @@ export interface User {
   lastName: string;
   email: string;
   role: UserRole;
+  profileImageUrl: string | null;
   phoneNumber: string | null;
   isActive: boolean;
   city: City | null;

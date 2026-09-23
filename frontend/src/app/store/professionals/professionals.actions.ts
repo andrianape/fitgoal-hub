@@ -27,6 +27,21 @@ export const ProfessionalsActions =
         error: string;
       }>(),
 
+      'Load Professional': props<{
+        id: number;
+      }>(),
+
+      'Load Professional Success': props<{
+        professional: Professional;
+      }>(),
+
+      'Load Professional Failure': props<{
+        error: string;
+      }>(),
+
+      'Clear Selected Professional':
+        emptyProps(),
+
       'Clear Professionals': emptyProps(),
     },
   });

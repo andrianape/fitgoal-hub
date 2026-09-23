@@ -1,0 +1,398 @@
+<section class="profile-page">
+  <div class="container">
+    <a
+      class="back-link"
+      routerLink="/professionals"
+    >
+      ← Nazad na profesionalce
+    </a>
+
+    @if (loading()) {
+      <div class="profile-status">
+        <span class="loader"></span>
+
+        <p>
+          Učitavanje profesionalnog profila...
+        </p>
+      </div>
+    } @else if (error()) {
+      <div class="profile-status">
+        <h1>Profil nije dostupan</h1>
+
+        <p>{{ error() }}</p>
+
+        <div class="profile-status__actions">
+          <button
+            class="primary-button"
+            type="button"
+            (click)="reload()"
+          >
+            Pokušaj ponovo
+          </button>
+
+          <a
+            class="secondary-button"
+            routerLink="/professionals"
+          >
+            Svi profesionalci
+          </a>
+        </div>
+      </div>
+    } @else if (professional(); as profile) {
+      <header class="profile-header">
+        <div class="profile-header__avatar">
+          @if (
+            getProfileImageUrl(
+              profile.user.profileImageUrl
+            );
+            as profileImageUrl
+          ) {
+            @if (!imageLoadFailed()) {
+              <img
+                [src]="profileImageUrl"
+                [alt]="
+                  'Profilna fotografija korisnika ' +
+                  profile.user.firstName +
+                  ' ' +
+                  profile.user.lastName
+                "
+                (error)="handleImageError()"
+              />
+            } @else {
+              <span>
+                {{
+                  getInitials(
+                    profile.user.firstName,
+                    profile.user.lastName
+                  )
+                }}
+              </span>
+            }
+          } @else {
+            <span>
+              {{
+                getInitials(
+                  profile.user.firstName,
+                  profile.user.lastName
+                )
+              }}
+            </span>
+          }
+        </div>
+
+        <div class="profile-header__content">
+          <span class="profile-header__role">
+            {{
+              getRoleLabel(
+                profile.user.role
+              )
+            }}
+          </span>
+
+          <h1>
+            {{ profile.user.firstName }}
+            {{ profile.user.lastName }}
+          </h1>
+
+          <p>
+            {{
+              profile.user.city?.name ??
+                'Grad nije naveden'
+            }}
+          </p>
+
+          <div class="profile-header__badges">
+            <span>✓ Verifikovan profil</span>
+
+            <span>
+              {{ profile.yearsOfExperience }}
+              godina iskustva
+            </span>
+          </div>
+        </div>
+
+        <div class="profile-header__price">
+          <small>Cena jednog termina</small>
+
+          <strong>
+            {{ profile.pricePerSession }}
+            RSD
+          </strong>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="openAvailabilityModal()"
+          >
+            Pogledaj slobodne termine
+          </button>
+        </div>
+      </header>
+
+      <div class="profile-content">
+        <main class="profile-main">
+          <article class="profile-section">
+            <span class="profile-section__label">
+              O profesionalcu
+            </span>
+
+            <h2>Biografija</h2>
+
+            <p
+              class="profile-section__biography"
+            >
+              {{ profile.biography }}
+            </p>
+          </article>
+
+          <article class="profile-section">
+            <span class="profile-section__label">
+              Oblasti rada
+            </span>
+
+            <h2>Specijalnosti</h2>
+
+            <div class="specialties">
+              @for (
+                specialty of profile.specialties;
+                track specialty
+              ) {
+                <span>{{ specialty }}</span>
+              }
+            </div>
+          </article>
+        </main>
+
+        <aside class="profile-sidebar">
+          <article class="information-card">
+            <h2>Informacije</h2>
+
+            <dl>
+              <div>
+                <dt>Uloga</dt>
+
+                <dd>
+                  {{
+                    getRoleLabel(
+                      profile.user.role
+                    )
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Iskustvo</dt>
+
+                <dd>
+                  {{ profile.yearsOfExperience }}
+                  godina
+                </dd>
+              </div>
+
+              <div>
+                <dt>Grad</dt>
+
+                <dd>
+                  {{
+                    profile.user.city?.name ??
+                      'Nije naveden'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Cena termina</dt>
+
+                <dd>
+                  {{ profile.pricePerSession }}
+                  RSD
+                </dd>
+              </div>
+            </dl>
+          </article>
+        </aside>
+      </div>
+
+      @if (availabilityModalOpen()) {
+        <div
+          class="modal-backdrop"
+          role="presentation"
+          (click)="closeAvailabilityModal()"
+        >
+          <section
+            class="availability-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="availability-title"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="availability-modal__header">
+              <div>
+                <span class="profile-section__label">
+                  Zakazivanje
+                </span>
+
+                <h2 id="availability-title">
+                  Slobodni termini
+                </h2>
+
+                <p>
+                  {{ profile.user.firstName }}
+                  {{ profile.user.lastName }}
+                </p>
+              </div>
+
+              <button
+                class="availability-modal__close"
+                type="button"
+                aria-label="Zatvori prozor"
+                (click)="closeAvailabilityModal()"
+              >
+                ×
+              </button>
+            </header>
+
+            <div class="availability-modal__body">
+              @if (slotsLoading()) {
+                <div class="slots-status">
+                  <span class="loader"></span>
+
+                  <p>
+                    Učitavanje slobodnih termina...
+                  </p>
+                </div>
+              } @else if (slotsError()) {
+                <div class="slots-status">
+                  <h3>Termini nisu dostupni</h3>
+
+                  <p>{{ slotsError() }}</p>
+
+                  <button
+                    class="secondary-button"
+                    type="button"
+                    (click)="reloadSlots()"
+                  >
+                    Pokušaj ponovo
+                  </button>
+                </div>
+              } @else if (
+                availableSlots().length === 0
+              ) {
+                <div class="slots-status">
+                  <h3>
+                    Trenutno nema slobodnih termina
+                  </h3>
+
+                  <p>
+                    Profesionalac još nije objavio
+                    nove termine. Proveri ponovo
+                    kasnije.
+                  </p>
+                </div>
+              } @else {
+                <p class="availability-modal__instruction">
+                  Izaberi datum i vreme koji ti
+                  najviše odgovaraju.
+                </p>
+
+                <div class="slots-grid">
+                  @for (
+                    slot of availableSlots();
+                    track slot.id
+                  ) {
+                    <button
+                      class="slot-card"
+                      type="button"
+                      [class.slot-card--selected]="
+                        selectedSlotId() === slot.id
+                      "
+                      (click)="selectSlot(slot.id)"
+                    >
+                      <span class="slot-card__date">
+                        {{
+                          formatSlotDate(
+                            slot.startsAt
+                          )
+                        }}
+                      </span>
+
+                      <span class="slot-card__time">
+                        {{
+                          formatSlotTime(
+                            slot.startsAt
+                          )
+                        }}
+                        –
+                        {{
+                          formatSlotTime(
+                            slot.endsAt
+                          )
+                        }}
+                      </span>
+
+                      <span
+                        class="slot-card__selection"
+                      >
+                        @if (
+                          selectedSlotId() ===
+                          slot.id
+                        ) {
+                          ✓ Izabran termin
+                        } @else {
+                          Izaberi termin
+                        }
+                      </span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (
+              !slotsLoading() &&
+              !slotsError() &&
+              availableSlots().length > 0
+            ) {
+              <footer
+                class="availability-modal__footer"
+              >
+                <div>
+                  @if (
+                    selectedSlotId() !== null
+                  ) {
+                    <strong>
+                      Termin je izabran
+                    </strong>
+
+                    <span>
+                      Možeš nastaviti na rezervaciju.
+                    </span>
+                  } @else {
+                    <strong>
+                      Izaberi jedan termin
+                    </strong>
+
+                    <span>
+                      Nakon izbora moći ćeš da
+                      nastaviš.
+                    </span>
+                  }
+                </div>
+
+                <button
+                  class="primary-button"
+                  type="button"
+                  [disabled]="
+                    selectedSlotId() === null
+                  "
+                >
+                  Nastavi na rezervaciju
+                </button>
+              </footer>
+            }
+          </section>
+        </div>
+      }
+    }
+  </div>
+</section>

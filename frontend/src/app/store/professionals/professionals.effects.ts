@@ -51,4 +51,36 @@ export class ProfessionalsEffects {
         ),
       ),
   );
+
+  readonly loadProfessional$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(
+          ProfessionalsActions.loadProfessional,
+        ),
+
+        switchMap(({ id }) =>
+          this.professionalsService
+            .getOne(id)
+            .pipe(
+              map((professional) =>
+                ProfessionalsActions
+                  .loadProfessionalSuccess({
+                    professional,
+                  }),
+              ),
+
+              catchError(() =>
+                of(
+                  ProfessionalsActions
+                    .loadProfessionalFailure({
+                      error:
+                        'Profesionalni profil ne postoji ili trenutno ne može da se učita.',
+                    }),
+                ),
+              ),
+            ),
+        ),
+      ),
+  );
 }

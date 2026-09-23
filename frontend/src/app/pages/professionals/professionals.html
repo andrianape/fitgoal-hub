@@ -7,8 +7,8 @@
 
       <p>
         Pregledaj verifikovane trenere i nutricioniste,
-        istraži njihove specijalnosti i pronađi osobu
-        koja odgovara tvojim potrebama.
+        istraži njihove specijalnosti i pronađi osobu koja
+        odgovara tvojim potrebama.
       </p>
     </header>
 
@@ -66,14 +66,9 @@
           name="cityId"
           [(ngModel)]="selectedCityId"
         >
-          <option value="">
-            Svi gradovi
-          </option>
+          <option value="">Svi gradovi</option>
 
-          @for (
-            city of cities();
-            track city.id
-          ) {
+          @for (city of cities(); track city.id) {
             <option [value]="city.id">
               {{ city.name }}
             </option>
@@ -135,8 +130,8 @@
         <h2>Nema pronađenih profesionalaca</h2>
 
         <p>
-          Pokušaj da promeniš ili ukloniš
-          izabrane filtere.
+          Pokušaj da promeniš ili ukloniš izabrane
+          filtere.
         </p>
 
         <button
@@ -155,14 +150,50 @@
         ) {
           <article class="professional-card">
             <div class="professional-card__header">
-              <span class="professional-card__avatar">
-                {{
-                  getInitials(
-                    professional.user.firstName,
-                    professional.user.lastName
-                  )
-                }}
-              </span>
+              <div class="professional-card__avatar">
+                @if (
+                  getProfileImageUrl(
+                    professional.user.profileImageUrl
+                  );
+                  as profileImageUrl
+                ) {
+                  <img
+                    [src]="profileImageUrl"
+                    [alt]="
+                      'Profilna fotografija korisnika ' +
+                      professional.user.firstName +
+                      ' ' +
+                      professional.user.lastName
+                    "
+                    (error)="handleImageError($event)"
+                  />
+
+                  <span
+                    class="
+                      professional-card__initials
+                      professional-card__initials--fallback
+                    "
+                  >
+                    {{
+                      getInitials(
+                        professional.user.firstName,
+                        professional.user.lastName
+                      )
+                    }}
+                  </span>
+                } @else {
+                  <span
+                    class="professional-card__initials"
+                  >
+                    {{
+                      getInitials(
+                        professional.user.firstName,
+                        professional.user.lastName
+                      )
+                    }}
+                  </span>
+                }
+              </div>
 
               <div>
                 <span class="professional-card__role">
@@ -191,7 +222,9 @@
               {{ professional.biography }}
             </p>
 
-            <div class="professional-card__specialties">
+            <div
+              class="professional-card__specialties"
+            >
               @for (
                 specialty of professional.specialties;
                 track specialty
@@ -203,6 +236,7 @@
             <dl class="professional-card__details">
               <div>
                 <dt>Iskustvo</dt>
+
                 <dd>
                   {{
                     professional.yearsOfExperience
@@ -213,6 +247,7 @@
 
               <div>
                 <dt>Cena termina</dt>
+
                 <dd>
                   {{
                     professional.pricePerSession
@@ -223,7 +258,10 @@
             </dl>
 
             <a
-              class="primary-button professional-card__link"
+              class="
+                primary-button
+                professional-card__link
+              "
               [routerLink]="[
                 '/professionals',
                 professional.id
@@ -253,11 +291,16 @@
 
           <span>
             Stranica
+
             <strong>
               {{ currentFilters().page }}
             </strong>
+
             od
-            <strong>{{ totalPages() }}</strong>
+
+            <strong>
+              {{ totalPages() }}
+            </strong>
           </span>
 
           <button

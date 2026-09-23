@@ -13,6 +13,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UserRole } from './enums/user-role.enum';
+import { unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 
 @Injectable()
 export class UsersService {
@@ -86,16 +88,17 @@ export class UsersService {
       );
     }
 
-    const user = this.userRepository.create({
-      firstName: data.firstName.trim(),
-      lastName: data.lastName.trim(),
-      email: normalizedEmail,
-      passwordHash: data.passwordHash,
-      phoneNumber: data.phoneNumber?.trim() ?? null,
-      role: UserRole.CLIENT,
-      isActive: true,
-      city: null,
-    });
+   const user = this.userRepository.create({
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    email: normalizedEmail,
+    passwordHash: data.passwordHash,
+    phoneNumber: data.phoneNumber?.trim() ?? null,
+    profileImageUrl: null,
+    role: UserRole.CLIENT,
+    isActive: true,
+    city: null,
+  });
 
     const savedUser = await this.userRepository.save(user);
 
@@ -155,6 +158,74 @@ export class UsersService {
 
     return this.findOne(id);
   }
+
+  async updateProfileImage(
+  userId: number,
+  profileImageUrl: string,
+): Promise<User> {
+  const user = await this.findOne(userId);
+
+  const previousProfileImageUrl =
+    user.profileImageUrl;
+
+  user.profileImageUrl = profileImageUrl;
+
+  await this.userRepository.save(user);
+
+  await this.deleteProfileImageFile(
+    previousProfileImageUrl,
+  );
+
+  return this.findOne(userId);
+}
+
+async removeProfileImage(
+  userId: number,
+): Promise<void> {
+  const user = await this.findOne(userId);
+
+  const previousProfileImageUrl =
+    user.profileImageUrl;
+
+  user.profileImageUrl = null;
+
+  await this.userRepository.save(user);
+
+  await this.deleteProfileImageFile(
+    previousProfileImageUrl,
+  );
+}
+
+private async deleteProfileImageFile(
+  profileImageUrl: string | null,
+): Promise<void> {
+  if (
+    !profileImageUrl?.startsWith(
+      '/uploads/profile-images/',
+    )
+  ) {
+    return;
+  }
+
+  const relativePath =
+    profileImageUrl.replace(/^\//, '');
+
+  const absolutePath = join(
+    process.cwd(),
+    relativePath,
+  );
+
+  try {
+    await unlink(absolutePath);
+  } catch (error: unknown) {
+    const fileError =
+      error as NodeJS.ErrnoException;
+
+    if (fileError.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+}
 
   async changePassword(userId: number, dto: ChangePasswordDto): Promise<void> {
     const user = await this.userRepository

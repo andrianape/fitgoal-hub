@@ -179,16 +179,39 @@
 }
 
 .professional-card__avatar {
+  position: relative;
+  display: block;
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  flex: 0 0 76px;
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: #e7f1eb;
+}
+
+.professional-card__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+}
+
+.professional-card__initials {
   display: grid;
-  width: 53px;
-  height: 53px;
-  flex: 0 0 auto;
+  width: 100%;
+  height: 100%;
   place-items: center;
-  border-radius: 16px;
-  color: var(--color-primary);
-  background: var(--color-primary-soft);
-  font-size: 13px;
+  color: #0f4c3a;
+  font-size: 1rem;
   font-weight: 700;
+}
+
+.professional-card__initials--fallback {
+  display: none;
 }
 
 .professional-card__role {

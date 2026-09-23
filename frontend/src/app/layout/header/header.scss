@@ -129,4 +129,58 @@
   .header__actions {
     display: none;
   }
+
+.header__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__user-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.header__user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    color: var(--color-text);
+    font-size: 13px;
+  }
+
+  small {
+    color: var(--color-muted);
+    font-size: 10px;
+    text-transform: capitalize;
+  }
+}
+
+.header__logout {
+  padding: 10px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-primary);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    color: #ffffff;
+    background: var(--color-primary);
+  }
+}
+
 }

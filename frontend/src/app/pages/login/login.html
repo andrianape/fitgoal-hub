@@ -1,0 +1,145 @@
+<section class="login-page">
+  <div class="login-page__decoration"></div>
+
+  <div class="container login-page__container">
+    <div class="login-introduction">
+      <span class="login-introduction__label">
+        Dobro došla nazad
+      </span>
+
+      <h1>
+        Nastavi put ka svojoj najboljoj verziji.
+      </h1>
+
+      <p>
+        Prijavi se da rezervišeš termine,
+        pratiš svoje planove i ostaneš povezana
+        sa trenerima i nutricionistima.
+      </p>
+
+      <div class="login-benefits">
+        <div>
+          <span>✓</span>
+          <p>
+            <strong>Jednostavno zakazivanje</strong>
+            Izaberi i rezerviši slobodan termin.
+          </p>
+        </div>
+
+        <div>
+          <span>✓</span>
+          <p>
+            <strong>Planovi na jednom mestu</strong>
+            Prati planove treninga i ishrane.
+          </p>
+        </div>
+
+        <div>
+          <span>✓</span>
+          <p>
+            <strong>Provereni stručnjaci</strong>
+            Sarađuj sa verifikovanim profesionalcima.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <header class="login-card__header">
+        <span>Prijava na nalog</span>
+
+        <h2>Drago nam je što si ponovo tu</h2>
+
+        <p>
+          Unesi email adresu i lozinku svog naloga.
+        </p>
+      </header>
+
+      <form
+        class="login-form"
+        [formGroup]="loginForm"
+        (ngSubmit)="submit()"
+      >
+        <label class="login-form__field">
+          <span>Email adresa</span>
+
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="ime@email.com"
+            autocomplete="email"
+          />
+
+          @if (
+            hasError('email', 'required')
+          ) {
+            <small>
+              Email adresa je obavezna.
+            </small>
+          } @else if (
+            hasError('email', 'email')
+          ) {
+            <small>
+              Unesi ispravnu email adresu.
+            </small>
+          }
+        </label>
+
+        <label class="login-form__field">
+          <span>Lozinka</span>
+
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="Najmanje 8 karaktera"
+            autocomplete="current-password"
+          />
+
+          @if (
+            hasError('password', 'required')
+          ) {
+            <small>
+              Lozinka je obavezna.
+            </small>
+          } @else if (
+            hasError('password', 'minlength')
+          ) {
+            <small>
+              Lozinka mora imati najmanje
+              8 karaktera.
+            </small>
+          }
+        </label>
+
+        @if (error()) {
+          <div
+            class="login-form__error"
+            role="alert"
+          >
+            {{ error() }}
+          </div>
+        }
+
+        <button
+          class="primary-button login-form__submit"
+          type="submit"
+          [disabled]="loading()"
+        >
+          @if (loading()) {
+            Prijavljivanje...
+          } @else {
+            Prijavi se
+          }
+        </button>
+      </form>
+
+      <footer class="login-card__footer">
+        Nemaš nalog?
+
+        <a routerLink="/register">
+          Napravi nalog
+        </a>
+      </footer>
+    </div>
+  </div>
+</section>
