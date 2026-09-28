@@ -27,3 +27,11 @@ export interface UpdateUserRequest {
   phoneNumber?: string;
   cityId?: number | null;
 }
+
+export interface UpdateUserRoleRequest {
+  role: UserRole;
+}
+
+export interface UpdateUserStatusRequest {
+  isActive: boolean;
+}

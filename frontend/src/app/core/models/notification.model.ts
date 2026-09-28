@@ -4,7 +4,9 @@ export type NotificationType =
   | 'appointment_rejected'
   | 'appointment_cancelled'
   | 'appointment_completed'
-  | 'plan_created';
+  | 'plan_created'
+  | 'professional_profile_verified'
+  | 'professional_profile_rejected';
 
 export interface NotificationAppointment {
   id: number;
@@ -17,7 +19,9 @@ export interface Notification {
   message: string;
   isRead: boolean;
   createdAt: string;
-  appointment: NotificationAppointment | null;
+
+  appointment:
+    NotificationAppointment | null;
 }
 
 export interface UnreadNotificationCount {

@@ -265,6 +265,145 @@ export const professionalsFeature =
 
       on(
         ProfessionalsActions
+          .loadAdminProfessionals,
+        (state) => ({
+          ...state,
+          adminProfessionalsLoading:
+            true,
+          adminProfessionalsLoaded:
+            false,
+          adminProfessionalsError:
+            null,
+          verificationUpdateSuccessful:
+            false,
+          verificationUpdateError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .loadAdminProfessionalsSuccess,
+        (
+          state,
+          { professionals },
+        ) => ({
+          ...state,
+          adminProfessionals:
+            professionals,
+          adminProfessionalsLoading:
+            false,
+          adminProfessionalsLoaded:
+            true,
+          adminProfessionalsError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .loadAdminProfessionalsFailure,
+        (
+          state,
+          { error },
+        ) => ({
+          ...state,
+          adminProfessionals:
+            [],
+          adminProfessionalsLoading:
+            false,
+          adminProfessionalsLoaded:
+            false,
+          adminProfessionalsError:
+            error,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .updateProfessionalVerification,
+        (
+          state,
+          { professionalId },
+        ) => ({
+          ...state,
+          verificationUpdatingId:
+            professionalId,
+          verificationUpdateSuccessful:
+            false,
+          verificationUpdateError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .updateProfessionalVerificationSuccess,
+        (
+          state,
+          { professional },
+        ) => ({
+          ...state,
+
+          adminProfessionals:
+            state.adminProfessionals.map(
+              (currentProfessional) =>
+                currentProfessional.id ===
+                professional.id
+                  ? professional
+                  : currentProfessional,
+            ),
+
+          verificationUpdatingId:
+            null,
+          verificationUpdateSuccessful:
+            true,
+          verificationUpdateError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .updateProfessionalVerificationFailure,
+        (
+          state,
+          { error },
+        ) => ({
+          ...state,
+          verificationUpdatingId:
+            null,
+          verificationUpdateSuccessful:
+            false,
+          verificationUpdateError:
+            error,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .clearAdminProfessionals,
+        (state) => ({
+          ...state,
+          adminProfessionals:
+            [],
+          adminProfessionalsLoading:
+            false,
+          adminProfessionalsLoaded:
+            false,
+          adminProfessionalsError:
+            null,
+          verificationUpdatingId:
+            null,
+          verificationUpdateSuccessful:
+            false,
+          verificationUpdateError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
           .clearProfessionals,
         () =>
           initialProfessionalsState,

@@ -8,6 +8,7 @@ import {
   Professional,
   ProfessionalFilters,
   UpdateProfessionalProfileRequest,
+  UpdateProfessionalVerificationRequest,
 } from '../../core/models/professional.model';
 import {
   PaginatedResponse,
@@ -96,6 +97,40 @@ export const ProfessionalsActions =
         }>(),
 
       'Clear Own Professional Profile State':
+        emptyProps(),
+
+      'Load Admin Professionals':
+        emptyProps(),
+
+      'Load Admin Professionals Success':
+        props<{
+          professionals:
+            Professional[];
+        }>(),
+
+      'Load Admin Professionals Failure':
+        props<{
+          error: string;
+        }>(),
+
+      'Update Professional Verification':
+        props<{
+          professionalId: number;
+          data:
+            UpdateProfessionalVerificationRequest;
+        }>(),
+
+      'Update Professional Verification Success':
+        props<{
+          professional: Professional;
+        }>(),
+
+      'Update Professional Verification Failure':
+        props<{
+          error: string;
+        }>(),
+
+      'Clear Admin Professionals':
         emptyProps(),
 
       'Clear Professionals':

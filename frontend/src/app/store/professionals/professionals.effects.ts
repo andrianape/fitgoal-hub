@@ -230,6 +230,87 @@ export class ProfessionalsEffects {
       ),
     );
 
+  readonly loadAdminProfessionals$ =
+    createEffect(() =>
+      this.actions$.pipe(
+        ofType(
+          ProfessionalsActions
+            .loadAdminProfessionals,
+        ),
+
+        switchMap(() =>
+          this.professionalsService
+            .getAllForAdmin()
+            .pipe(
+              map((professionals) =>
+                ProfessionalsActions
+                  .loadAdminProfessionalsSuccess({
+                    professionals,
+                  }),
+              ),
+
+              catchError(
+                (error: unknown) =>
+                  of(
+                    ProfessionalsActions
+                      .loadAdminProfessionalsFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                            'Profesionalne profile trenutno nije moguće učitati.',
+                          ),
+                      }),
+                  ),
+              ),
+            ),
+        ),
+      ),
+    );
+
+  readonly updateProfessionalVerification$ =
+    createEffect(() =>
+      this.actions$.pipe(
+        ofType(
+          ProfessionalsActions
+            .updateProfessionalVerification,
+        ),
+
+        switchMap(
+          ({
+            professionalId,
+            data,
+          }) =>
+            this.professionalsService
+              .updateVerification(
+                professionalId,
+                data,
+              )
+              .pipe(
+                map((professional) =>
+                  ProfessionalsActions
+                    .updateProfessionalVerificationSuccess({
+                      professional,
+                    }),
+                ),
+
+                catchError(
+                  (error: unknown) =>
+                    of(
+                      ProfessionalsActions
+                        .updateProfessionalVerificationFailure({
+                          error:
+                            this.getErrorMessage(
+                              error,
+                              'Odluku trenutno nije moguće sačuvati.',
+                            ),
+                        }),
+                    ),
+                ),
+              ),
+        ),
+      ),
+    );
+
   private getErrorMessage(
     error: unknown,
     fallbackMessage: string,

@@ -1,0 +1,803 @@
+<section class="verifications-page">
+  <div class="container">
+    @if (!isAdmin()) {
+      <div class="verifications-status">
+        <span class="verifications-status__icon">!</span>
+
+        <h1>Pristup nije dozvoljen</h1>
+
+        <p>
+          Ovoj stranici može pristupiti samo
+          administrator sistema.
+        </p>
+
+        <a
+          class="primary-button"
+          routerLink="/my-profile"
+        >
+          Nazad na profil
+        </a>
+      </div>
+    } @else {
+      <header class="verifications-heading">
+        <div>
+          <span>Administracija</span>
+
+          <h1>Verifikacija profesionalaca</h1>
+
+          <p>
+            Pregledaj profesionalne podatke i
+            kvalifikacije trenera i nutricionista pre
+            nego što njihovi profili postanu javno
+            dostupni.
+          </p>
+        </div>
+
+        <a
+          class="secondary-button"
+          routerLink="/my-profile"
+        >
+          ← Moj profil
+        </a>
+      </header>
+
+      <div class="verification-summary">
+        <article>
+          <span>Čekaju proveru</span>
+          <strong>{{ pendingCount() }}</strong>
+        </article>
+
+        <article>
+          <span>Odobreni</span>
+          <strong>{{ verifiedCount() }}</strong>
+        </article>
+
+        <article>
+          <span>Odbijeni</span>
+          <strong>{{ rejectedCount() }}</strong>
+        </article>
+
+        <article>
+          <span>Ukupno</span>
+          <strong>{{ professionals().length }}</strong>
+        </article>
+      </div>
+
+      <nav
+        class="verification-filters"
+        aria-label="Filter profesionalnih profila"
+      >
+        <button
+          type="button"
+          [class.verification-filters__button--active]="
+            selectedFilter() === 'pending'
+          "
+          (click)="selectFilter('pending')"
+        >
+          Čekaju proveru
+          <span>{{ pendingCount() }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.verification-filters__button--active]="
+            selectedFilter() === 'verified'
+          "
+          (click)="selectFilter('verified')"
+        >
+          Odobreni
+          <span>{{ verifiedCount() }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.verification-filters__button--active]="
+            selectedFilter() === 'rejected'
+          "
+          (click)="selectFilter('rejected')"
+        >
+          Odbijeni
+          <span>{{ rejectedCount() }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.verification-filters__button--active]="
+            selectedFilter() === 'all'
+          "
+          (click)="selectFilter('all')"
+        >
+          Svi
+          <span>{{ professionals().length }}</span>
+        </button>
+      </nav>
+
+      @if (loading()) {
+        <div class="verifications-status">
+          <span class="loader"></span>
+
+          <h2>Učitavanje profila...</h2>
+
+          <p>
+            Sačekaj trenutak dok učitamo profesionalne
+            profile.
+          </p>
+        </div>
+      } @else if (loadError()) {
+        <div
+          class="
+            verifications-status
+            verifications-status--error
+          "
+        >
+          <span class="verifications-status__icon">!</span>
+
+          <h2>Profili nisu učitani</h2>
+
+          <p>{{ loadError() }}</p>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="loadProfessionals()"
+          >
+            Pokušaj ponovo
+          </button>
+        </div>
+      } @else if (
+        filteredProfessionals().length === 0
+      ) {
+        <div class="verifications-status">
+          <span class="verifications-status__icon">✓</span>
+
+          <h2>Nema profila u ovoj grupi</h2>
+
+          <p>
+            Trenutno nema profesionalnih profila koji
+            odgovaraju izabranom filteru.
+          </p>
+        </div>
+      } @else {
+        <div class="verification-list">
+          @for (
+            professional of filteredProfessionals();
+            track professional.id
+          ) {
+            <article class="verification-card">
+              <div class="verification-card__header">
+                <div class="verification-card__person">
+                  <div class="verification-card__avatar">
+                    @if (
+                      getProfileImageUrl(
+                        professional.user.profileImageUrl
+                      );
+                      as profileImageUrl
+                    ) {
+                      @if (
+                        !hasImageLoadFailed(
+                          professional.user.id
+                        )
+                      ) {
+                        <img
+                          [src]="profileImageUrl"
+                          [alt]="
+                            'Profilna fotografija korisnika ' +
+                            professional.user.firstName +
+                            ' ' +
+                            professional.user.lastName
+                          "
+                          (error)="
+                            handleImageError(
+                              professional.user.id
+                            )
+                          "
+                        />
+                      } @else {
+                        <span>
+                          {{
+                            getInitials(
+                              professional.user.firstName,
+                              professional.user.lastName
+                            )
+                          }}
+                        </span>
+                      }
+                    } @else {
+                      <span>
+                        {{
+                          getInitials(
+                            professional.user.firstName,
+                            professional.user.lastName
+                          )
+                        }}
+                      </span>
+                    }
+                  </div>
+
+                  <div>
+                    <span>
+                      {{ getRoleLabel(professional) }}
+                    </span>
+
+                    <h2>
+                      {{ professional.user.firstName }}
+                      {{ professional.user.lastName }}
+                    </h2>
+
+                    <p>
+                      {{
+                        professional.user.city?.name ??
+                          'Grad nije naveden'
+                      }}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  [class]="
+                    'verification-status ' +
+                    getStatusClass(professional)
+                  "
+                >
+                  {{ getStatusLabel(professional) }}
+                </span>
+              </div>
+
+              <div class="verification-card__details">
+                <div>
+                  <span>Iskustvo</span>
+                  <strong>
+                    {{ professional.yearsOfExperience }}
+                    god.
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Cena termina</span>
+                  <strong>
+                    {{ professional.pricePerSession }}
+                    RSD
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Mesto rada</span>
+                  <strong>
+                    {{
+                      professional.workplaceName ??
+                        professional.address ??
+                        'Nije navedeno'
+                    }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Kvalifikacija</span>
+                  <strong>
+                    {{
+                      professional.qualificationName ??
+                        'Nije navedena'
+                    }}
+                  </strong>
+                </div>
+              </div>
+
+              <div class="verification-card__specialties">
+                @for (
+                  specialty of professional.specialties;
+                  track specialty
+                ) {
+                  <span>{{ specialty }}</span>
+                }
+              </div>
+
+              @if (
+                getVerificationStatus(professional) ===
+                  'rejected' &&
+                professional.verificationNote
+              ) {
+                <div class="verification-card__note">
+                  <strong>Razlog odbijanja</strong>
+                  <p>{{ professional.verificationNote }}</p>
+                </div>
+              }
+
+              <footer class="verification-card__footer">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="openDetails(professional)"
+                >
+                  Pregledaj podatke
+                </button>
+
+                <div class="verification-card__actions">
+                  @if (!professional.isVerified) {
+                    <button
+                      class="verification-approve"
+                      type="button"
+                      [disabled]="
+                        isUpdating(professional.id)
+                      "
+                      (click)="approve(professional)"
+                    >
+                      @if (isUpdating(professional.id)) {
+                        Čuvanje...
+                      } @else {
+                        Odobri
+                      }
+                    </button>
+                  }
+
+                  @if (
+                    getVerificationStatus(professional) !==
+                    'rejected'
+                  ) {
+                    <button
+                      class="verification-reject"
+                      type="button"
+                      [disabled]="
+                        isUpdating(professional.id)
+                      "
+                      (click)="
+                        openDetails(professional);
+                        startRejection()
+                      "
+                    >
+                      Odbij
+                    </button>
+                  }
+                </div>
+              </footer>
+            </article>
+          }
+        </div>
+      }
+
+      @if (
+        selectedProfessional();
+        as professional
+      ) {
+        <div
+          class="verification-modal-backdrop"
+          role="presentation"
+          (click)="closeDetails()"
+        >
+          <section
+            class="verification-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="verification-modal-title"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="verification-modal__header">
+              <div>
+                <span>
+                  {{ getRoleLabel(professional) }}
+                </span>
+
+                <h2 id="verification-modal-title">
+                  {{ professional.user.firstName }}
+                  {{ professional.user.lastName }}
+                </h2>
+
+                <p>
+                  Kompletni podaci profesionalnog profila
+                </p>
+              </div>
+
+              <button
+                class="verification-modal__close"
+                type="button"
+                aria-label="Zatvori prozor"
+                [disabled]="
+                  isUpdating(professional.id)
+                "
+                (click)="closeDetails()"
+              >
+                ×
+              </button>
+            </header>
+
+            <div class="verification-modal__identity">
+              <div class="verification-modal__avatar">
+                @if (
+                  getProfileImageUrl(
+                    professional.user.profileImageUrl
+                  );
+                  as profileImageUrl
+                ) {
+                  @if (
+                    !hasImageLoadFailed(
+                      professional.user.id
+                    )
+                  ) {
+                    <img
+                      [src]="profileImageUrl"
+                      [alt]="
+                        'Profilna fotografija korisnika ' +
+                        professional.user.firstName +
+                        ' ' +
+                        professional.user.lastName
+                      "
+                      (error)="
+                        handleImageError(
+                          professional.user.id
+                        )
+                      "
+                    />
+                  } @else {
+                    <span>
+                      {{
+                        getInitials(
+                          professional.user.firstName,
+                          professional.user.lastName
+                        )
+                      }}
+                    </span>
+                  }
+                } @else {
+                  <span>
+                    {{
+                      getInitials(
+                        professional.user.firstName,
+                        professional.user.lastName
+                      )
+                    }}
+                  </span>
+                }
+              </div>
+
+              <div>
+                <span
+                  [class]="
+                    'verification-status ' +
+                    getStatusClass(professional)
+                  "
+                >
+                  {{ getStatusLabel(professional) }}
+                </span>
+
+                <h3>
+                  {{ professional.user.firstName }}
+                  {{ professional.user.lastName }}
+                </h3>
+
+                <p>{{ professional.user.email }}</p>
+
+                <p>
+                  {{
+                    professional.user.phoneNumber ??
+                      'Telefon nije naveden'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <div class="verification-modal__body">
+              <section class="verification-detail-section">
+                <span>Profesionalni podaci</span>
+                <h3>Iskustvo i usluge</h3>
+
+                <dl>
+                  <div>
+                    <dt>Godine iskustva</dt>
+                    <dd>
+                      {{ professional.yearsOfExperience }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Cena termina</dt>
+                    <dd>
+                      {{ professional.pricePerSession }}
+                      RSD
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Grad</dt>
+                    <dd>
+                      {{
+                        professional.user.city?.name ??
+                          'Nije naveden'
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div class="verification-detail-section__text">
+                  <strong>Biografija</strong>
+                  <p>{{ professional.biography }}</p>
+                </div>
+
+                <div class="verification-detail-section__text">
+                  <strong>Specijalnosti</strong>
+
+                  <div class="verification-modal__specialties">
+                    @for (
+                      specialty of
+                        professional.specialties;
+                      track specialty
+                    ) {
+                      <span>{{ specialty }}</span>
+                    }
+                  </div>
+                </div>
+              </section>
+
+              <section class="verification-detail-section">
+                <span>Mesto rada</span>
+                <h3>Lokacija usluge</h3>
+
+                <dl>
+                  <div>
+                    <dt>
+                      Naziv teretane ili ordinacije
+                    </dt>
+
+                    <dd>
+                      {{
+                        professional.workplaceName ??
+                          'Nije naveden'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Tačna adresa</dt>
+                    <dd>
+                      {{
+                        professional.address ??
+                          'Nije navedena'
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section class="verification-detail-section">
+                <span>Privatni podaci</span>
+                <h3>Kvalifikacija</h3>
+
+                <dl>
+                  <div>
+                    <dt>Vrsta kvalifikacije</dt>
+                    <dd>
+                      {{
+                        professional.qualificationType ??
+                          'Nije navedena'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Naziv kvalifikacije</dt>
+                    <dd>
+                      {{
+                        professional.qualificationName ??
+                          'Nije naveden'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Ustanova</dt>
+                    <dd>
+                      {{
+                        professional.issuingInstitution ??
+                          'Nije navedena'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Godina sticanja</dt>
+                    <dd>
+                      {{
+                        professional.qualificationYear ??
+                          'Nije navedena'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Broj sertifikata</dt>
+                    <dd>
+                      {{
+                        professional.credentialNumber ??
+                          'Nije naveden'
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <p class="verification-detail-section__privacy">
+                  Broj sertifikata je privatan i nije
+                  vidljiv na javnom profilu.
+                </p>
+              </section>
+
+              @if (
+                professional.verifiedAt ||
+                professional.verificationNote
+              ) {
+                <section class="verification-detail-section">
+                  <span>Prethodna odluka</span>
+                  <h3>Podaci o proveri</h3>
+
+                  <dl>
+                    <div>
+                      <dt>Datum odluke</dt>
+                      <dd>
+                        {{
+                          formatDate(
+                            professional.verifiedAt
+                          )
+                        }}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>Administrator</dt>
+                      <dd>
+                        @if (professional.verifiedBy) {
+                          {{
+                            professional.verifiedBy.firstName
+                          }}
+                          {{
+                            professional.verifiedBy.lastName
+                          }}
+                        } @else {
+                          Nije evidentiran
+                        }
+                      </dd>
+                    </div>
+                  </dl>
+
+                  @if (
+                    professional.verificationNote
+                  ) {
+                    <div class="verification-detail-section__text">
+                      <strong>Napomena</strong>
+                      <p>
+                        {{
+                          professional.verificationNote
+                        }}
+                      </p>
+                    </div>
+                  }
+                </section>
+              }
+
+              @if (rejectionMode()) {
+                <section class="verification-rejection">
+                  <label>
+                    <span>Razlog odbijanja *</span>
+
+                    <textarea
+                      rows="5"
+                      maxlength="1000"
+                      placeholder="Objasni profesionalcu šta treba da ispravi ili dopuni."
+                      [ngModel]="rejectionNote()"
+                      [ngModelOptions]="{
+                        standalone: true
+                      }"
+                      (ngModelChange)="
+                        rejectionNote.set($event)
+                      "
+                    ></textarea>
+                  </label>
+
+                  <small>
+                    {{ rejectionNote().length }}/1000
+                  </small>
+
+                  @if (localError()) {
+                    <div
+                      class="verification-modal__error"
+                      role="alert"
+                    >
+                      {{ localError() }}
+                    </div>
+                  }
+
+                  <div class="verification-rejection__actions">
+                    <button
+                      class="secondary-button"
+                      type="button"
+                      [disabled]="
+                        isUpdating(professional.id)
+                      "
+                      (click)="cancelRejection()"
+                    >
+                      Odustani
+                    </button>
+
+                    <button
+                      class="verification-reject"
+                      type="button"
+                      [disabled]="
+                        isUpdating(professional.id)
+                      "
+                      (click)="reject(professional)"
+                    >
+                      @if (
+                        isUpdating(professional.id)
+                      ) {
+                        Čuvanje...
+                      } @else {
+                        Potvrdi odbijanje
+                      }
+                    </button>
+                  </div>
+                </section>
+              }
+
+              @if (updateError()) {
+                <div
+                  class="verification-modal__error"
+                  role="alert"
+                >
+                  {{ updateError() }}
+                </div>
+              }
+            </div>
+
+            @if (!rejectionMode()) {
+              <footer class="verification-modal__footer">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  [disabled]="
+                    isUpdating(professional.id)
+                  "
+                  (click)="closeDetails()"
+                >
+                  Zatvori
+                </button>
+
+                <div>
+                  @if (
+                    getVerificationStatus(professional) !==
+                    'rejected'
+                  ) {
+                    <button
+                      class="verification-reject"
+                      type="button"
+                      [disabled]="
+                        isUpdating(professional.id)
+                      "
+                      (click)="startRejection()"
+                    >
+                      Odbij profil
+                    </button>
+                  }
+
+                  @if (!professional.isVerified) {
+                    <button
+                      class="verification-approve"
+                      type="button"
+                      [disabled]="
+                        isUpdating(professional.id)
+                      "
+                      (click)="approve(professional)"
+                    >
+                      @if (
+                        isUpdating(professional.id)
+                      ) {
+                        Čuvanje...
+                      } @else {
+                        Odobri profil
+                      }
+                    </button>
+                  }
+                </div>
+              </footer>
+            }
+          </section>
+        </div>
+      }
+    }
+  </div>
+</section>

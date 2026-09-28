@@ -58,697 +58,765 @@
           Pokušaj ponovo
         </button>
       </div>
-    } @else if (ownProfile(); as profile) {
-      <div class="onboarding-status">
-        @if (profile.isVerified) {
-          <span
-            class="
-              onboarding-status__icon
-              onboarding-status__icon--success
-            "
-          >
-            ✓
-          </span>
-
-          <span class="onboarding-status__label">
-            Profil je verifikovan
-          </span>
-
-          <h1>
-            Tvoj profesionalni profil je aktivan
-          </h1>
-
-          <p>
-            Profil je odobren i klijenti sada mogu
-            da ga pronađu, pregledaju slobodne termine
-            i zakažu uslugu.
-          </p>
-        } @else {
-          <span
-            class="
-              onboarding-status__icon
-              onboarding-status__icon--pending
-            "
-          >
-            ◷
-          </span>
-
-          <span class="onboarding-status__label">
-            Čeka proveru
-          </span>
-
-          <h1>
-            Profesionalni profil je poslat
-          </h1>
-
-          <p>
-            Administrator će proveriti podatke o radu
-            i kvalifikaciji. Nakon odluke dobićeš
-            obaveštenje u aplikaciji.
-          </p>
-
-          @if (profile.verificationNote) {
-            <div class="onboarding-status__note">
-              <strong>
-                Napomena administratora
-              </strong>
-
-              <p>
-                {{ profile.verificationNote }}
-              </p>
-            </div>
-          }
-        }
-
-        <div class="onboarding-status__summary">
-          <div>
-            <span>Uloga</span>
-
-            <strong>
-              @if (isTrainer()) {
-                Lični trener
-              } @else {
-                Nutricionista
-              }
-            </strong>
-          </div>
-
-          <div>
-            <span>Adresa</span>
-
-            <strong>
-              {{ profile.address }}
-            </strong>
-          </div>
-
-          @if (profile.workplaceName) {
-            <div>
-              <span>Mesto rada</span>
-
-              <strong>
-                {{ profile.workplaceName }}
-              </strong>
-            </div>
-          }
-
-          <div>
-            <span>Kvalifikacija</span>
-
-            <strong>
-              {{
-                profile.qualificationName ??
-                  'Nije navedena'
-              }}
-            </strong>
-          </div>
-        </div>
-
-        <a
-          class="primary-button"
-          routerLink="/my-profile"
-        >
-          Otvori moj profil
-        </a>
-      </div>
     } @else {
-      <div class="onboarding-introduction">
-        <span class="onboarding-introduction__label">
-          Profesionalni profil
-        </span>
-
-        <h1>
-          Predstavi svoje iskustvo i način rada.
-        </h1>
-
-        <p>
-          Popuni profesionalne podatke kako bi
-          administrator mogao da proveri profil pre
-          nego što postane vidljiv klijentima.
-        </p>
-
-        <div class="onboarding-steps">
-          <div>
-            <span>01</span>
-
-            <p>
-              <strong>Predstavi svoj rad</strong>
-
-              Napiši biografiju, iskustvo i oblasti
-              kojima se baviš.
-            </p>
-          </div>
-
-          <div>
-            <span>02</span>
-
-            <p>
-              <strong>Unesi mesto rada</strong>
-
-              Dodaj tačnu adresu na kojoj održavaš
-              treninge ili konsultacije.
-            </p>
-          </div>
-
-          <div>
-            <span>03</span>
-
-            <p>
-              <strong>Navedi kvalifikaciju</strong>
-
-              Podatke vidi administrator radi provere
-              profesionalnog profila.
-            </p>
-          </div>
-        </div>
-
-        <div class="onboarding-introduction__notice">
-          <strong>Važno</strong>
-
-          <p>
-            Profesionalni profil neće biti javno
-            prikazan dok ga administrator ne odobri.
-          </p>
-        </div>
-      </div>
-
-      <div class="onboarding-card">
-        <header class="onboarding-card__header">
-          <span>
-            Podaci {{ roleLabel() }}
-          </span>
-
-          <h2>Dovrši profesionalni profil</h2>
-
-          <p>
-            Sva polja označena zvezdicom su obavezna.
-          </p>
-        </header>
-
-        <form
-          class="onboarding-form"
-          [formGroup]="onboardingForm"
-          (ngSubmit)="submit()"
-        >
-          <section class="onboarding-form__section">
-            <div class="onboarding-form__section-heading">
-              <span>01</span>
-
-              <div>
-                <h3>Profesionalno iskustvo</h3>
-
-                <p>
-                  Ovi podaci biće prikazani klijentima
-                  nakon verifikacije.
-                </p>
-              </div>
-            </div>
-
-            <label class="onboarding-form__field">
-              <span>Biografija *</span>
-
-              <textarea
-                formControlName="biography"
-                rows="6"
-                placeholder="Opiši svoje iskustvo, pristup radu i kome su namenjene tvoje usluge..."
-              ></textarea>
-
-              <small class="onboarding-form__hint">
-                Najmanje 20, a najviše 2000 karaktera.
-              </small>
-
-              @if (
-                hasError(
-                  'biography',
-                  'required'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Biografija je obavezna.
-                </small>
-              } @else if (
-                hasError(
-                  'biography',
-                  'minlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Biografija mora imati najmanje
-                  20 karaktera.
-                </small>
-              } @else if (
-                hasError(
-                  'biography',
-                  'maxlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Biografija može imati najviše
-                  2000 karaktera.
-                </small>
-              }
-            </label>
-
-            <div class="onboarding-form__row">
-              <label class="onboarding-form__field">
-                <span>Godine iskustva *</span>
-
-                <input
-                  type="number"
-                  formControlName="yearsOfExperience"
-                  min="0"
-                  max="60"
-                  step="1"
-                  placeholder="Na primer: 5"
-                />
-
-                @if (
-                  hasError(
-                    'yearsOfExperience',
-                    'required'
-                  )
-                ) {
-                  <small class="onboarding-form__validation">
-                    Unesi godine iskustva.
-                  </small>
-                } @else if (
-                  hasError(
-                    'yearsOfExperience',
-                    'min'
-                  ) ||
-                  hasError(
-                    'yearsOfExperience',
-                    'max'
-                  )
-                ) {
-                  <small class="onboarding-form__validation">
-                    Dozvoljena vrednost je od 0 do 60.
-                  </small>
-                }
-              </label>
-
-              <label class="onboarding-form__field">
-                <span>Cena termina u RSD *</span>
-
-                <input
-                  type="number"
-                  formControlName="pricePerSession"
-                  min="0"
-                  max="1000000"
-                  step="1"
-                  placeholder="Na primer: 3000"
-                />
-
-                @if (
-                  hasError(
-                    'pricePerSession',
-                    'required'
-                  )
-                ) {
-                  <small class="onboarding-form__validation">
-                    Unesi cenu termina.
-                  </small>
-                } @else if (
-                  hasError(
-                    'pricePerSession',
-                    'min'
-                  ) ||
-                  hasError(
-                    'pricePerSession',
-                    'max'
-                  )
-                ) {
-                  <small class="onboarding-form__validation">
-                    Uneta cena nije dozvoljena.
-                  </small>
-                }
-              </label>
-            </div>
-
-            <label class="onboarding-form__field">
-              <span>Specijalnosti *</span>
-
-              <input
-                type="text"
-                formControlName="specialties"
-                placeholder="Mršavljenje, sportska ishrana, kondicija"
-              />
-
-              <small class="onboarding-form__hint">
-                Odvoji specijalnosti zarezima. Možeš
-                uneti najviše 20.
-              </small>
-
-              @if (
-                hasError(
-                  'specialties',
-                  'required'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Unesi najmanje jednu specijalnost.
-                </small>
-              }
-            </label>
-          </section>
-
-          <section class="onboarding-form__section">
-            <div class="onboarding-form__section-heading">
-              <span>02</span>
-
-              <div>
-                <h3>Mesto rada</h3>
-
-                <p>
-                  Navedi gde klijent dolazi na termin.
-                </p>
-              </div>
-            </div>
-
-            <label class="onboarding-form__field">
-              <span>
-                @if (isTrainer()) {
-                  Naziv teretane ili mesta rada *
-                } @else {
-                  Naziv ordinacije ili savetovališta
-                }
+      @if (
+        ownProfile();
+        as profile
+      ) {
+        @if (!editMode()) {
+          <div class="onboarding-status">
+            @if (profile.isVerified) {
+              <span
+                class="
+                  onboarding-status__icon
+                  onboarding-status__icon--success
+                "
+              >
+                ✓
               </span>
 
-              <input
-                type="text"
-                formControlName="workplaceName"
-                [placeholder]="
-                  isTrainer()
-                    ? 'Na primer: FitZone centar'
-                    : 'Na primer: Nutri Balance'
+              <span class="onboarding-status__label">
+                Profil je verifikovan
+              </span>
+
+              <h1>
+                Tvoj profesionalni profil je aktivan
+              </h1>
+
+              <p>
+                Profil je odobren i klijenti sada mogu
+                da ga pronađu, pregledaju slobodne
+                termine i zakažu uslugu.
+              </p>
+            } @else {
+              <span
+                class="
+                  onboarding-status__icon
+                  onboarding-status__icon--pending
                 "
-              />
+              >
+                ◷
+              </span>
 
-              @if (
-                hasError(
-                  'workplaceName',
-                  'maxlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Naziv može imati najviše
-                  200 karaktera.
-                </small>
+              <span class="onboarding-status__label">
+                Čeka proveru
+              </span>
+
+              <h1>
+                Profesionalni profil je poslat
+              </h1>
+
+              <p>
+                Administrator će proveriti podatke o
+                radu i kvalifikaciji. Nakon odluke
+                dobićeš obaveštenje u aplikaciji.
+              </p>
+
+              @if (profile.verificationNote) {
+                <div class="onboarding-status__note">
+                  <strong>
+                    Napomena administratora
+                  </strong>
+
+                  <p>
+                    {{ profile.verificationNote }}
+                  </p>
+                </div>
               }
-            </label>
+            }
 
-            <label class="onboarding-form__field">
-              <span>Tačna adresa *</span>
+            <div class="onboarding-status__summary">
+              <div>
+                <span>Uloga</span>
 
-              <input
-                type="text"
-                formControlName="address"
-                placeholder="Ulica, broj i grad"
-                autocomplete="street-address"
-              />
-
-              <small class="onboarding-form__hint">
-                Adresa će biti prikazana klijentu kako
-                bi znao gde se termin održava.
-              </small>
-
-              @if (
-                hasError(
-                  'address',
-                  'required'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Adresa je obavezna.
-                </small>
-              } @else if (
-                hasError(
-                  'address',
-                  'minlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Unesi potpunu adresu.
-                </small>
-              } @else if (
-                hasError(
-                  'address',
-                  'maxlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Adresa može imati najviše
-                  300 karaktera.
-                </small>
-              }
-            </label>
-          </section>
-
-          <section class="onboarding-form__section">
-            <div class="onboarding-form__section-heading">
-              <span>03</span>
+                <strong>
+                  @if (isTrainer()) {
+                    Lični trener
+                  } @else {
+                    Nutricionista
+                  }
+                </strong>
+              </div>
 
               <div>
-                <h3>Kvalifikacija</h3>
+                <span>Adresa</span>
 
-                <p>
-                  Ove podatke administrator koristi
-                  za proveru profila.
-                </p>
+                <strong>
+                  {{ profile.address }}
+                </strong>
+              </div>
+
+              @if (profile.workplaceName) {
+                <div>
+                  <span>Mesto rada</span>
+
+                  <strong>
+                    {{ profile.workplaceName }}
+                  </strong>
+                </div>
+              }
+
+              <div>
+                <span>Kvalifikacija</span>
+
+                <strong>
+                  {{
+                    profile.qualificationName ??
+                      'Nije navedena'
+                  }}
+                </strong>
               </div>
             </div>
 
-            <div class="onboarding-form__row">
+            <div class="onboarding-status__actions">
+              <a
+                class="secondary-button"
+                routerLink="/my-profile"
+              >
+                Otvori moj profil
+              </a>
+
+              <button
+                class="primary-button"
+                type="button"
+                (click)="startEditing()"
+              >
+                Izmeni profesionalne podatke
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      @if (
+        !ownProfile() ||
+        editMode()
+      ) {
+        <div class="onboarding-introduction">
+          <span class="onboarding-introduction__label">
+            Profesionalni profil
+          </span>
+
+          @if (editMode()) {
+            <h1>
+              Ažuriraj svoje profesionalne podatke.
+            </h1>
+
+            <p>
+              Proveri postojeće podatke i izmeni
+              informacije koje više nisu aktuelne.
+            </p>
+          } @else {
+            <h1>
+              Predstavi svoje iskustvo i način rada.
+            </h1>
+
+            <p>
+              Popuni profesionalne podatke kako bi
+              administrator mogao da proveri profil pre
+              nego što postane vidljiv klijentima.
+            </p>
+          }
+
+          <div class="onboarding-steps">
+            <div>
+              <span>01</span>
+
+              <p>
+                <strong>Predstavi svoj rad</strong>
+
+                Napiši biografiju, iskustvo i oblasti
+                kojima se baviš.
+              </p>
+            </div>
+
+            <div>
+              <span>02</span>
+
+              <p>
+                <strong>Unesi mesto rada</strong>
+
+                Dodaj tačnu adresu na kojoj održavaš
+                treninge ili konsultacije.
+              </p>
+            </div>
+
+            <div>
+              <span>03</span>
+
+              <p>
+                <strong>Navedi kvalifikaciju</strong>
+
+                Podatke vidi administrator radi provere
+                profesionalnog profila.
+              </p>
+            </div>
+          </div>
+
+          <div class="onboarding-introduction__notice">
+            <strong>Važno</strong>
+
+            @if (editMode()) {
+              <p>
+                Nakon čuvanja izmena profil će ponovo
+                čekati administratorsku verifikaciju i
+                privremeno neće biti prikazan klijentima.
+              </p>
+            } @else {
+              <p>
+                Profesionalni profil neće biti javno
+                prikazan dok ga administrator ne odobri.
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="onboarding-card">
+          <header class="onboarding-card__header">
+            <span>
+              Podaci {{ roleLabel() }}
+            </span>
+
+            <h2>{{ formTitle() }}</h2>
+
+            <p>
+              Sva polja označena zvezdicom su obavezna.
+            </p>
+          </header>
+
+          <form
+            class="onboarding-form"
+            [formGroup]="onboardingForm"
+            (ngSubmit)="submit()"
+          >
+            @if (editMode()) {
+              <div class="onboarding-form__warning">
+                <strong>
+                  Ponovna verifikacija profila
+                </strong>
+
+                <p>
+                  Čuvanjem izmena profil će biti vraćen
+                  na proveru administratoru.
+                </p>
+              </div>
+            }
+
+            <section class="onboarding-form__section">
+              <div class="onboarding-form__section-heading">
+                <span>01</span>
+
+                <div>
+                  <h3>Profesionalno iskustvo</h3>
+
+                  <p>
+                    Ovi podaci biće prikazani klijentima
+                    nakon verifikacije.
+                  </p>
+                </div>
+              </div>
+
               <label class="onboarding-form__field">
-                <span>Vrsta kvalifikacije *</span>
+                <span>Biografija *</span>
 
-                <select formControlName="qualificationType">
-                  <option value="">
-                    Izaberi vrstu
-                  </option>
+                <textarea
+                  formControlName="biography"
+                  rows="6"
+                  placeholder="Opiši svoje iskustvo, pristup radu i kome su namenjene tvoje usluge..."
+                ></textarea>
 
-                  <option value="Diploma">
-                    Diploma
-                  </option>
-
-                  <option value="Sertifikat">
-                    Sertifikat
-                  </option>
-
-                  <option value="Licenca">
-                    Licenca
-                  </option>
-
-                  <option value="Stručna obuka">
-                    Stručna obuka
-                  </option>
-
-                  <option value="Drugo">
-                    Drugo
-                  </option>
-                </select>
+                <small class="onboarding-form__hint">
+                  Najmanje 20, a najviše 2000 karaktera.
+                </small>
 
                 @if (
                   hasError(
-                    'qualificationType',
+                    'biography',
                     'required'
                   )
                 ) {
                   <small class="onboarding-form__validation">
-                    Izaberi vrstu kvalifikacije.
+                    Biografija je obavezna.
+                  </small>
+                } @else if (
+                  hasError(
+                    'biography',
+                    'minlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Biografija mora imati najmanje
+                    20 karaktera.
+                  </small>
+                } @else if (
+                  hasError(
+                    'biography',
+                    'maxlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Biografija može imati najviše
+                    2000 karaktera.
                   </small>
                 }
               </label>
 
+              <div class="onboarding-form__row">
+                <label class="onboarding-form__field">
+                  <span>Godine iskustva *</span>
+
+                  <input
+                    type="number"
+                    formControlName="yearsOfExperience"
+                    min="0"
+                    max="60"
+                    step="1"
+                    placeholder="Na primer: 5"
+                  />
+
+                  @if (
+                    hasError(
+                      'yearsOfExperience',
+                      'required'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Unesi godine iskustva.
+                    </small>
+                  } @else if (
+                    hasError(
+                      'yearsOfExperience',
+                      'min'
+                    ) ||
+                    hasError(
+                      'yearsOfExperience',
+                      'max'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Dozvoljena vrednost je od 0 do 60.
+                    </small>
+                  }
+                </label>
+
+                <label class="onboarding-form__field">
+                  <span>Cena termina u RSD *</span>
+
+                  <input
+                    type="number"
+                    formControlName="pricePerSession"
+                    min="0"
+                    max="1000000"
+                    step="1"
+                    placeholder="Na primer: 3000"
+                  />
+
+                  @if (
+                    hasError(
+                      'pricePerSession',
+                      'required'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Unesi cenu termina.
+                    </small>
+                  } @else if (
+                    hasError(
+                      'pricePerSession',
+                      'min'
+                    ) ||
+                    hasError(
+                      'pricePerSession',
+                      'max'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Uneta cena nije dozvoljena.
+                    </small>
+                  }
+                </label>
+              </div>
+
               <label class="onboarding-form__field">
-                <span>Godina sticanja *</span>
+                <span>Specijalnosti *</span>
 
                 <input
-                  type="number"
-                  formControlName="qualificationYear"
-                  min="1950"
-                  [max]="currentYear"
-                  step="1"
-                  placeholder="Na primer: 2024"
+                  type="text"
+                  formControlName="specialties"
+                  placeholder="Mršavljenje, sportska ishrana, kondicija"
+                />
+
+                <small class="onboarding-form__hint">
+                  Odvoji specijalnosti zarezima. Možeš
+                  uneti najviše 20.
+                </small>
+
+                @if (
+                  hasError(
+                    'specialties',
+                    'required'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Unesi najmanje jednu specijalnost.
+                  </small>
+                }
+              </label>
+            </section>
+
+            <section class="onboarding-form__section">
+              <div class="onboarding-form__section-heading">
+                <span>02</span>
+
+                <div>
+                  <h3>Mesto rada</h3>
+
+                  <p>
+                    Navedi gde klijent dolazi na termin.
+                  </p>
+                </div>
+              </div>
+
+              <label class="onboarding-form__field">
+                <span>
+                  @if (isTrainer()) {
+                    Naziv teretane ili mesta rada *
+                  } @else {
+                    Naziv ordinacije ili savetovališta
+                  }
+                </span>
+
+                <input
+                  type="text"
+                  formControlName="workplaceName"
+                  [placeholder]="
+                    isTrainer()
+                      ? 'Na primer: FitZone centar'
+                      : 'Na primer: Nutri Balance'
+                  "
                 />
 
                 @if (
                   hasError(
-                    'qualificationYear',
+                    'workplaceName',
+                    'maxlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Naziv može imati najviše
+                    200 karaktera.
+                  </small>
+                }
+              </label>
+
+              <label class="onboarding-form__field">
+                <span>Tačna adresa *</span>
+
+                <input
+                  type="text"
+                  formControlName="address"
+                  placeholder="Ulica, broj i grad"
+                  autocomplete="street-address"
+                />
+
+                <small class="onboarding-form__hint">
+                  Adresa će biti prikazana klijentu kako
+                  bi znao gde se termin održava.
+                </small>
+
+                @if (
+                  hasError(
+                    'address',
                     'required'
                   )
                 ) {
                   <small class="onboarding-form__validation">
-                    Godina je obavezna.
+                    Adresa je obavezna.
                   </small>
                 } @else if (
                   hasError(
-                    'qualificationYear',
-                    'min'
-                  ) ||
-                  hasError(
-                    'qualificationYear',
-                    'max'
+                    'address',
+                    'minlength'
                   )
                 ) {
                   <small class="onboarding-form__validation">
-                    Godina mora biti između 1950.
-                    i {{ currentYear }}.
+                    Unesi potpunu adresu.
+                  </small>
+                } @else if (
+                  hasError(
+                    'address',
+                    'maxlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Adresa može imati najviše
+                    300 karaktera.
                   </small>
                 }
               </label>
-            </div>
+            </section>
 
-            <label class="onboarding-form__field">
-              <span>Naziv kvalifikacije *</span>
+            <section class="onboarding-form__section">
+              <div class="onboarding-form__section-heading">
+                <span>03</span>
 
-              <input
-                type="text"
-                formControlName="qualificationName"
-                placeholder="Na primer: Sertifikovani nutricionista"
-              />
+                <div>
+                  <h3>Kvalifikacija</h3>
 
-              @if (
-                hasError(
-                  'qualificationName',
-                  'required'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Naziv kvalifikacije je obavezan.
+                  <p>
+                    Ove podatke administrator koristi
+                    za proveru profila.
+                  </p>
+                </div>
+              </div>
+
+              <div class="onboarding-form__row">
+                <label class="onboarding-form__field">
+                  <span>Vrsta kvalifikacije *</span>
+
+                  <select
+                    formControlName="qualificationType"
+                  >
+                    <option value="">
+                      Izaberi vrstu
+                    </option>
+
+                    <option value="Diploma">
+                      Diploma
+                    </option>
+
+                    <option value="Sertifikat">
+                      Sertifikat
+                    </option>
+
+                    <option value="Licenca">
+                      Licenca
+                    </option>
+
+                    <option value="Stručna obuka">
+                      Stručna obuka
+                    </option>
+
+                    <option value="Drugo">
+                      Drugo
+                    </option>
+                  </select>
+
+                  @if (
+                    hasError(
+                      'qualificationType',
+                      'required'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Izaberi vrstu kvalifikacije.
+                    </small>
+                  }
+                </label>
+
+                <label class="onboarding-form__field">
+                  <span>Godina sticanja *</span>
+
+                  <input
+                    type="number"
+                    formControlName="qualificationYear"
+                    min="1950"
+                    [max]="currentYear"
+                    step="1"
+                    placeholder="Na primer: 2024"
+                  />
+
+                  @if (
+                    hasError(
+                      'qualificationYear',
+                      'required'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Godina je obavezna.
+                    </small>
+                  } @else if (
+                    hasError(
+                      'qualificationYear',
+                      'min'
+                    ) ||
+                    hasError(
+                      'qualificationYear',
+                      'max'
+                    )
+                  ) {
+                    <small class="onboarding-form__validation">
+                      Godina mora biti između 1950.
+                      i {{ currentYear }}.
+                    </small>
+                  }
+                </label>
+              </div>
+
+              <label class="onboarding-form__field">
+                <span>Naziv kvalifikacije *</span>
+
+                <input
+                  type="text"
+                  formControlName="qualificationName"
+                  placeholder="Na primer: Sertifikovani nutricionista"
+                />
+
+                @if (
+                  hasError(
+                    'qualificationName',
+                    'required'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Naziv kvalifikacije je obavezan.
+                  </small>
+                } @else if (
+                  hasError(
+                    'qualificationName',
+                    'minlength'
+                  ) ||
+                  hasError(
+                    'qualificationName',
+                    'maxlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Naziv kvalifikacije nije odgovarajuće
+                    dužine.
+                  </small>
+                }
+              </label>
+
+              <label class="onboarding-form__field">
+                <span>
+                  Ustanova koja je izdala kvalifikaciju *
+                </span>
+
+                <input
+                  type="text"
+                  formControlName="issuingInstitution"
+                  placeholder="Naziv fakulteta, škole ili organizacije"
+                />
+
+                @if (
+                  hasError(
+                    'issuingInstitution',
+                    'required'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Naziv ustanove je obavezan.
+                  </small>
+                } @else if (
+                  hasError(
+                    'issuingInstitution',
+                    'minlength'
+                  ) ||
+                  hasError(
+                    'issuingInstitution',
+                    'maxlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Naziv ustanove nije odgovarajuće
+                    dužine.
+                  </small>
+                }
+              </label>
+
+              <label class="onboarding-form__field">
+                <span>
+                  Broj kvalifikacije ili sertifikata *
+                </span>
+
+                <input
+                  type="text"
+                  formControlName="credentialNumber"
+                  placeholder="Na primer: CERT-2026-001"
+                />
+
+                <small class="onboarding-form__hint">
+                  Ovaj broj nije javno prikazan.
+                  Dostupan je samo administratoru radi
+                  provere.
                 </small>
-              } @else if (
-                hasError(
-                  'qualificationName',
-                  'minlength'
-                ) ||
-                hasError(
-                  'qualificationName',
-                  'maxlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Naziv kvalifikacije nije odgovarajuće
-                  dužine.
-                </small>
-              }
-            </label>
 
-            <label class="onboarding-form__field">
-              <span>Ustanova koja je izdala kvalifikaciju *</span>
+                @if (
+                  hasError(
+                    'credentialNumber',
+                    'required'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Broj kvalifikacije je obavezan.
+                  </small>
+                } @else if (
+                  hasError(
+                    'credentialNumber',
+                    'minlength'
+                  ) ||
+                  hasError(
+                    'credentialNumber',
+                    'maxlength'
+                  )
+                ) {
+                  <small class="onboarding-form__validation">
+                    Broj kvalifikacije nije odgovarajuće
+                    dužine.
+                  </small>
+                }
+              </label>
+            </section>
 
-              <input
-                type="text"
-                formControlName="issuingInstitution"
-                placeholder="Naziv fakulteta, škole ili organizacije"
-              />
+            @if (localError()) {
+              <div
+                class="onboarding-form__error"
+                role="alert"
+              >
+                {{ localError() }}
+              </div>
+            }
 
-              @if (
-                hasError(
-                  'issuingInstitution',
-                  'required'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Naziv ustanove je obavezan.
-                </small>
-              } @else if (
-                hasError(
-                  'issuingInstitution',
-                  'minlength'
-                ) ||
-                hasError(
-                  'issuingInstitution',
-                  'maxlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Naziv ustanove nije odgovarajuće
-                  dužine.
-                </small>
-              }
-            </label>
+            @if (saveError()) {
+              <div
+                class="onboarding-form__error"
+                role="alert"
+              >
+                {{ saveError() }}
+              </div>
+            }
 
-            <label class="onboarding-form__field">
-              <span>Broj kvalifikacije ili sertifikata *</span>
-
-              <input
-                type="text"
-                formControlName="credentialNumber"
-                placeholder="Na primer: CERT-2026-001"
-              />
-
-              <small class="onboarding-form__hint">
-                Ovaj broj nije javno prikazan. Dostupan
-                je samo administratoru radi provere.
-              </small>
-
-              @if (
-                hasError(
-                  'credentialNumber',
-                  'required'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Broj kvalifikacije je obavezan.
-                </small>
-              } @else if (
-                hasError(
-                  'credentialNumber',
-                  'minlength'
-                ) ||
-                hasError(
-                  'credentialNumber',
-                  'maxlength'
-                )
-              ) {
-                <small class="onboarding-form__validation">
-                  Broj kvalifikacije nije odgovarajuće
-                  dužine.
-                </small>
-              }
-            </label>
-          </section>
-
-          @if (localError()) {
-            <div
-              class="onboarding-form__error"
-              role="alert"
-            >
-              {{ localError() }}
-            </div>
-          }
-
-          @if (saveError()) {
-            <div
-              class="onboarding-form__error"
-              role="alert"
-            >
-              {{ saveError() }}
-            </div>
-          }
-
-          <footer class="onboarding-form__actions">
-            <a
-              class="secondary-button"
-              routerLink="/my-profile"
-            >
-              Sačuvaj kasnije
-            </a>
-
-            <button
-              class="primary-button"
-              type="submit"
-              [disabled]="saving()"
-            >
-              @if (saving()) {
-                Slanje profila...
+            <footer class="onboarding-form__actions">
+              @if (editMode()) {
+                <button
+                  class="secondary-button"
+                  type="button"
+                  [disabled]="saving()"
+                  (click)="cancelEditing()"
+                >
+                  Odustani
+                </button>
               } @else {
-                Pošalji profil na proveru
+                <a
+                  class="secondary-button"
+                  routerLink="/my-profile"
+                >
+                  Sačuvaj kasnije
+                </a>
               }
-            </button>
-          </footer>
-        </form>
-      </div>
+
+              <button
+                class="primary-button"
+                type="submit"
+                [disabled]="saving()"
+              >
+                {{ submitButtonLabel() }}
+              </button>
+            </footer>
+          </form>
+        </div>
+      }
     }
   </div>
 </section>

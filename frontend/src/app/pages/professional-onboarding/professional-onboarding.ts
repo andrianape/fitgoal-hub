@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  effect,
   inject,
   OnDestroy,
   OnInit,
@@ -11,14 +12,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import {
-  RouterLink,
-} from '@angular/router';
-import {
-  Store,
-} from '@ngrx/store';
+import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
 import {
   CreateProfessionalProfileRequest,
+  UpdateProfessionalProfileRequest,
 } from '../../core/models/professional.model';
 import {
   selectCurrentUser,
@@ -37,8 +35,7 @@ import {
 } from '../../store/professionals/professionals.selectors';
 
 @Component({
-  selector:
-    'app-professional-onboarding',
+  selector: 'app-professional-onboarding',
 
   imports: [
     ReactiveFormsModule,
@@ -106,6 +103,9 @@ export class ProfessionalOnboarding
   protected readonly localError =
     signal<string | null>(null);
 
+  protected readonly editMode =
+    signal(false);
+
   protected readonly isProfessional =
     computed(() => {
       const role =
@@ -132,6 +132,33 @@ export class ProfessionalOnboarding
       }
 
       return 'nutricioniste';
+    });
+
+  protected readonly isCreating =
+    computed(() => {
+      return this.ownProfile() === null;
+    });
+
+  protected readonly formTitle =
+    computed(() => {
+      if (this.editMode()) {
+        return 'Izmeni profesionalni profil';
+      }
+
+      return 'Napravi profesionalni profil';
+    });
+
+  protected readonly submitButtonLabel =
+    computed(() => {
+      if (this.saving()) {
+        return this.editMode()
+          ? 'Čuvanje izmena...'
+          : 'Slanje profila...';
+      }
+
+      return this.editMode()
+        ? 'Sačuvaj izmene'
+        : 'Pošalji profil na verifikaciju';
     });
 
   protected readonly onboardingForm =
@@ -259,6 +286,17 @@ export class ProfessionalOnboarding
           ),
     });
 
+  private readonly closeFormAfterSave =
+    effect(() => {
+      if (
+        this.saveSuccessful() &&
+        this.editMode()
+      ) {
+        this.editMode.set(false);
+        this.localError.set(null);
+      }
+    });
+
   ngOnInit(): void {
     this.store.dispatch(
       ProfessionalsActions
@@ -280,6 +318,65 @@ export class ProfessionalOnboarding
     );
   }
 
+  protected startEditing(): void {
+    const profile =
+      this.ownProfile();
+
+    if (!profile) {
+      return;
+    }
+
+    this.localError.set(null);
+
+    this.onboardingForm.reset({
+      biography:
+        profile.biography,
+
+      yearsOfExperience:
+        profile.yearsOfExperience,
+
+      pricePerSession:
+        profile.pricePerSession,
+
+      specialties:
+        profile.specialties.join(', '),
+
+      workplaceName:
+        profile.workplaceName ?? '',
+
+      address:
+        profile.address ?? '',
+
+      qualificationType:
+        profile.qualificationType ?? '',
+
+      qualificationName:
+        profile.qualificationName ?? '',
+
+      issuingInstitution:
+        profile.issuingInstitution ?? '',
+
+      qualificationYear:
+        profile.qualificationYear ?? null,
+
+      credentialNumber:
+        profile.credentialNumber ?? '',
+    });
+
+    this.editMode.set(true);
+  }
+
+  protected cancelEditing(): void {
+    if (this.saving()) {
+      return;
+    }
+
+    this.editMode.set(false);
+    this.localError.set(null);
+
+    this.onboardingForm.reset();
+  }
+
   protected submit(): void {
     this.localError.set(null);
 
@@ -291,9 +388,7 @@ export class ProfessionalOnboarding
       return;
     }
 
-    if (
-      this.onboardingForm.invalid
-    ) {
+    if (this.onboardingForm.invalid) {
       this.onboardingForm
         .markAllAsTouched();
 
@@ -346,9 +441,7 @@ export class ProfessionalOnboarding
         formValue.specialties,
       );
 
-    if (
-      specialties.length === 0
-    ) {
+    if (specialties.length === 0) {
       this.localError.set(
         'Unesi najmanje jednu specijalnost.',
       );
@@ -356,9 +449,7 @@ export class ProfessionalOnboarding
       return;
     }
 
-    if (
-      specialties.length > 20
-    ) {
+    if (specialties.length > 20) {
       this.localError.set(
         'Možeš uneti najviše 20 specijalnosti.',
       );
@@ -366,58 +457,81 @@ export class ProfessionalOnboarding
       return;
     }
 
-    const data:
-      CreateProfessionalProfileRequest = {
-        biography:
-          formValue.biography.trim(),
+    const baseData = {
+      biography:
+        formValue.biography.trim(),
 
-        yearsOfExperience:
-          Number(
-            formValue
-              .yearsOfExperience,
-          ),
+      yearsOfExperience:
+        Number(
+          formValue.yearsOfExperience,
+        ),
 
-        pricePerSession:
-          Number(
-            formValue
-              .pricePerSession,
-          ),
+      pricePerSession:
+        Number(
+          formValue.pricePerSession,
+        ),
 
-        specialties,
+      specialties,
 
-        address:
-          formValue.address.trim(),
+      address:
+        formValue.address.trim(),
 
-        qualificationType:
-          formValue
-            .qualificationType
-            .trim(),
+      qualificationType:
+        formValue
+          .qualificationType
+          .trim(),
 
-        qualificationName:
-          formValue
-            .qualificationName
-            .trim(),
+      qualificationName:
+        formValue
+          .qualificationName
+          .trim(),
 
-        issuingInstitution:
-          formValue
-            .issuingInstitution
-            .trim(),
+      issuingInstitution:
+        formValue
+          .issuingInstitution
+          .trim(),
 
-        qualificationYear:
-          Number(
-            formValue
-              .qualificationYear,
-          ),
+      qualificationYear:
+        Number(
+          formValue.qualificationYear,
+        ),
 
-        credentialNumber:
-          formValue
-            .credentialNumber
-            .trim(),
-      };
+      credentialNumber:
+        formValue
+          .credentialNumber
+          .trim(),
+    };
 
     if (
-      workplaceName.length > 0
+      this.ownProfile() &&
+      this.editMode()
     ) {
+      const data:
+        UpdateProfessionalProfileRequest = {
+          ...baseData,
+
+          workplaceName:
+            workplaceName.length > 0
+              ? workplaceName
+              : undefined,
+        };
+
+      this.store.dispatch(
+        ProfessionalsActions
+          .updateProfessionalProfile({
+            data,
+          }),
+      );
+
+      return;
+    }
+
+    const data:
+      CreateProfessionalProfileRequest = {
+        ...baseData,
+    };
+
+    if (workplaceName.length > 0) {
       data.workplaceName =
         workplaceName;
     }
@@ -443,6 +557,7 @@ export class ProfessionalOnboarding
       | 'issuingInstitution'
       | 'qualificationYear'
       | 'credentialNumber',
+
     errorName: string,
   ): boolean {
     const control =
@@ -458,8 +573,7 @@ export class ProfessionalOnboarding
     );
   }
 
-  protected retryProfileLoad():
-    void {
+  protected retryProfileLoad(): void {
     this.store.dispatch(
       ProfessionalsActions
         .loadOwnProfessionalProfile(),

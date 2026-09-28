@@ -7,7 +7,9 @@ import {
   isDevMode,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideEffects } from '@ngrx/effects';
+import {
+  provideEffects,
+} from '@ngrx/effects';
 import {
   provideState,
   provideStore,
@@ -15,66 +17,110 @@ import {
 import {
   provideStoreDevtools,
 } from '@ngrx/store-devtools';
-import { provideRouter } from '@angular/router';
-import { routes } from './app.routes';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { AppointmentsEffects } from './store/appointments/appointments.effects';
-import { appointmentsFeature } from './store/appointments/appointments.reducer';
-import { AvailabilityEffects } from './store/availability/availability.effects';
-import { availabilityFeature } from './store/availability/availability.reducer';
-import { AuthEffects } from './store/auth/auth.effects';
-import { authFeature } from './store/auth/auth.reducer';
-import { CitiesEffects } from './store/cities/cities.effects';
-import { citiesFeature } from './store/cities/cities.reducer';
-import { ProfessionalsEffects } from './store/professionals/professionals.effects';
-import { professionalsFeature } from './store/professionals/professionals.reducer';
-import { NotificationsEffects } from './store/notifications/notifications.effects';
-import { notificationsFeature } from './store/notifications/notifications.reducer';
-import { PlansEffects } from './store/plans/plans.effects';
-import { plansFeature } from './store/plans/plans.reducer';
+import {
+  provideRouter,
+} from '@angular/router';
+import {
+  routes,
+} from './app.routes';
+import {
+  authInterceptor,
+} from './core/interceptors/auth.interceptor';
+import {
+  AdminUsersEffects,
+} from './store/admin-users/admin-users.effects';
+import {
+  adminUsersFeature,
+} from './store/admin-users/admin-users.reducer';
+import {
+  AppointmentsEffects,
+} from './store/appointments/appointments.effects';
+import {
+  appointmentsFeature,
+} from './store/appointments/appointments.reducer';
+import {
+  AvailabilityEffects,
+} from './store/availability/availability.effects';
+import {
+  availabilityFeature,
+} from './store/availability/availability.reducer';
+import {
+  AuthEffects,
+} from './store/auth/auth.effects';
+import {
+  authFeature,
+} from './store/auth/auth.reducer';
+import {
+  CitiesEffects,
+} from './store/cities/cities.effects';
+import {
+  citiesFeature,
+} from './store/cities/cities.reducer';
+import {
+  NotificationsEffects,
+} from './store/notifications/notifications.effects';
+import {
+  notificationsFeature,
+} from './store/notifications/notifications.reducer';
+import {
+  PlansEffects,
+} from './store/plans/plans.effects';
+import {
+  plansFeature,
+} from './store/plans/plans.reducer';
+import {
+  ProfessionalsEffects,
+} from './store/professionals/professionals.effects';
+import {
+  professionalsFeature,
+} from './store/professionals/professionals.reducer';
 
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
+export const appConfig:
+  ApplicationConfig = {
+    providers: [
+      provideBrowserGlobalErrorListeners(),
 
-    provideRouter(routes),
+      provideRouter(routes),
 
-    provideHttpClient(
-      withInterceptors([
-        authInterceptor,
-      ]),
-    ),
+      provideHttpClient(
+        withInterceptors([
+          authInterceptor,
+        ]),
+      ),
 
-    provideStore(),
+      provideStore(),
 
-    provideState(citiesFeature),
+      provideState(citiesFeature),
 
-    provideState(professionalsFeature),
+      provideState(professionalsFeature),
 
-    provideState(availabilityFeature),
+      provideState(availabilityFeature),
 
-    provideState(authFeature),
+      provideState(authFeature),
 
-    provideState(appointmentsFeature),
+      provideState(appointmentsFeature),
 
-    provideState(notificationsFeature),
+      provideState(notificationsFeature),
 
-    provideState(plansFeature),
+      provideState(plansFeature),
 
-    provideEffects(
-      CitiesEffects,
-      ProfessionalsEffects,
-      AvailabilityEffects,
-      AuthEffects,
-      AppointmentsEffects,
-      NotificationsEffects,
-      PlansEffects,
-    ),
+      provideState(adminUsersFeature),
 
-    provideStoreDevtools({
-      maxAge: 25,
-      logOnly: !isDevMode(),
-      autoPause: true,
-    }),
-  ],
-};
+      provideEffects(
+        CitiesEffects,
+        ProfessionalsEffects,
+        AvailabilityEffects,
+        AuthEffects,
+        AppointmentsEffects,
+        NotificationsEffects,
+        PlansEffects,
+        AdminUsersEffects,
+      ),
+
+      provideStoreDevtools({
+        maxAge: 25,
+        logOnly: !isDevMode(),
+        autoPause: true,
+      }),
+    ],
+  };

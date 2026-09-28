@@ -1,0 +1,421 @@
+<section class="admin-users-page">
+  <div class="container">
+    <header class="admin-users-heading">
+      <div>
+        <span>Administracija</span>
+
+        <h1>Upravljanje korisnicima</h1>
+
+        <p>
+          Pregledaj korisničke naloge, promeni njihove
+          uloge i upravljaj statusom pristupa aplikaciji.
+        </p>
+      </div>
+
+      <a
+        class="secondary-button"
+        routerLink="/my-profile"
+      >
+        ← Moj profil
+      </a>
+    </header>
+
+    <section
+      class="admin-users-statistics"
+      aria-label="Statistika korisnika"
+    >
+      <article class="admin-users-statistic">
+        <span>Ukupno korisnika</span>
+        <strong>{{ totalUsers() }}</strong>
+      </article>
+
+      <article class="admin-users-statistic">
+        <span>Aktivni nalozi</span>
+        <strong>{{ activeUsers() }}</strong>
+      </article>
+
+      <article class="admin-users-statistic">
+        <span>Profesionalci</span>
+        <strong>{{ professionalUsers() }}</strong>
+      </article>
+    </section>
+
+    <section class="admin-users-panel">
+      <div class="admin-users-filters">
+        <label class="admin-users-search">
+          <span>Pretraga korisnika</span>
+
+          <input
+            type="search"
+            placeholder="Ime, prezime ili email..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="updateSearch($event)"
+          />
+        </label>
+
+        <label class="admin-users-filter">
+          <span>Uloga</span>
+
+          <select
+            [ngModel]="selectedRole()"
+            (ngModelChange)="updateRoleFilter($event)"
+          >
+            <option value="all">
+              Sve uloge
+            </option>
+
+            <option value="client">
+              Klijenti
+            </option>
+
+            <option value="trainer">
+              Lični treneri
+            </option>
+
+            <option value="nutritionist">
+              Nutricionisti
+            </option>
+
+            <option value="admin">
+              Administratori
+            </option>
+          </select>
+        </label>
+
+        <label class="admin-users-filter">
+          <span>Status</span>
+
+          <select
+            [ngModel]="selectedStatus()"
+            (ngModelChange)="updateStatusFilter($event)"
+          >
+            <option value="all">
+              Svi statusi
+            </option>
+
+            <option value="active">
+              Aktivni
+            </option>
+
+            <option value="inactive">
+              Neaktivni
+            </option>
+          </select>
+        </label>
+
+        <button
+          class="secondary-button admin-users-refresh"
+          type="button"
+          [disabled]="loading()"
+          (click)="loadUsers()"
+        >
+          @if (loading()) {
+            Učitavanje...
+          } @else {
+            Osveži
+          }
+        </button>
+      </div>
+
+      @if (operationError()) {
+        <div
+          class="admin-users-message admin-users-message--error"
+          role="alert"
+        >
+          <span>{{ operationError() }}</span>
+
+          <button
+            type="button"
+            (click)="clearOperationError()"
+          >
+            ×
+          </button>
+        </div>
+      }
+
+      @if (loading()) {
+        <div class="admin-users-status">
+          <span class="loader"></span>
+
+          <h2>Učitavanje korisnika</h2>
+
+          <p>
+            Sačekaj trenutak dok učitamo korisničke
+            naloge.
+          </p>
+        </div>
+      } @else if (error()) {
+        <div class="admin-users-status admin-users-status--error">
+          <span class="admin-users-status__icon">
+            !
+          </span>
+
+          <h2>Korisnike nije moguće učitati</h2>
+
+          <p>{{ error() }}</p>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="loadUsers()"
+          >
+            Pokušaj ponovo
+          </button>
+        </div>
+      } @else if (filteredUsers().length === 0) {
+        <div class="admin-users-status">
+          <span class="admin-users-status__icon">
+            ◎
+          </span>
+
+          <h2>Nema pronađenih korisnika</h2>
+
+          <p>
+            Promeni kriterijume pretrage ili izaberi
+            drugi filter.
+          </p>
+        </div>
+      } @else {
+        <div class="admin-users-results">
+          <div class="admin-users-results__heading">
+            <div>
+              <span>Rezultati</span>
+
+              <strong>
+                {{ filteredUsers().length }}
+                korisnika
+              </strong>
+            </div>
+
+            <p>
+              Promene se čuvaju odmah nakon potvrde.
+            </p>
+          </div>
+
+          <div class="admin-users-list">
+            @for (
+              user of filteredUsers();
+              track user.id
+            ) {
+              <article
+                class="admin-user-card"
+                [class.admin-user-card--inactive]="
+                  !user.isActive
+                "
+              >
+                <header class="admin-user-card__header">
+                  <div class="admin-user-card__identity">
+                    <div class="admin-user-card__avatar">
+                      @if (
+                        getProfileImageUrl(
+                          user.profileImageUrl
+                        );
+                        as profileImageUrl
+                      ) {
+                        @if (
+                          !hasImageLoadFailed(user.id)
+                        ) {
+                          <img
+                            [src]="profileImageUrl"
+                            [alt]="
+                              'Profilna fotografija korisnika ' +
+                              user.firstName +
+                              ' ' +
+                              user.lastName
+                            "
+                            (error)="
+                              handleImageError(user.id)
+                            "
+                          />
+                        } @else {
+                          <span>
+                            {{
+                              getInitials(
+                                user.firstName,
+                                user.lastName
+                              )
+                            }}
+                          </span>
+                        }
+                      } @else {
+                        <span>
+                          {{
+                            getInitials(
+                              user.firstName,
+                              user.lastName
+                            )
+                          }}
+                        </span>
+                      }
+                    </div>
+
+                    <div>
+                      <div class="admin-user-card__labels">
+                        <span
+                          class="admin-user-card__role"
+                          [attr.data-role]="user.role"
+                        >
+                          {{ getRoleLabel(user.role) }}
+                        </span>
+
+                        @if (isCurrentUser(user)) {
+                          <span class="admin-user-card__current">
+                            Tvoj nalog
+                          </span>
+                        }
+                      </div>
+
+                      <h2>
+                        {{ user.firstName }}
+                        {{ user.lastName }}
+                      </h2>
+
+                      <p>{{ user.email }}</p>
+                    </div>
+                  </div>
+
+                  <span
+                    class="admin-user-card__status"
+                    [class.admin-user-card__status--active]="
+                      user.isActive
+                    "
+                    [class.admin-user-card__status--inactive]="
+                      !user.isActive
+                    "
+                  >
+                    @if (user.isActive) {
+                      Aktivan
+                    } @else {
+                      Neaktivan
+                    }
+                  </span>
+                </header>
+
+                <dl class="admin-user-card__details">
+                  <div>
+                    <dt>Telefon</dt>
+
+                    <dd>
+                      {{
+                        user.phoneNumber ??
+                          'Nije naveden'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Grad</dt>
+
+                    <dd>
+                      {{
+                        user.city?.name ??
+                          'Nije naveden'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Datum registracije</dt>
+
+                    <dd>
+                      {{ formatDate(user.createdAt) }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <footer class="admin-user-card__footer">
+                  <label class="admin-user-card__role-control">
+                    <span>Korisnička uloga</span>
+
+                    <select
+                      [value]="user.role"
+                      [disabled]="
+                        isCurrentUser(user) ||
+                        isUpdating(user.id) ||
+                        isDeleting(user.id)
+                      "
+                      (change)="
+                        changeUserRole(
+                          user,
+                          $event
+                        )
+                      "
+                    >
+                      <option value="client">
+                        Klijent
+                      </option>
+
+                      <option value="trainer">
+                        Lični trener
+                      </option>
+
+                      <option value="nutritionist">
+                        Nutricionista
+                      </option>
+
+                      <option value="admin">
+                        Administrator
+                      </option>
+                    </select>
+                  </label>
+
+                  <div class="admin-user-card__actions">
+                    <button
+                      class="admin-user-card__status-button"
+                      [class.admin-user-card__status-button--activate]="
+                        !user.isActive
+                      "
+                      [class.admin-user-card__status-button--deactivate]="
+                        user.isActive
+                      "
+                      type="button"
+                      [disabled]="
+                        isCurrentUser(user) ||
+                        isUpdating(user.id) ||
+                        isDeleting(user.id)
+                      "
+                      (click)="toggleUserStatus(user)"
+                    >
+                      @if (isUpdating(user.id)) {
+                        Čuvanje...
+                      } @else if (user.isActive) {
+                        Deaktiviraj
+                      } @else {
+                        Aktiviraj
+                      }
+                    </button>
+
+                    <button
+                      class="admin-user-card__delete"
+                      type="button"
+                      [disabled]="
+                        isCurrentUser(user) ||
+                        isUpdating(user.id) ||
+                        isDeleting(user.id)
+                      "
+                      (click)="deleteUser(user)"
+                    >
+                      @if (isDeleting(user.id)) {
+                        Brisanje...
+                      } @else {
+                        Obriši
+                      }
+                    </button>
+                  </div>
+                </footer>
+
+                @if (isCurrentUser(user)) {
+                  <p class="admin-user-card__protection">
+                    Sopstvenom administratorskom nalogu
+                    ne možeš promeniti ulogu, status ili
+                    ga obrisati.
+                  </p>
+                }
+              </article>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+</section>

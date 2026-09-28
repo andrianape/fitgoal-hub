@@ -25,4 +25,13 @@ export const {
   selectProfessionalProfileSaving,
   selectProfessionalProfileSaveSuccessful,
   selectProfessionalProfileSaveError,
+
+  selectAdminProfessionals,
+  selectAdminProfessionalsLoading,
+  selectAdminProfessionalsLoaded,
+  selectAdminProfessionalsError,
+
+  selectVerificationUpdatingId,
+  selectVerificationUpdateSuccessful,
+  selectVerificationUpdateError,
 } = professionalsFeature;

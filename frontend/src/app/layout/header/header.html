@@ -4,10 +4,9 @@
       class="header__logo"
       routerLink="/"
       aria-label="FitGoal Hub početna stranica"
-      (click)="closeMenu()"
+      (click)="closeNavigation()"
     >
       <span class="header__logo-mark">F</span>
-
       <span>FitGoal Hub</span>
     </a>
 
@@ -36,7 +35,7 @@
         [routerLinkActiveOptions]="{
           exact: true
         }"
-        (click)="closeMenu()"
+        (click)="closeNavigation()"
       >
         Početna
       </a>
@@ -44,17 +43,85 @@
       <a
         routerLink="/professionals"
         routerLinkActive="header__link--active"
-        (click)="closeMenu()"
+        (click)="closeNavigation()"
       >
         Profesionalci
       </a>
+
+      @if (isClient()) {
+        <a
+          routerLink="/my-appointments"
+          routerLinkActive="header__link--active"
+          (click)="closeNavigation()"
+        >
+          Moje rezervacije
+        </a>
+
+        <a
+          routerLink="/my-plans"
+          routerLinkActive="header__link--active"
+          (click)="closeNavigation()"
+        >
+          Moji planovi
+        </a>
+      }
+
+      @if (isProfessional()) {
+        <a
+          routerLink="/my-appointments"
+          routerLinkActive="header__link--active"
+          (click)="closeNavigation()"
+        >
+          @if (isTrainer()) {
+            Treninzi
+          } @else {
+            Konsultacije
+          }
+        </a>
+
+        <a
+          routerLink="/professional-onboarding"
+          routerLinkActive="header__link--active"
+          (click)="closeNavigation()"
+        >
+          Profesionalni profil
+        </a>
+
+        @if (isNutritionist()) {
+          <a
+            routerLink="/my-plans"
+            routerLinkActive="header__link--active"
+            (click)="closeNavigation()"
+          >
+            Planovi ishrane
+          </a>
+        }
+      }
+
+      @if (isAdmin()) {
+        <a
+          routerLink="/admin/users"
+          routerLinkActive="header__link--active"
+          (click)="closeNavigation()"
+        >
+          Korisnici
+        </a>
+
+        <a
+          routerLink="/admin/verifications"
+          routerLinkActive="header__link--active"
+          (click)="closeNavigation()"
+        >
+          Verifikacije
+        </a>
+      }
 
       <div class="header__mobile-actions">
         @if (isAuthenticated()) {
           <a
             routerLink="/my-profile"
             routerLinkActive="header__link--active"
-            (click)="closeMenu()"
+            (click)="closeNavigation()"
           >
             Moj profil
           </a>
@@ -88,7 +155,7 @@
           <a
             routerLink="/login"
             routerLinkActive="header__link--active"
-            (click)="closeMenu()"
+            (click)="closeNavigation()"
           >
             Prijavi se
           </a>
@@ -96,7 +163,7 @@
           <a
             routerLink="/register"
             routerLinkActive="header__link--active"
-            (click)="closeMenu()"
+            (click)="closeNavigation()"
           >
             Napravi nalog
           </a>
@@ -182,7 +249,8 @@
 
                     <p>
                       Ovde će se prikazati promene
-                      vezane za termine i planove.
+                      vezane za termine, planove i
+                      profesionalni profil.
                     </p>
                   </div>
                 } @else {
@@ -233,6 +301,18 @@
                               ≡
                             }
 
+                            @case (
+                              'professional_profile_verified'
+                            ) {
+                              ✓
+                            }
+
+                            @case (
+                              'professional_profile_rejected'
+                            ) {
+                              ×
+                            }
+
                             @default {
                               +
                             }
@@ -273,12 +353,35 @@
               </div>
 
               <footer class="notifications__footer">
-                <a
-                  routerLink="/my-appointments"
-                  (click)="closeNotifications()"
-                >
-                  Pogledaj moje rezervacije
-                </a>
+                @if (isAdmin()) {
+                  <a
+                    routerLink="/admin/verifications"
+                    (click)="closeNotifications()"
+                  >
+                    Otvori verifikacije
+                  </a>
+                } @else if (isNutritionist()) {
+                  <a
+                    routerLink="/my-appointments"
+                    (click)="closeNotifications()"
+                  >
+                    Konsultacije
+                  </a>
+
+                  <a
+                    routerLink="/my-plans"
+                    (click)="closeNotifications()"
+                  >
+                    Planovi
+                  </a>
+                } @else {
+                  <a
+                    routerLink="/my-appointments"
+                    (click)="closeNotifications()"
+                  >
+                    Moje rezervacije
+                  </a>
+                }
               </footer>
             </section>
           }
@@ -288,7 +391,7 @@
           class="header__profile-link"
           routerLink="/my-profile"
           routerLinkActive="header__link--active"
-          (click)="closeMenu()"
+          (click)="closeNavigation()"
         >
           Moj profil
         </a>
@@ -363,8 +466,9 @@
               <h3>Nema novih obaveštenja</h3>
 
               <p>
-                Ovde će se prikazati promene
-                vezane za termine i planove.
+                Ovde će se prikazati promene vezane
+                za termine, planove i profesionalni
+                profil.
               </p>
             </div>
           } @else {
@@ -386,7 +490,51 @@
                   <span
                     class="notification-item__icon"
                   >
-                    !
+                    @switch (notification.type) {
+                      @case (
+                        'appointment_confirmed'
+                      ) {
+                        ✓
+                      }
+
+                      @case (
+                        'appointment_rejected'
+                      ) {
+                        ×
+                      }
+
+                      @case (
+                        'appointment_cancelled'
+                      ) {
+                        ×
+                      }
+
+                      @case (
+                        'appointment_completed'
+                      ) {
+                        ✓
+                      }
+
+                      @case ('plan_created') {
+                        ≡
+                      }
+
+                      @case (
+                        'professional_profile_verified'
+                      ) {
+                        ✓
+                      }
+
+                      @case (
+                        'professional_profile_rejected'
+                      ) {
+                        ×
+                      }
+
+                      @default {
+                        +
+                      }
+                    }
                   </span>
 
                   <span
@@ -412,6 +560,7 @@
                   @if (!notification.isRead) {
                     <span
                       class="notification-item__dot"
+                      aria-label="Nepročitano"
                     >
                     </span>
                   }
@@ -431,12 +580,28 @@
             </button>
           }
 
-          <a
-            routerLink="/my-appointments"
-            (click)="closeNotifications()"
-          >
-            Moje rezervacije
-          </a>
+          @if (isAdmin()) {
+            <a
+              routerLink="/admin/verifications"
+              (click)="closeNotifications()"
+            >
+              Verifikacije
+            </a>
+          } @else if (isNutritionist()) {
+            <a
+              routerLink="/my-plans"
+              (click)="closeNotifications()"
+            >
+              Planovi ishrane
+            </a>
+          } @else {
+            <a
+              routerLink="/my-appointments"
+              (click)="closeNotifications()"
+            >
+              Moje rezervacije
+            </a>
+          }
         </footer>
       </div>
     }

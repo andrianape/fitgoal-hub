@@ -16,4 +16,10 @@ export enum NotificationType {
 
   PLAN_CREATED =
     'plan_created',
+
+  PROFESSIONAL_PROFILE_VERIFIED =
+    'professional_profile_verified',
+
+  PROFESSIONAL_PROFILE_REJECTED =
+    'professional_profile_rejected',
 }

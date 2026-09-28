@@ -4,6 +4,9 @@ import {
 import {
   authGuard,
 } from './core/guards/auth.guard';
+import {
+  roleGuard,
+} from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -76,12 +79,19 @@ export const routes: Routes = [
   },
 
   {
-    path: 'professional-onboarding',
+    path:
+      'professional-onboarding',
+
     title:
       'Profesionalni profil | FitGoal Hub',
 
     canActivate: [
       authGuard,
+
+      roleGuard(
+        'trainer',
+        'nutritionist',
+      ),
     ],
 
     loadComponent: () =>
@@ -145,6 +155,48 @@ export const routes: Routes = [
       ).then(
         (component) =>
           component.MyPlans,
+      ),
+  },
+
+  {
+    path:
+      'admin/verifications',
+
+    title:
+      'Verifikacija profesionalaca | FitGoal Hub',
+
+    canActivate: [
+      authGuard,
+      roleGuard('admin'),
+    ],
+
+    loadComponent: () =>
+      import(
+        './pages/admin-verifications/admin-verifications'
+      ).then(
+        (component) =>
+          component
+            .AdminVerifications,
+      ),
+  },
+
+  {
+    path: 'admin/users',
+
+    title:
+      'Upravljanje korisnicima | FitGoal Hub',
+
+    canActivate: [
+      authGuard,
+      roleGuard('admin'),
+    ],
+
+    loadComponent: () =>
+      import(
+        './pages/admin-users/admin-users'
+      ).then(
+        (component) =>
+          component.AdminUsers,
       ),
   },
 

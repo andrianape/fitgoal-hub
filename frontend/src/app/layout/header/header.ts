@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   HostListener,
   inject,
   OnInit,
@@ -9,13 +10,19 @@ import {
   RouterLink,
   RouterLinkActive,
 } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AuthActions } from '../../store/auth/auth.actions';
+import {
+  Store,
+} from '@ngrx/store';
+import {
+  AuthActions,
+} from '../../store/auth/auth.actions';
 import {
   selectCurrentUser,
   selectIsAuthenticated,
 } from '../../store/auth/auth.selectors';
-import { NotificationsActions } from '../../store/notifications/notifications.actions';
+import {
+  NotificationsActions,
+} from '../../store/notifications/notifications.actions';
 import {
   selectLoading as selectNotificationsLoading,
   selectNotifications,
@@ -24,15 +31,19 @@ import {
 
 @Component({
   selector: 'app-header',
+
   imports: [
     RouterLink,
     RouterLinkActive,
   ],
+
   templateUrl: './header.html',
+
   styleUrl: './header.scss',
 })
 export class Header implements OnInit {
-  private readonly store = inject(Store);
+  private readonly store =
+    inject(Store);
 
   protected readonly isMenuOpen =
     signal(false);
@@ -65,6 +76,49 @@ export class Header implements OnInit {
       selectNotificationsLoading,
     );
 
+  protected readonly isClient =
+    computed(() => {
+      return (
+        this.currentUser()?.role ===
+        'client'
+      );
+    });
+
+  protected readonly isProfessional =
+    computed(() => {
+      const role =
+        this.currentUser()?.role;
+
+      return (
+        role === 'trainer' ||
+        role === 'nutritionist'
+      );
+    });
+
+  protected readonly isTrainer =
+    computed(() => {
+      return (
+        this.currentUser()?.role ===
+        'trainer'
+      );
+    });
+
+  protected readonly isNutritionist =
+    computed(() => {
+      return (
+        this.currentUser()?.role ===
+        'nutritionist'
+      );
+    });
+
+  protected readonly isAdmin =
+    computed(() => {
+      return (
+        this.currentUser()?.role ===
+        'admin'
+      );
+    });
+
   ngOnInit(): void {
     this.store.dispatch(
       AuthActions.restoreSession(),
@@ -81,6 +135,11 @@ export class Header implements OnInit {
 
   protected closeMenu(): void {
     this.isMenuOpen.set(false);
+  }
+
+  protected closeNavigation(): void {
+    this.closeMenu();
+    this.closeNotifications();
   }
 
   protected toggleNotifications(
@@ -115,16 +174,22 @@ export class Header implements OnInit {
     }
 
     this.store.dispatch(
-      NotificationsActions.markAllAsRead(),
+      NotificationsActions
+        .markAllAsRead(),
     );
   }
 
   protected formatNotificationDate(
     createdAt: string,
   ): string {
-    const date = new Date(createdAt);
+    const date =
+      new Date(createdAt);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime(),
+      )
+    ) {
       return '';
     }
 
@@ -154,7 +219,9 @@ export class Header implements OnInit {
     this.closeNotifications();
   }
 
-  @HostListener('document:keydown.escape')
+  @HostListener(
+    'document:keydown.escape',
+  )
   protected onEscapePressed(): void {
     this.closeNotifications();
     this.closeMenu();

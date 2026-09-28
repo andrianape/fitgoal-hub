@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,6 +11,12 @@ import {
 import {
   Repository,
 } from 'typeorm';
+import {
+  NotificationsService,
+} from '../notifications/notifications.service';
+import {
+  NotificationType,
+} from '../notifications/enums/notification-type.enum';
 import {
   User,
 } from '../users/entities/user.entity';
@@ -41,6 +48,9 @@ export class ProfessionalsService {
     @InjectRepository(User)
     private readonly userRepository:
       Repository<User>,
+
+    private readonly notificationsService:
+      NotificationsService,
   ) {}
 
   async findAll(
@@ -48,7 +58,8 @@ export class ProfessionalsService {
   ) {
     const page = filters.page;
     const limit = filters.limit;
-    const skip = (page - 1) * limit;
+    const skip =
+      (page - 1) * limit;
 
     const query =
       this.profileRepository
@@ -68,7 +79,9 @@ export class ProfessionalsService {
           },
         );
 
-    if (filters.role !== undefined) {
+    if (
+      filters.role !== undefined
+    ) {
       query.andWhere(
         'user.role = :role',
         {
@@ -115,7 +128,7 @@ export class ProfessionalsService {
       query.andWhere(
         `
           profile.pricePerSession
-            <= :maxPrice
+          <= :maxPrice
         `,
         {
           maxPrice:
@@ -169,14 +182,14 @@ export class ProfessionalsService {
     const [
       data,
       total,
-    ] = await query.getManyAndCount();
+    ] =
+      await query.getManyAndCount();
 
     return {
       data,
       total,
       page,
       limit,
-
       totalPages:
         Math.ceil(total / limit),
     };
@@ -205,10 +218,6 @@ export class ProfessionalsService {
         'verifiedBy',
       )
       .orderBy(
-        'profile.isVerified',
-        'ASC',
-      )
-      .addOrderBy(
         'profile.createdAt',
         'DESC',
       )
@@ -294,10 +303,6 @@ export class ProfessionalsService {
             id: userId,
             isActive: true,
           },
-
-          relations: {
-            city: true,
-          },
         });
 
     if (!user) {
@@ -308,32 +313,6 @@ export class ProfessionalsService {
 
     this.validateProfessionalRole(
       user.role,
-    );
-
-    this.validateProfessionalData(
-      user.role,
-      {
-        workplaceName:
-          dto.workplaceName,
-
-        address:
-          dto.address,
-
-        qualificationType:
-          dto.qualificationType,
-
-        qualificationName:
-          dto.qualificationName,
-
-        issuingInstitution:
-          dto.issuingInstitution,
-
-        qualificationYear:
-          dto.qualificationYear,
-
-        credentialNumber:
-          dto.credentialNumber,
-      },
     );
 
     const existingProfile =
@@ -352,10 +331,29 @@ export class ProfessionalsService {
       );
     }
 
+    const workplaceName =
+      dto.workplaceName?.trim() ??
+      null;
+
     const specialties =
       this.normalizeSpecialties(
         dto.specialties,
       );
+
+    this.validateProfessionalData({
+      role: user.role,
+      workplaceName,
+      address:
+        dto.address.trim(),
+      qualificationType:
+        dto.qualificationType.trim(),
+      qualificationName:
+        dto.qualificationName.trim(),
+      issuingInstitution:
+        dto.issuingInstitution.trim(),
+      credentialNumber:
+        dto.credentialNumber.trim(),
+    });
 
     const profile =
       this.profileRepository.create({
@@ -372,9 +370,7 @@ export class ProfessionalsService {
 
         specialties,
 
-        workplaceName:
-          dto.workplaceName?.trim() ??
-          null,
+        workplaceName,
 
         address:
           dto.address.trim(),
@@ -394,23 +390,16 @@ export class ProfessionalsService {
         credentialNumber:
           dto.credentialNumber.trim(),
 
-        isVerified:
-          false,
+        isVerified: false,
 
-        verificationNote:
-          null,
-
-        verifiedAt:
-          null,
-
-        verifiedBy:
-          null,
+        verificationNote: null,
+        verifiedAt: null,
+        verifiedBy: null,
       });
 
     const savedProfile =
-      await this.profileRepository.save(
-        profile,
-      );
+      await this.profileRepository
+        .save(profile);
 
     return this.findOwn(
       savedProfile.user.id,
@@ -423,6 +412,10 @@ export class ProfessionalsService {
   ): Promise<ProfessionalProfile> {
     const profile =
       await this.findOwn(userId);
+
+    this.validateProfessionalRole(
+      profile.user.role,
+    );
 
     if (
       dto.biography !== undefined
@@ -440,7 +433,8 @@ export class ProfessionalsService {
     }
 
     if (
-      dto.pricePerSession !== undefined
+      dto.pricePerSession !==
+      undefined
     ) {
       profile.pricePerSession =
         dto.pricePerSession;
@@ -456,10 +450,16 @@ export class ProfessionalsService {
     }
 
     if (
-      dto.workplaceName !== undefined
+      dto.workplaceName !==
+      undefined
     ) {
-      profile.workplaceName =
+      const workplaceName =
         dto.workplaceName.trim();
+
+      profile.workplaceName =
+        workplaceName.length > 0
+          ? workplaceName
+          : null;
     }
 
     if (
@@ -509,40 +509,35 @@ export class ProfessionalsService {
         dto.credentialNumber.trim();
     }
 
-    this.validateProfessionalData(
-      profile.user.role,
-      {
-        workplaceName:
-          profile.workplaceName,
+    this.validateProfessionalData({
+      role: profile.user.role,
 
-        address:
-          profile.address,
+      workplaceName:
+        profile.workplaceName,
 
-        qualificationType:
-          profile.qualificationType,
+      address:
+        profile.address,
 
-        qualificationName:
-          profile.qualificationName,
+      qualificationType:
+        profile.qualificationType,
 
-        issuingInstitution:
-          profile.issuingInstitution,
+      qualificationName:
+        profile.qualificationName,
 
-        qualificationYear:
-          profile.qualificationYear,
+      issuingInstitution:
+        profile.issuingInstitution,
 
-        credentialNumber:
-          profile.credentialNumber,
-      },
-    );
+      credentialNumber:
+        profile.credentialNumber,
+    });
 
     profile.isVerified = false;
     profile.verificationNote = null;
     profile.verifiedAt = null;
     profile.verifiedBy = null;
 
-    await this.profileRepository.save(
-      profile,
-    );
+    await this.profileRepository
+      .save(profile);
 
     return this.findOwn(userId);
   }
@@ -554,62 +549,41 @@ export class ProfessionalsService {
     adminUserId?: number,
   ): Promise<ProfessionalProfile> {
     const profile =
-      await this.profileRepository
-        .createQueryBuilder('profile')
-        .addSelect(
-          'profile.credentialNumber',
-        )
-        .addSelect(
-          'profile.verificationNote',
-        )
-        .leftJoinAndSelect(
-          'profile.user',
-          'user',
-        )
-        .leftJoinAndSelect(
-          'user.city',
-          'city',
-        )
-        .where(
-          'profile.id = :id',
-          {
-            id,
-          },
-        )
-        .getOne();
-
-    if (!profile) {
-      throw new NotFoundException(
-        `Profesionalni profil sa ID vrednošću ${id} ne postoji.`,
+      await this.findProfileForAdmin(
+        id,
       );
-    }
 
     const normalizedNote =
-      verificationNote?.trim();
+      verificationNote?.trim() ??
+      '';
 
     if (
       !isVerified &&
-      !normalizedNote
+      normalizedNote.length < 2
     ) {
       throw new BadRequestException(
         'Razlog odbijanja profesionalnog profila je obavezan.',
       );
     }
 
-    let administrator: User | null =
-      null;
+    let administrator:
+      User | null = null;
 
-    if (adminUserId !== undefined) {
+    if (
+      adminUserId !== undefined
+    ) {
       administrator =
         await this.userRepository
-          .findOneBy({
-            id: adminUserId,
-            role: UserRole.ADMIN,
-            isActive: true,
+          .findOne({
+            where: {
+              id: adminUserId,
+              role: UserRole.ADMIN,
+              isActive: true,
+            },
           });
 
       if (!administrator) {
-        throw new NotFoundException(
+        throw new ForbiddenException(
           'Aktivan administratorski nalog ne postoji.',
         );
       }
@@ -619,22 +593,55 @@ export class ProfessionalsService {
       isVerified;
 
     profile.verificationNote =
-      normalizedNote ?? null;
+      normalizedNote.length > 0
+        ? normalizedNote
+        : null;
 
     profile.verifiedAt =
-      isVerified
-        ? new Date()
-        : null;
+      new Date();
 
     profile.verifiedBy =
       administrator;
 
-    await this.profileRepository.save(
-      profile,
-    );
+    await this.profileRepository
+      .save(profile);
+
+    if (isVerified) {
+      await this.notificationsService
+        .createAndSend({
+          userId:
+            profile.user.id,
+
+          type:
+            NotificationType
+              .PROFESSIONAL_PROFILE_VERIFIED,
+
+          title:
+            'Profesionalni profil je odobren',
+
+          message:
+            'Tvoj profesionalni profil je verifikovan i sada je vidljiv klijentima.',
+        });
+    } else {
+      await this.notificationsService
+        .createAndSend({
+          userId:
+            profile.user.id,
+
+          type:
+            NotificationType
+              .PROFESSIONAL_PROFILE_REJECTED,
+
+          title:
+            'Profesionalni profil nije odobren',
+
+          message:
+            `Profil je potrebno dopuniti ili ispraviti. Razlog: ${normalizedNote}`,
+        });
+    }
 
     return this.findProfileForAdmin(
-      profile.id,
+      id,
     );
   }
 
@@ -672,7 +679,7 @@ export class ProfessionalsService {
 
     if (!profile) {
       throw new NotFoundException(
-        'Profesionalni profil ne postoji.',
+        `Profesionalni profil sa ID vrednošću ${id} ne postoji.`,
       );
     }
 
@@ -684,60 +691,61 @@ export class ProfessionalsService {
   ): void {
     if (
       role !== UserRole.TRAINER &&
-      role !== UserRole.NUTRITIONIST
+      role !==
+        UserRole.NUTRITIONIST
     ) {
-      throw new BadRequestException(
-        'Samo trener ili nutricionista može napraviti profesionalni profil.',
+      throw new ForbiddenException(
+        'Profesionalni profil može imati samo trener ili nutricionista.',
       );
     }
   }
 
   private validateProfessionalData(
-    role: UserRole,
     data: {
-      workplaceName?:
+      role: UserRole;
+      workplaceName:
         string | null;
-
-      address?:
+      address:
         string | null;
-
-      qualificationType?:
+      qualificationType:
         string | null;
-
-      qualificationName?:
+      qualificationName:
         string | null;
-
-      issuingInstitution?:
+      issuingInstitution:
         string | null;
-
-      qualificationYear?:
-        number | null;
-
-      credentialNumber?:
+      credentialNumber:
         string | null;
     },
   ): void {
-    this.validateProfessionalRole(role);
-
     if (
-      role === UserRole.TRAINER &&
-      !data.workplaceName?.trim()
+      data.role ===
+        UserRole.TRAINER &&
+      (
+        !data.workplaceName ||
+        data.workplaceName
+          .trim()
+          .length < 2
+      )
     ) {
       throw new BadRequestException(
-        'Naziv teretane je obavezan za trenera.',
-      );
-    }
-
-    if (!data.address?.trim()) {
-      throw new BadRequestException(
-        role === UserRole.TRAINER
-          ? 'Adresa teretane je obavezna.'
-          : 'Adresa konsultacija je obavezna.',
+        'Lični trener mora uneti naziv teretane ili mesta rada.',
       );
     }
 
     if (
-      !data.qualificationType?.trim()
+      !data.address ||
+      data.address.trim().length < 5
+    ) {
+      throw new BadRequestException(
+        'Tačna adresa mesta rada je obavezna.',
+      );
+    }
+
+    if (
+      !data.qualificationType ||
+      data.qualificationType
+        .trim()
+        .length < 2
     ) {
       throw new BadRequestException(
         'Vrsta kvalifikacije je obavezna.',
@@ -745,7 +753,10 @@ export class ProfessionalsService {
     }
 
     if (
-      !data.qualificationName?.trim()
+      !data.qualificationName ||
+      data.qualificationName
+        .trim()
+        .length < 2
     ) {
       throw new BadRequestException(
         'Naziv kvalifikacije je obavezan.',
@@ -753,28 +764,24 @@ export class ProfessionalsService {
     }
 
     if (
-      !data.issuingInstitution?.trim()
+      !data.issuingInstitution ||
+      data.issuingInstitution
+        .trim()
+        .length < 2
     ) {
       throw new BadRequestException(
-        'Naziv ustanove koja je izdala kvalifikaciju je obavezan.',
+        'Ustanova koja je izdala kvalifikaciju je obavezna.',
       );
     }
 
     if (
-      data.qualificationYear ===
-        undefined ||
-      data.qualificationYear === null
+      !data.credentialNumber ||
+      data.credentialNumber
+        .trim()
+        .length < 2
     ) {
       throw new BadRequestException(
-        'Godina sticanja kvalifikacije je obavezna.',
-      );
-    }
-
-    if (
-      !data.credentialNumber?.trim()
-    ) {
-      throw new BadRequestException(
-        'Broj sertifikata ili diplome je obavezan.',
+        'Broj kvalifikacije ili sertifikata je obavezan.',
       );
     }
   }
@@ -782,28 +789,29 @@ export class ProfessionalsService {
   private normalizeSpecialties(
     specialties: string[],
   ): string[] {
-    const normalizedSpecialties =
-      specialties
-        .map((specialty) =>
-          specialty.trim(),
-        )
-        .filter(
-          (specialty) =>
-            specialty.length > 0,
-        );
+    const normalized =
+      [
+        ...new Set(
+          specialties
+            .map(
+              (specialty) =>
+                specialty.trim(),
+            )
+            .filter(
+              (specialty) =>
+                specialty.length > 0,
+            ),
+        ),
+      ];
 
     if (
-      normalizedSpecialties.length === 0
+      normalized.length === 0
     ) {
       throw new BadRequestException(
         'Potrebno je uneti najmanje jednu specijalnost.',
       );
     }
 
-    return Array.from(
-      new Set(
-        normalizedSpecialties,
-      ),
-    );
+    return normalized;
   }
 }

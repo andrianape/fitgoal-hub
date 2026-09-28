@@ -44,6 +44,27 @@ export interface ProfessionalsState {
 
   professionalProfileSaveError:
     string | null;
+
+  adminProfessionals:
+    Professional[];
+
+  adminProfessionalsLoading:
+    boolean;
+
+  adminProfessionalsLoaded:
+    boolean;
+
+  adminProfessionalsError:
+    string | null;
+
+  verificationUpdatingId:
+    number | null;
+
+  verificationUpdateSuccessful:
+    boolean;
+
+  verificationUpdateError:
+    string | null;
 }
 
 export const initialProfessionalsState:
@@ -69,19 +90,30 @@ export const initialProfessionalsState:
     ownProfessionalProfile: null,
     ownProfessionalProfileLoading:
       false,
-
     ownProfessionalProfileLoaded:
       false,
-
     ownProfessionalProfileError:
       null,
 
     professionalProfileSaving:
       false,
-
     professionalProfileSaveSuccessful:
       false,
-
     professionalProfileSaveError:
+      null,
+
+    adminProfessionals: [],
+    adminProfessionalsLoading:
+      false,
+    adminProfessionalsLoaded:
+      false,
+    adminProfessionalsError:
+      null,
+
+    verificationUpdatingId:
+      null,
+    verificationUpdateSuccessful:
+      false,
+    verificationUpdateError:
       null,
   };

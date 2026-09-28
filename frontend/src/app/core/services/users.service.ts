@@ -10,6 +10,8 @@ import {
 } from 'rxjs';
 import {
   UpdateUserRequest,
+  UpdateUserRoleRequest,
+  UpdateUserStatusRequest,
   User,
 } from '../models/user.model';
 
@@ -23,6 +25,12 @@ export class UsersService {
   private readonly apiUrl =
     'http://localhost:3000/api/users';
 
+  findAll(): Observable<User[]> {
+    return this.http.get<User[]>(
+      this.apiUrl,
+    );
+  }
+
   updateProfile(
     userId: number,
     data: UpdateUserRequest,
@@ -30,6 +38,34 @@ export class UsersService {
     return this.http.patch<User>(
       `${this.apiUrl}/${userId}`,
       data,
+    );
+  }
+
+  updateRole(
+    userId: number,
+    data: UpdateUserRoleRequest,
+  ): Observable<User> {
+    return this.http.patch<User>(
+      `${this.apiUrl}/${userId}/role`,
+      data,
+    );
+  }
+
+  updateStatus(
+    userId: number,
+    data: UpdateUserStatusRequest,
+  ): Observable<User> {
+    return this.http.patch<User>(
+      `${this.apiUrl}/${userId}/status`,
+      data,
+    );
+  }
+
+  remove(
+    userId: number,
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/${userId}`,
     );
   }
 

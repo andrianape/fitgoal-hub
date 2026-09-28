@@ -59,6 +59,9 @@
             } @else if (user.role === 'nutritionist') {
               Ovde možeš da pratiš svoj profil,
               konsultacije i planove ishrane.
+            } @else if (user.role === 'admin') {
+              Ovde možeš da upravljaš korisnicima i
+              profesionalnim profilima.
             } @else {
               Ovde možeš da pratiš svoj profil,
               termine i planove ishrane.
@@ -112,6 +115,7 @@
 
                   <div>
                     <h3>Moje rezervacije</h3>
+
                     <p>
                       Pregledaj predstojeće i završene
                       termine.
@@ -129,6 +133,7 @@
 
                   <div>
                     <h3>Moji planovi ishrane</h3>
+
                     <p>
                       Pregledaj planove koje je
                       nutricionista napravio za tebe.
@@ -146,6 +151,7 @@
 
                   <div>
                     <h3>Pronađi stručnjaka</h3>
+
                     <p>
                       Pronađi trenera ili nutricionistu
                       i zakaži termin.
@@ -169,6 +175,24 @@
               </div>
 
               <div class="dashboard-cards">
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/professional-onboarding"
+                >
+                  <span class="dashboard-card__icon">◉</span>
+
+                  <div>
+                    <h3>Profesionalni profil</h3>
+
+                    <p>
+                      Pregledaj status verifikacije i
+                      izmeni svoje profesionalne podatke.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
+
                 <button
                   class="
                     dashboard-card
@@ -182,6 +206,7 @@
 
                   <div>
                     <h3>Dodaj slobodan termin</h3>
+
                     <p>
                       Izaberi datum i vreme kada
                       klijenti mogu da zakažu termin.
@@ -224,6 +249,7 @@
 
                     <div>
                       <h3>Planovi ishrane</h3>
+
                       <p>
                         Pregledaj i kreiraj planove
                         ishrane za svoje klijente.
@@ -397,36 +423,42 @@
               </div>
 
               <div class="dashboard-cards">
-                <article class="dashboard-card">
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/admin/users"
+                >
                   <span class="dashboard-card__icon">◎</span>
 
                   <div>
                     <h3>Korisnici</h3>
+
                     <p>
-                      Pregled i upravljanje korisničkim
-                      nalozima.
+                      Pregledaj korisničke naloge,
+                      promeni uloge i upravljaj njihovim
+                      statusom.
                     </p>
                   </div>
 
-                  <span class="dashboard-card__soon">
-                    Uskoro
-                  </span>
-                </article>
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
 
-                <article class="dashboard-card">
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/admin/verifications"
+                >
                   <span class="dashboard-card__icon">✓</span>
 
                   <div>
-                    <h3>Verifikacije</h3>
+                    <h3>Verifikacije profesionalaca</h3>
+
                     <p>
-                      Verifikuj profesionalne profile.
+                      Pregledaj kvalifikacije i odobri
+                      ili odbij profesionalne profile.
                     </p>
                   </div>
 
-                  <span class="dashboard-card__soon">
-                    Uskoro
-                  </span>
-                </article>
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
               </div>
             </section>
           }
@@ -442,6 +474,7 @@
           <dl>
             <div>
               <dt>Ime i prezime</dt>
+
               <dd>
                 {{ user.firstName }}
                 {{ user.lastName }}
@@ -455,6 +488,7 @@
 
             <div>
               <dt>Telefon</dt>
+
               <dd>
                 {{
                   user.phoneNumber ??
@@ -465,6 +499,7 @@
 
             <div>
               <dt>Grad</dt>
+
               <dd>
                 {{
                   user.city?.name ??
@@ -663,7 +698,8 @@
                 </h2>
 
                 <p>
-                  Izmeni lične podatke i profilnu fotografiju.
+                  Izmeni lične podatke i profilnu
+                  fotografiju.
                 </p>
               </div>
 
@@ -824,7 +860,8 @@
                     class="profile-image-editor__success"
                     role="status"
                   >
-                    Profilna fotografija je uspešno ažurirana.
+                    Profilna fotografija je uspešno
+                    ažurirana.
                   </div>
                 }
               </div>
@@ -859,7 +896,8 @@
                     )
                   ) {
                     <small>
-                      Ime mora imati najmanje 2 karaktera.
+                      Ime mora imati najmanje
+                      2 karaktera.
                     </small>
                   } @else if (
                     hasEditError(
@@ -894,7 +932,8 @@
                     )
                   ) {
                     <small>
-                      Prezime mora imati najmanje 2 karaktera.
+                      Prezime mora imati najmanje
+                      2 karaktera.
                     </small>
                   } @else if (
                     hasEditError(
@@ -954,7 +993,8 @@
                   )
                 ) {
                   <small>
-                    Broj telefona nije u ispravnom formatu.
+                    Broj telefona nije u ispravnom
+                    formatu.
                   </small>
                 }
               </label>
