@@ -3,37 +3,102 @@ import {
   emptyProps,
   props,
 } from '@ngrx/store';
-import { LoginCredentials } from '../../core/models/auth.model';
-import { User } from '../../core/models/user.model';
+import {
+  LoginCredentials,
+  RegisterData,
+} from '../../core/models/auth.model';
+import {
+  UpdateUserRequest,
+  User,
+} from '../../core/models/user.model';
 
-export const AuthActions = createActionGroup({
-  source: 'Auth',
+export const AuthActions =
+  createActionGroup({
+    source: 'Auth',
 
-  events: {
-    Login: props<{
-      credentials: LoginCredentials;
-    }>(),
+    events: {
+      Login: props<{
+        credentials: LoginCredentials;
+      }>(),
 
-    'Login Success': props<{
-      user: User;
-      accessToken: string;
-    }>(),
+      'Login Success': props<{
+        user: User;
+        accessToken: string;
+      }>(),
 
-    'Login Failure': props<{
-      error: string;
-    }>(),
+      'Login Failure': props<{
+        error: string;
+      }>(),
 
-    'Restore Session': emptyProps(),
+      Register: props<{
+        data: RegisterData;
+      }>(),
 
-    'Restore Session Success': props<{
-      user: User;
-      accessToken: string;
-    }>(),
+      'Register Success': props<{
+        user: User;
+        accessToken: string;
+      }>(),
 
-    'Restore Session Finished': emptyProps(),
+      'Register Failure': props<{
+        error: string;
+      }>(),
 
-    Logout: emptyProps(),
+      'Restore Session': emptyProps(),
 
-    'Clear Error': emptyProps(),
-  },
-});
+      'Restore Session Success': props<{
+        user: User;
+        accessToken: string;
+      }>(),
+
+      'Restore Session Finished':
+        emptyProps(),
+
+      'Update Profile': props<{
+        userId: number;
+        data: UpdateUserRequest;
+      }>(),
+
+      'Update Profile Success': props<{
+        user: User;
+      }>(),
+
+      'Update Profile Failure': props<{
+        error: string;
+      }>(),
+
+      'Clear Profile Update State':
+        emptyProps(),
+
+      'Upload Profile Image': props<{
+        file: File;
+      }>(),
+
+      'Upload Profile Image Success':
+        props<{
+          user: User;
+        }>(),
+
+      'Upload Profile Image Failure':
+        props<{
+          error: string;
+        }>(),
+
+      'Remove Profile Image':
+        emptyProps(),
+
+      'Remove Profile Image Success':
+        emptyProps(),
+
+      'Remove Profile Image Failure':
+        props<{
+          error: string;
+        }>(),
+
+      'Clear Profile Image State':
+        emptyProps(),
+
+      Logout: emptyProps(),
+
+      'Clear Error': emptyProps(),
+    },
+  });

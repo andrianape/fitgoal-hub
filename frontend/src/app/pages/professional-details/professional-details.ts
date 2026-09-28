@@ -7,18 +7,33 @@ import {
   signal,
 } from '@angular/core';
 import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
   ActivatedRoute,
   Router,
   RouterLink,
 } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { UserRole } from '../../core/models/user.model';
+import { AppointmentsActions } from '../../store/appointments/appointments.actions';
+import {
+  selectCreateAppointmentError,
+  selectIsCreatingAppointment,
+  selectWasAppointmentCreated,
+} from '../../store/appointments/appointments.selectors';
 import { AvailabilityActions } from '../../store/availability/availability.actions';
 import {
   selectAvailableSlots,
   selectAvailableSlotsError,
   selectAvailableSlotsLoading,
 } from '../../store/availability/availability.selectors';
+import {
+  selectCurrentUser,
+  selectIsAuthenticated,
+} from '../../store/auth/auth.selectors';
 import { ProfessionalsActions } from '../../store/professionals/professionals.actions';
 import {
   selectSelectedProfessional,
@@ -28,7 +43,10 @@ import {
 
 @Component({
   selector: 'app-professional-details',
-  imports: [RouterLink],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+  ],
   templateUrl: './professional-details.html',
   styleUrl: './professional-details.scss',
 })
@@ -38,6 +56,9 @@ export class ProfessionalDetails
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  private readonly formBuilder =
+    inject(FormBuilder);
 
   protected readonly professional =
     this.store.selectSignal(
@@ -69,6 +90,31 @@ export class ProfessionalDetails
       selectAvailableSlotsError,
     );
 
+  protected readonly currentUser =
+    this.store.selectSignal(
+      selectCurrentUser,
+    );
+
+  protected readonly isAuthenticated =
+    this.store.selectSignal(
+      selectIsAuthenticated,
+    );
+
+  protected readonly creatingAppointment =
+    this.store.selectSignal(
+      selectIsCreatingAppointment,
+    );
+
+  protected readonly appointmentCreated =
+    this.store.selectSignal(
+      selectWasAppointmentCreated,
+    );
+
+  protected readonly createAppointmentError =
+    this.store.selectSignal(
+      selectCreateAppointmentError,
+    );
+
   protected readonly imageLoadFailed =
     signal(false);
 
@@ -77,6 +123,17 @@ export class ProfessionalDetails
 
   protected readonly selectedSlotId =
     signal<number | null>(null);
+
+  protected readonly bookingForm =
+    this.formBuilder.nonNullable.group({
+      clientNote: [
+        '',
+        [
+          Validators.minLength(2),
+          Validators.maxLength(1000),
+        ],
+      ],
+    });
 
   ngOnInit(): void {
     const id = this.getProfessionalId();
@@ -102,11 +159,19 @@ export class ProfessionalDetails
       AvailabilityActions
         .clearAvailableSlots(),
     );
+
+    this.store.dispatch(
+      AppointmentsActions
+        .clearCreateAppointmentState(),
+    );
   }
 
   @HostListener('document:keydown.escape')
   protected handleEscapeKey(): void {
-    if (this.availabilityModalOpen()) {
+    if (
+      this.availabilityModalOpen() &&
+      !this.creatingAppointment()
+    ) {
       this.closeAvailabilityModal();
     }
   }
@@ -130,6 +195,14 @@ export class ProfessionalDetails
 
     if (role === 'nutritionist') {
       return 'Nutricionista';
+    }
+
+    if (role === 'client') {
+      return 'Klijent';
+    }
+
+    if (role === 'admin') {
+      return 'Administrator';
     }
 
     return role;
@@ -162,6 +235,13 @@ export class ProfessionalDetails
     }
 
     this.selectedSlotId.set(null);
+    this.bookingForm.reset();
+
+    this.store.dispatch(
+      AppointmentsActions
+        .clearCreateAppointmentState(),
+    );
+
     this.availabilityModalOpen.set(true);
 
     this.store.dispatch(
@@ -172,8 +252,18 @@ export class ProfessionalDetails
   }
 
   protected closeAvailabilityModal(): void {
+    if (this.creatingAppointment()) {
+      return;
+    }
+
     this.availabilityModalOpen.set(false);
     this.selectedSlotId.set(null);
+    this.bookingForm.reset();
+
+    this.store.dispatch(
+      AppointmentsActions
+        .clearCreateAppointmentState(),
+    );
   }
 
   protected formatSlotDate(
@@ -203,6 +293,15 @@ export class ProfessionalDetails
   }
 
   protected selectSlot(slotId: number): void {
+    if (this.creatingAppointment()) {
+      return;
+    }
+
+    this.store.dispatch(
+      AppointmentsActions
+        .clearCreateAppointmentState(),
+    );
+
     if (this.selectedSlotId() === slotId) {
       this.selectedSlotId.set(null);
 
@@ -210,6 +309,60 @@ export class ProfessionalDetails
     }
 
     this.selectedSlotId.set(slotId);
+  }
+
+  protected confirmBooking(): void {
+    const slotId = this.selectedSlotId();
+
+    if (slotId === null) {
+      return;
+    }
+
+    if (!this.isAuthenticated()) {
+      this.closeAvailabilityModal();
+
+      void this.router.navigate(
+        ['/login'],
+        {
+          queryParams: {
+            returnUrl: this.router.url,
+          },
+        },
+      );
+
+      return;
+    }
+
+    const user = this.currentUser();
+
+    if (!user || user.role !== 'client') {
+      return;
+    }
+
+    if (this.bookingForm.invalid) {
+      this.bookingForm.markAllAsTouched();
+
+      return;
+    }
+
+    const clientNote =
+      this.bookingForm.controls
+        .clientNote.value
+        .trim();
+
+    this.store.dispatch(
+      AppointmentsActions.createAppointment({
+        data: {
+          slotId,
+
+          ...(clientNote.length > 0
+            ? {
+                clientNote,
+              }
+            : {}),
+        },
+      }),
+    );
   }
 
   protected reload(): void {
@@ -236,6 +389,14 @@ export class ProfessionalDetails
         professionalId,
       }),
     );
+  }
+
+  protected goToMyProfile(): void {
+    this.closeAvailabilityModal();
+
+    void this.router.navigate([
+      '/my-profile',
+    ]);
   }
 
   private getProfessionalId(): number | null {

@@ -257,9 +257,6 @@
   }
 }
 
-/*
- * Modalna pozadina prekriva celu stranicu.
- */
 .modal-backdrop {
   position: fixed;
   z-index: 1000;
@@ -272,9 +269,6 @@
   backdrop-filter: blur(7px);
 }
 
-/*
- * Beli modalni prozor sa terminima.
- */
 .availability-modal {
   width: min(760px, 100%);
   max-height: calc(100vh - 48px);
@@ -325,10 +319,15 @@
     border-color 180ms ease,
     background-color 180ms ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--color-primary);
     color: #ffffff;
     background: var(--color-primary);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
@@ -366,10 +365,15 @@
     box-shadow 180ms ease,
     transform 180ms ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--color-primary);
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgb(15 76 58 / 10%);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
   }
 }
 
@@ -425,6 +429,113 @@
   }
 }
 
+.booking-note {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 17px;
+  background: #f8faf8;
+
+  label {
+    display: grid;
+    gap: 9px;
+  }
+
+  label > span {
+    color: var(--color-text);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  label > span small {
+    margin-left: 5px;
+    color: var(--color-muted);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 105px;
+    resize: vertical;
+    padding: 13px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    outline: none;
+    color: var(--color-text);
+    background: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow:
+        0 0 0 3px rgb(15 76 58 / 10%);
+    }
+  }
+}
+
+.booking-note__details {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 10px;
+}
+
+.booking-note__error {
+  display: block;
+  margin-top: 7px;
+  color: #b73b32;
+  font-size: 11px;
+}
+
+.booking-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #f0c5c1;
+  border-radius: 12px;
+  color: #8e2f28;
+  background: #fff1f0;
+  font-size: 12px;
+}
+
+.booking-success {
+  display: flex;
+  min-height: 290px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 35px;
+  text-align: center;
+
+  h3 {
+    margin: 18px 0 8px;
+    font-size: 25px;
+  }
+
+  p {
+    max-width: 440px;
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.7;
+  }
+}
+
+.booking-success__icon {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--color-primary);
+  box-shadow: 0 15px 35px rgb(15 76 58 / 25%);
+  font-size: 29px;
+  font-weight: 800;
+}
+
 .availability-modal__footer {
   display: flex;
   align-items: center;
@@ -434,7 +545,7 @@
   border-top: 1px solid var(--color-border);
   background: #f8faf8;
 
-  div {
+  > div:not(.availability-modal__actions) {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -453,6 +564,12 @@
     cursor: not-allowed;
     opacity: 0.45;
   }
+}
+
+.availability-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 @media (max-width: 850px) {
@@ -498,8 +615,17 @@
     flex-direction: column;
   }
 
-  .availability-modal__footer .primary-button {
+  .availability-modal__footer > button {
     width: 100%;
+  }
+
+  .availability-modal__actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
   }
 }
 

@@ -19,3 +19,11 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  cityId?: number | null;
+}

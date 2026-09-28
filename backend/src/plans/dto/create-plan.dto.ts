@@ -1,6 +1,5 @@
 import {
   IsDateString,
-  IsEnum,
   IsInt,
   IsObject,
   IsOptional,
@@ -8,15 +7,11 @@ import {
   Length,
   Min,
 } from 'class-validator';
-import { PlanType } from '../enums/plan-type.enum';
 
 export class CreatePlanDto {
   @IsInt()
   @Min(1)
   clientId!: number;
-
-  @IsEnum(PlanType)
-  type!: PlanType;
 
   @IsString()
   @Length(2, 200)

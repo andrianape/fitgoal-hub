@@ -1,0 +1,1039 @@
+<section class="profile-dashboard">
+  <div class="container">
+    @if (!initialized()) {
+      <div class="profile-dashboard__status">
+        <span class="loader"></span>
+        <p>Učitavanje korisničkog profila...</p>
+      </div>
+    } @else if (currentUser(); as user) {
+      <header class="dashboard-header">
+        <div class="dashboard-header__avatar">
+          @if (
+            getProfileImageUrl(user.profileImageUrl);
+            as profileImageUrl
+          ) {
+            @if (!imageLoadFailed()) {
+              <img
+                [src]="profileImageUrl"
+                [alt]="
+                  'Profilna fotografija korisnika ' +
+                  user.firstName +
+                  ' ' +
+                  user.lastName
+                "
+                (error)="handleImageError()"
+              />
+            } @else {
+              <span>
+                {{
+                  getInitials(
+                    user.firstName,
+                    user.lastName
+                  )
+                }}
+              </span>
+            }
+          } @else {
+            <span>
+              {{
+                getInitials(
+                  user.firstName,
+                  user.lastName
+                )
+              }}
+            </span>
+          }
+        </div>
+
+        <div class="dashboard-header__content">
+          <span class="dashboard-header__eyebrow">
+            Moj FitGoal Hub
+          </span>
+
+          <h1>Zdravo, {{ user.firstName }}!</h1>
+
+          <p>
+            @if (user.role === 'trainer') {
+              Ovde možeš da pratiš svoj profil i
+              zakazane treninge.
+            } @else if (user.role === 'nutritionist') {
+              Ovde možeš da pratiš svoj profil,
+              konsultacije i planove ishrane.
+            } @else {
+              Ovde možeš da pratiš svoj profil,
+              termine i planove ishrane.
+            }
+          </p>
+
+          <div class="dashboard-header__badges">
+            <span>{{ getRoleLabel(user.role) }}</span>
+
+            @if (user.isActive) {
+              <span>✓ Aktivan nalog</span>
+            } @else {
+              <span>Neaktivan nalog</span>
+            }
+          </div>
+        </div>
+
+        <div class="dashboard-header__actions">
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="openEditModal()"
+          >
+            Uredi profil
+          </button>
+
+          <button
+            class="dashboard-header__logout"
+            type="button"
+            (click)="logout()"
+          >
+            Odjavi se
+          </button>
+        </div>
+      </header>
+
+      <div class="dashboard-layout">
+        <main class="dashboard-main">
+          @if (user.role === 'client') {
+            <section class="dashboard-section">
+              <div class="dashboard-section__heading">
+                <span>Aktivnosti</span>
+              </div>
+
+              <div class="dashboard-cards">
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/my-appointments"
+                >
+                  <span class="dashboard-card__icon">◷</span>
+
+                  <div>
+                    <h3>Moje rezervacije</h3>
+                    <p>
+                      Pregledaj predstojeće i završene
+                      termine.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
+
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/my-plans"
+                >
+                  <span class="dashboard-card__icon">≡</span>
+
+                  <div>
+                    <h3>Moji planovi ishrane</h3>
+                    <p>
+                      Pregledaj planove koje je
+                      nutricionista napravio za tebe.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
+
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/professionals"
+                >
+                  <span class="dashboard-card__icon">+</span>
+
+                  <div>
+                    <h3>Pronađi stručnjaka</h3>
+                    <p>
+                      Pronađi trenera ili nutricionistu
+                      i zakaži termin.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
+              </div>
+            </section>
+          }
+
+          @if (
+            user.role === 'trainer' ||
+            user.role === 'nutritionist'
+          ) {
+            <section class="dashboard-section">
+              <div class="dashboard-section__heading">
+                <span>Profesionalni nalog</span>
+                <h2>Kontrolna tabla</h2>
+              </div>
+
+              <div class="dashboard-cards">
+                <button
+                  class="
+                    dashboard-card
+                    dashboard-card--link
+                    dashboard-card--button
+                  "
+                  type="button"
+                  (click)="openSlotModal()"
+                >
+                  <span class="dashboard-card__icon">◷</span>
+
+                  <div>
+                    <h3>Dodaj slobodan termin</h3>
+                    <p>
+                      Izaberi datum i vreme kada
+                      klijenti mogu da zakažu termin.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__arrow">+</span>
+                </button>
+
+                <a
+                  class="dashboard-card dashboard-card--link"
+                  routerLink="/my-appointments"
+                >
+                  <span class="dashboard-card__icon">✓</span>
+
+                  <div>
+                    <h3>
+                      @if (user.role === 'trainer') {
+                        Rezervacije treninga
+                      } @else {
+                        Rezervacije konsultacija
+                      }
+                    </h3>
+
+                    <p>
+                      Potvrdi ili odbij zahteve svojih
+                      klijenata.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__arrow">→</span>
+                </a>
+
+                @if (user.role === 'nutritionist') {
+                  <a
+                    class="dashboard-card dashboard-card--link"
+                    routerLink="/my-plans"
+                  >
+                    <span class="dashboard-card__icon">≡</span>
+
+                    <div>
+                      <h3>Planovi ishrane</h3>
+                      <p>
+                        Pregledaj i kreiraj planove
+                        ishrane za svoje klijente.
+                      </p>
+                    </div>
+
+                    <span class="dashboard-card__arrow">→</span>
+                  </a>
+                }
+              </div>
+            </section>
+
+            <section class="dashboard-section">
+              <div
+                class="
+                  dashboard-section__heading
+                  availability-heading
+                "
+              >
+                <div>
+                  <span>Raspored</span>
+                  <h2>Moji slobodni termini</h2>
+                </div>
+
+                <button
+                  class="primary-button"
+                  type="button"
+                  (click)="openSlotModal()"
+                >
+                  + Dodaj termin
+                </button>
+              </div>
+
+              @if (mySlotsLoading()) {
+                <div class="availability-status">
+                  <span class="loader"></span>
+                  <p>Učitavanje termina...</p>
+                </div>
+              } @else if (mySlotsError()) {
+                <div
+                  class="
+                    availability-status
+                    availability-status--error
+                  "
+                >
+                  <p>{{ mySlotsError() }}</p>
+
+                  <button
+                    class="secondary-button"
+                    type="button"
+                    (click)="reloadMySlots()"
+                  >
+                    Pokušaj ponovo
+                  </button>
+                </div>
+              } @else if (mySlots().length === 0) {
+                <div class="availability-status">
+                  <span class="availability-status__icon">
+                    ◷
+                  </span>
+
+                  <h3>Još nemaš termine</h3>
+
+                  <p>
+                    Dodaj prvi slobodan termin kako bi
+                    klijenti mogli da ga rezervišu.
+                  </p>
+
+                  <button
+                    class="primary-button"
+                    type="button"
+                    (click)="openSlotModal()"
+                  >
+                    Dodaj prvi termin
+                  </button>
+                </div>
+              } @else {
+                @if (deleteSlotError()) {
+                  <div
+                    class="availability-error"
+                    role="alert"
+                  >
+                    {{ deleteSlotError() }}
+                  </div>
+                }
+
+                <div class="own-slots">
+                  @for (
+                    slot of mySlots();
+                    track slot.id
+                  ) {
+                    <article
+                      class="own-slot"
+                      [class.own-slot--booked]="slot.isBooked"
+                      [class.own-slot--past]="isPastSlot(slot)"
+                    >
+                      <div class="own-slot__date">
+                        <span>
+                          {{ formatSlotDate(slot.startsAt) }}
+                        </span>
+
+                        <strong>
+                          {{ formatSlotTime(slot.startsAt) }}
+                          –
+                          {{ formatSlotTime(slot.endsAt) }}
+                        </strong>
+                      </div>
+
+                      <div class="own-slot__status">
+                        @if (slot.isBooked) {
+                          <span
+                            class="
+                              own-slot__badge
+                              own-slot__badge--booked
+                            "
+                          >
+                            Rezervisan
+                          </span>
+                        } @else if (isPastSlot(slot)) {
+                          <span
+                            class="
+                              own-slot__badge
+                              own-slot__badge--past
+                            "
+                          >
+                            Prošao
+                          </span>
+                        } @else {
+                          <span
+                            class="
+                              own-slot__badge
+                              own-slot__badge--available
+                            "
+                          >
+                            Slobodan
+                          </span>
+                        }
+                      </div>
+
+                      <button
+                        class="own-slot__delete"
+                        type="button"
+                        [disabled]="
+                          slot.isBooked ||
+                          deletingSlotId() === slot.id
+                        "
+                        (click)="deleteSlot(slot)"
+                      >
+                        @if (
+                          deletingSlotId() === slot.id
+                        ) {
+                          Brisanje...
+                        } @else if (slot.isBooked) {
+                          Nije moguće obrisati
+                        } @else {
+                          Obriši
+                        }
+                      </button>
+                    </article>
+                  }
+                </div>
+              }
+            </section>
+          }
+
+          @if (user.role === 'admin') {
+            <section class="dashboard-section">
+              <div class="dashboard-section__heading">
+                <span>Administracija</span>
+                <h2>Upravljanje sistemom</h2>
+              </div>
+
+              <div class="dashboard-cards">
+                <article class="dashboard-card">
+                  <span class="dashboard-card__icon">◎</span>
+
+                  <div>
+                    <h3>Korisnici</h3>
+                    <p>
+                      Pregled i upravljanje korisničkim
+                      nalozima.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__soon">
+                    Uskoro
+                  </span>
+                </article>
+
+                <article class="dashboard-card">
+                  <span class="dashboard-card__icon">✓</span>
+
+                  <div>
+                    <h3>Verifikacije</h3>
+                    <p>
+                      Verifikuj profesionalne profile.
+                    </p>
+                  </div>
+
+                  <span class="dashboard-card__soon">
+                    Uskoro
+                  </span>
+                </article>
+              </div>
+            </section>
+          }
+        </main>
+
+        <aside class="account-card">
+          <span class="account-card__label">
+            Podaci naloga
+          </span>
+
+          <h2>Lične informacije</h2>
+
+          <dl>
+            <div>
+              <dt>Ime i prezime</dt>
+              <dd>
+                {{ user.firstName }}
+                {{ user.lastName }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Email</dt>
+              <dd>{{ user.email }}</dd>
+            </div>
+
+            <div>
+              <dt>Telefon</dt>
+              <dd>
+                {{
+                  user.phoneNumber ??
+                    'Nije naveden'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Grad</dt>
+              <dd>
+                {{
+                  user.city?.name ??
+                    'Nije naveden'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Tip naloga</dt>
+              <dd>{{ getRoleLabel(user.role) }}</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+
+      @if (slotModalOpen()) {
+        <div
+          class="slot-modal-backdrop"
+          role="presentation"
+          (click)="closeSlotModal()"
+        >
+          <section
+            class="slot-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="slot-modal-title"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="slot-modal__header">
+              <div>
+                <span>Upravljanje rasporedom</span>
+
+                <h2 id="slot-modal-title">
+                  Dodaj slobodan termin
+                </h2>
+
+                <p>
+                  Izaberi datum i vreme kada možeš
+                  da primiš klijenta.
+                </p>
+              </div>
+
+              <button
+                class="slot-modal__close"
+                type="button"
+                aria-label="Zatvori prozor"
+                [disabled]="creatingSlot()"
+                (click)="closeSlotModal()"
+              >
+                ×
+              </button>
+            </header>
+
+            <form
+              class="slot-form"
+              [formGroup]="slotForm"
+              (ngSubmit)="submitSlot()"
+            >
+              <label class="slot-form__field">
+                <span>Datum termina</span>
+
+                <input
+                  type="date"
+                  formControlName="date"
+                  [min]="minimumSlotDate"
+                />
+
+                @if (
+                  slotForm.controls.date.touched &&
+                  slotForm.controls.date.hasError(
+                    'required'
+                  )
+                ) {
+                  <small>
+                    Datum termina je obavezan.
+                  </small>
+                }
+              </label>
+
+              <div class="slot-form__row">
+                <label class="slot-form__field">
+                  <span>Početak</span>
+
+                  <input
+                    type="time"
+                    formControlName="startTime"
+                  />
+
+                  @if (
+                    slotForm.controls.startTime.touched &&
+                    slotForm.controls.startTime.hasError(
+                      'required'
+                    )
+                  ) {
+                    <small>
+                      Vreme početka je obavezno.
+                    </small>
+                  }
+                </label>
+
+                <label class="slot-form__field">
+                  <span>Završetak</span>
+
+                  <input
+                    type="time"
+                    formControlName="endTime"
+                  />
+
+                  @if (
+                    slotForm.controls.endTime.touched &&
+                    slotForm.controls.endTime.hasError(
+                      'required'
+                    )
+                  ) {
+                    <small>
+                      Vreme završetka je obavezno.
+                    </small>
+                  }
+                </label>
+              </div>
+
+              <div class="slot-form__notice">
+                <strong>Napomena</strong>
+
+                <p>
+                  Klijenti će ovaj termin videti na
+                  tvom javnom profesionalnom profilu.
+                </p>
+              </div>
+
+              @if (slotValidationError()) {
+                <div
+                  class="slot-form__error"
+                  role="alert"
+                >
+                  {{ slotValidationError() }}
+                </div>
+              }
+
+              @if (createSlotError()) {
+                <div
+                  class="slot-form__error"
+                  role="alert"
+                >
+                  {{ createSlotError() }}
+                </div>
+              }
+
+              <footer class="slot-form__actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  [disabled]="creatingSlot()"
+                  (click)="closeSlotModal()"
+                >
+                  Otkaži
+                </button>
+
+                <button
+                  class="primary-button"
+                  type="submit"
+                  [disabled]="creatingSlot()"
+                >
+                  @if (creatingSlot()) {
+                    Dodavanje...
+                  } @else {
+                    Dodaj termin
+                  }
+                </button>
+              </footer>
+            </form>
+          </section>
+        </div>
+      }
+
+      @if (editModalOpen()) {
+        <div
+          class="edit-modal-backdrop"
+          role="presentation"
+          (click)="closeEditModal()"
+        >
+          <section
+            class="edit-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-profile-title"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="edit-modal__header">
+              <div>
+                <span>Postavke naloga</span>
+
+                <h2 id="edit-profile-title">
+                  Uredi profil
+                </h2>
+
+                <p>
+                  Izmeni lične podatke i profilnu fotografiju.
+                </p>
+              </div>
+
+              <button
+                class="edit-modal__close"
+                type="button"
+                aria-label="Zatvori prozor"
+                [disabled]="
+                  profileUpdating() ||
+                  profileImageUpdating()
+                "
+                (click)="closeEditModal()"
+              >
+                ×
+              </button>
+            </header>
+
+            <div class="profile-image-editor">
+              <div class="profile-image-editor__preview">
+                @if (
+                  getDisplayedProfileImageUrl(
+                    user.profileImageUrl
+                  );
+                  as displayedImageUrl
+                ) {
+                  @if (!imageLoadFailed()) {
+                    <img
+                      [src]="displayedImageUrl"
+                      [alt]="
+                        'Profilna fotografija korisnika ' +
+                        user.firstName +
+                        ' ' +
+                        user.lastName
+                      "
+                      (error)="handleImageError()"
+                    />
+                  } @else {
+                    <span>
+                      {{
+                        getInitials(
+                          user.firstName,
+                          user.lastName
+                        )
+                      }}
+                    </span>
+                  }
+                } @else {
+                  <span>
+                    {{
+                      getInitials(
+                        user.firstName,
+                        user.lastName
+                      )
+                    }}
+                  </span>
+                }
+              </div>
+
+              <div class="profile-image-editor__content">
+                <div>
+                  <h3>Profilna fotografija</h3>
+
+                  <p>
+                    Izaberi JPG, PNG ili WebP fotografiju
+                    veličine do 5 MB.
+                  </p>
+                </div>
+
+                <div class="profile-image-editor__actions">
+                  <label
+                    class="
+                      secondary-button
+                      profile-image-editor__select
+                    "
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      [disabled]="profileImageUpdating()"
+                      (change)="
+                        handleProfileImageSelected($event)
+                      "
+                    />
+
+                    Izaberi fotografiju
+                  </label>
+
+                  @if (selectedProfileImage()) {
+                    <button
+                      class="primary-button"
+                      type="button"
+                      [disabled]="profileImageUpdating()"
+                      (click)="uploadProfileImage()"
+                    >
+                      @if (profileImageUpdating()) {
+                        Slanje...
+                      } @else {
+                        Sačuvaj fotografiju
+                      }
+                    </button>
+
+                    <button
+                      class="
+                        secondary-button
+                        profile-image-editor__cancel
+                      "
+                      type="button"
+                      [disabled]="profileImageUpdating()"
+                      (click)="cancelSelectedImage()"
+                    >
+                      Odustani od izbora
+                    </button>
+                  } @else if (user.profileImageUrl) {
+                    <button
+                      class="profile-image-editor__remove"
+                      type="button"
+                      [disabled]="profileImageUpdating()"
+                      (click)="removeProfileImage()"
+                    >
+                      @if (profileImageUpdating()) {
+                        Uklanjanje...
+                      } @else {
+                        Ukloni fotografiju
+                      }
+                    </button>
+                  }
+                </div>
+
+                @if (selectedProfileImage(); as image) {
+                  <span class="profile-image-editor__filename">
+                    Izabrano: {{ image.name }}
+                  </span>
+                }
+
+                @if (profileImageValidationError()) {
+                  <div
+                    class="profile-image-editor__error"
+                    role="alert"
+                  >
+                    {{ profileImageValidationError() }}
+                  </div>
+                }
+
+                @if (profileImageError()) {
+                  <div
+                    class="profile-image-editor__error"
+                    role="alert"
+                  >
+                    {{ profileImageError() }}
+                  </div>
+                }
+
+                @if (
+                  profileImageUpdateSuccessful() &&
+                  !profileImageUpdating()
+                ) {
+                  <div
+                    class="profile-image-editor__success"
+                    role="status"
+                  >
+                    Profilna fotografija je uspešno ažurirana.
+                  </div>
+                }
+              </div>
+            </div>
+
+            <form
+              class="edit-profile-form"
+              [formGroup]="editForm"
+              (ngSubmit)="submitProfileUpdate()"
+            >
+              <div class="edit-profile-form__row">
+                <label class="edit-profile-form__field">
+                  <span>Ime</span>
+
+                  <input
+                    type="text"
+                    formControlName="firstName"
+                    autocomplete="given-name"
+                  />
+
+                  @if (
+                    hasEditError(
+                      'firstName',
+                      'required'
+                    )
+                  ) {
+                    <small>Ime je obavezno.</small>
+                  } @else if (
+                    hasEditError(
+                      'firstName',
+                      'minlength'
+                    )
+                  ) {
+                    <small>
+                      Ime mora imati najmanje 2 karaktera.
+                    </small>
+                  } @else if (
+                    hasEditError(
+                      'firstName',
+                      'maxlength'
+                    )
+                  ) {
+                    <small>Ime je predugačko.</small>
+                  }
+                </label>
+
+                <label class="edit-profile-form__field">
+                  <span>Prezime</span>
+
+                  <input
+                    type="text"
+                    formControlName="lastName"
+                    autocomplete="family-name"
+                  />
+
+                  @if (
+                    hasEditError(
+                      'lastName',
+                      'required'
+                    )
+                  ) {
+                    <small>Prezime je obavezno.</small>
+                  } @else if (
+                    hasEditError(
+                      'lastName',
+                      'minlength'
+                    )
+                  ) {
+                    <small>
+                      Prezime mora imati najmanje 2 karaktera.
+                    </small>
+                  } @else if (
+                    hasEditError(
+                      'lastName',
+                      'maxlength'
+                    )
+                  ) {
+                    <small>Prezime je predugačko.</small>
+                  }
+                </label>
+              </div>
+
+              <label class="edit-profile-form__field">
+                <span>Email adresa</span>
+
+                <input
+                  type="email"
+                  formControlName="email"
+                  autocomplete="email"
+                />
+
+                @if (
+                  hasEditError(
+                    'email',
+                    'required'
+                  )
+                ) {
+                  <small>
+                    Email adresa je obavezna.
+                  </small>
+                } @else if (
+                  hasEditError(
+                    'email',
+                    'email'
+                  )
+                ) {
+                  <small>
+                    Unesi ispravnu email adresu.
+                  </small>
+                }
+              </label>
+
+              <label class="edit-profile-form__field">
+                <span>Broj telefona</span>
+
+                <input
+                  type="tel"
+                  formControlName="phoneNumber"
+                  placeholder="+381 64 123 4567"
+                  autocomplete="tel"
+                />
+
+                @if (
+                  hasEditError(
+                    'phoneNumber',
+                    'pattern'
+                  )
+                ) {
+                  <small>
+                    Broj telefona nije u ispravnom formatu.
+                  </small>
+                }
+              </label>
+
+              <label class="edit-profile-form__field">
+                <span>Grad</span>
+
+                <select formControlName="cityId">
+                  <option [ngValue]="null">
+                    Grad nije izabran
+                  </option>
+
+                  @for (
+                    city of cities();
+                    track city.id
+                  ) {
+                    <option [ngValue]="city.id">
+                      {{ city.name }}
+                    </option>
+                  }
+                </select>
+              </label>
+
+              @if (profileUpdateError()) {
+                <div
+                  class="edit-profile-form__error"
+                  role="alert"
+                >
+                  {{ profileUpdateError() }}
+                </div>
+              }
+
+              <footer class="edit-profile-form__actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  [disabled]="
+                    profileUpdating() ||
+                    profileImageUpdating()
+                  "
+                  (click)="closeEditModal()"
+                >
+                  Otkaži
+                </button>
+
+                <button
+                  class="primary-button"
+                  type="submit"
+                  [disabled]="
+                    profileUpdating() ||
+                    profileImageUpdating()
+                  "
+                >
+                  @if (profileUpdating()) {
+                    Čuvanje...
+                  } @else {
+                    Sačuvaj izmene
+                  }
+                </button>
+              </footer>
+            </form>
+          </section>
+        </div>
+      }
+    } @else {
+      <div class="profile-dashboard__status">
+        <h1>Profil nije dostupan</h1>
+
+        <p>
+          Prijavi se kako bi pristupila svom profilu.
+        </p>
+
+        <a
+          class="primary-button"
+          routerLink="/login"
+        >
+          Prijavi se
+        </a>
+      </div>
+    }
+  </div>
+</section>

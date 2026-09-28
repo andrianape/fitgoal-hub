@@ -11,6 +11,7 @@ import { AvailabilityModule } from './availability/availability.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PlansModule } from './plans/plans.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -46,6 +47,8 @@ import { PlansModule } from './plans/plans.module';
     AvailabilityModule,
 
     AppointmentsModule,
+
+    NotificationsModule,
 
     ReviewsModule,
 

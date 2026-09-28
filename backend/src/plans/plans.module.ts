@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Appointment } from '../appointments/entities/appointment.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ProfessionalProfile } from '../professionals/entities/professional-profile.entity';
 import { User } from '../users/entities/user.entity';
 import { Plan } from './entities/plan.entity';
@@ -9,10 +10,26 @@ import { PlansService } from './plans.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Plan, User, ProfessionalProfile, Appointment]),
+    TypeOrmModule.forFeature([
+      Plan,
+      User,
+      ProfessionalProfile,
+      Appointment,
+    ]),
+
+    NotificationsModule,
   ],
-  controllers: [PlansController],
-  providers: [PlansService],
-  exports: [PlansService],
+
+  controllers: [
+    PlansController,
+  ],
+
+  providers: [
+    PlansService,
+  ],
+
+  exports: [
+    PlansService,
+  ],
 })
 export class PlansModule {}

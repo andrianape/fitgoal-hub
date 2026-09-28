@@ -1,0 +1,954 @@
+<section class="plans-page">
+  <div class="container">
+    <header class="plans-heading">
+      <div>
+        <span>Individualna podrška</span>
+
+        <h1>
+          @if (isNutritionist()) {
+            Planovi klijenata
+          } @else {
+            Moji planovi ishrane
+          }
+        </h1>
+
+        <p>
+          @if (isNutritionist()) {
+            Pregledaj i kreiraj individualne
+            planove ishrane za svoje klijente.
+          } @else {
+            Ovde možeš da pregledaš planove
+            ishrane koje je nutricionista
+            napravio za tebe.
+          }
+        </p>
+      </div>
+
+      <div class="plans-heading__actions">
+        @if (isNutritionist()) {
+          <button
+            class="primary-button"
+            type="button"
+            (click)="openCreateModal()"
+          >
+            + Napravi plan ishrane
+          </button>
+        }
+
+        <a
+          class="secondary-button"
+          routerLink="/my-profile"
+        >
+          ← Moj profil
+        </a>
+      </div>
+    </header>
+
+    <div class="plan-filters">
+      <button
+        type="button"
+        [class.plan-filters__button--active]="
+          selectedFilter() === 'active'
+        "
+        (click)="selectFilter('active')"
+      >
+        Aktivni
+      </button>
+
+      <button
+        type="button"
+        [class.plan-filters__button--active]="
+          selectedFilter() === 'inactive'
+        "
+        (click)="selectFilter('inactive')"
+      >
+        Završeni
+      </button>
+
+      <button
+        type="button"
+        [class.plan-filters__button--active]="
+          selectedFilter() === 'all'
+        "
+        (click)="selectFilter('all')"
+      >
+        Svi planovi
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="plans-status">
+        <span class="loader"></span>
+
+        <p>Učitavanje planova ishrane...</p>
+      </div>
+    } @else if (
+      error() &&
+      plans().length === 0
+    ) {
+      <div class="plans-status">
+        <span class="plans-status__icon">
+          !
+        </span>
+
+        <h2>Planovi nisu učitani</h2>
+
+        <p>{{ error() }}</p>
+
+        <button
+          class="primary-button"
+          type="button"
+          (click)="loadPlans()"
+        >
+          Pokušaj ponovo
+        </button>
+      </div>
+    } @else {
+      @if (error()) {
+        <div class="plans-error">
+          <span>{{ error() }}</span>
+
+          <button
+            type="button"
+            (click)="loadPlans()"
+          >
+            Pokušaj ponovo
+          </button>
+        </div>
+      }
+
+      @if (
+        filteredPlans().length === 0
+      ) {
+        <div
+          class="
+            plans-status
+            plans-status--compact
+          "
+        >
+          <span class="plans-status__icon">
+            ≡
+          </span>
+
+          <h2>
+            @if (
+              selectedFilter() === 'active'
+            ) {
+              Nema aktivnih planova
+            } @else if (
+              selectedFilter() === 'inactive'
+            ) {
+              Nema završenih planova
+            } @else {
+              Nema planova ishrane
+            }
+          </h2>
+
+          <p>
+            @if (isNutritionist()) {
+              Plan možeš da napraviš klijentu
+              nakon završene konsultacije.
+            } @else {
+              Kada ti nutricionista napravi
+              plan, on će se pojaviti ovde.
+            }
+          </p>
+
+          @if (isNutritionist()) {
+            <button
+              class="primary-button"
+              type="button"
+              (click)="openCreateModal()"
+            >
+              Napravi prvi plan
+            </button>
+          } @else {
+            <a
+              class="primary-button"
+              routerLink="/professionals"
+            >
+              Pronađi nutricionistu
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="plans-list">
+          @for (
+            plan of filteredPlans();
+            track plan.id
+          ) {
+            <article
+              class="plan-card"
+              [class.plan-card--expanded]="
+                isExpanded(plan.id)
+              "
+            >
+              <header class="plan-card__header">
+                <div class="plan-card__person">
+                  <div class="plan-card__avatar">
+                    @if (isNutritionist()) {
+                      @if (
+                        getProfileImageUrl(
+                          plan.client
+                            .profileImageUrl
+                        );
+                        as imageUrl
+                      ) {
+                        <img
+                          [src]="imageUrl"
+                          [alt]="
+                            plan.client.firstName +
+                            ' ' +
+                            plan.client.lastName
+                          "
+                        />
+                      } @else {
+                        <span>
+                          {{
+                            getInitials(
+                              plan.client
+                                .firstName,
+                              plan.client
+                                .lastName
+                            )
+                          }}
+                        </span>
+                      }
+                    } @else {
+                      @if (
+                        getProfileImageUrl(
+                          plan.professional.user
+                            .profileImageUrl
+                        );
+                        as imageUrl
+                      ) {
+                        <img
+                          [src]="imageUrl"
+                          [alt]="
+                            plan.professional.user
+                              .firstName +
+                            ' ' +
+                            plan.professional.user
+                              .lastName
+                          "
+                        />
+                      } @else {
+                        <span>
+                          {{
+                            getInitials(
+                              plan.professional.user
+                                .firstName,
+                              plan.professional.user
+                                .lastName
+                            )
+                          }}
+                        </span>
+                      }
+                    }
+                  </div>
+
+                  <div>
+                    <small>
+                      @if (isNutritionist()) {
+                        Klijent
+                      } @else {
+                        Nutricionista
+                      }
+                    </small>
+
+                    <strong>
+                      @if (isNutritionist()) {
+                        {{
+                          plan.client.firstName
+                        }}
+                        {{
+                          plan.client.lastName
+                        }}
+                      } @else {
+                        {{
+                          plan.professional.user
+                            .firstName
+                        }}
+                        {{
+                          plan.professional.user
+                            .lastName
+                        }}
+                      }
+                    </strong>
+
+                    <span>
+                      @if (isNutritionist()) {
+                        {{
+                          plan.client.city?.name ??
+                            'Grad nije naveden'
+                        }}
+                      } @else {
+                        {{
+                          plan.professional.user
+                            .city?.name ??
+                            'Grad nije naveden'
+                        }}
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                <span
+                  class="plan-card__status"
+                  [class.plan-card__status--inactive]="
+                    !plan.isActive
+                  "
+                >
+                  {{
+                    plan.isActive
+                      ? 'Aktivan plan'
+                      : 'Završen plan'
+                  }}
+                </span>
+              </header>
+
+              <div class="plan-card__title">
+                <span>Plan ishrane</span>
+
+                <h2>{{ plan.title }}</h2>
+
+                @if (plan.description) {
+                  <p>{{ plan.description }}</p>
+                }
+              </div>
+
+              <dl class="plan-card__dates">
+                <div>
+                  <dt>Početak</dt>
+
+                  <dd>
+                    {{
+                      formatDate(
+                        plan.startDate
+                      )
+                    }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Završetak</dt>
+
+                  <dd>
+                    {{
+                      formatDate(
+                        plan.endDate
+                      )
+                    }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Broj dana u planu</dt>
+
+                  <dd>
+                    {{
+                      getPlanDays(plan).length
+                    }}
+                  </dd>
+                </div>
+              </dl>
+
+              @if (isExpanded(plan.id)) {
+                <div class="plan-details">
+                  <section class="plan-instructions">
+                    <div>
+                      <span>Opšta uputstva</span>
+
+                      <p>
+                        {{
+                          plan.content
+                            .generalInstructions ||
+                            'Nema dodatnih uputstava.'
+                        }}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span>Dnevni unos vode</span>
+
+                      <strong>
+                        {{
+                          plan.content
+                            .dailyWaterIntake ||
+                            'Nije naveden'
+                        }}
+                      </strong>
+                    </div>
+                  </section>
+
+                  @if (
+                    getPlanDays(plan).length > 0
+                  ) {
+                    <div class="plan-days">
+                      @for (
+                        day of getPlanDays(plan);
+                        track $index
+                      ) {
+                        <section class="plan-day">
+                          <header>
+                            <span>
+                              Dan {{ $index + 1 }}
+                            </span>
+
+                            <h3>{{ day.day }}</h3>
+                          </header>
+
+                          <div class="plan-day__meals">
+                            @for (
+                              meal of day.meals;
+                              track $index
+                            ) {
+                              <article class="meal-card">
+                                <div>
+                                  <span>
+                                    {{ meal.time }}
+                                  </span>
+
+                                  <h4>
+                                    {{ meal.name }}
+                                  </h4>
+                                </div>
+
+                                <p>
+                                  {{
+                                    meal.description
+                                  }}
+                                </p>
+                              </article>
+                            }
+                          </div>
+                        </section>
+                      }
+                    </div>
+                  } @else {
+                    <div class="plan-details__empty">
+                      Plan još nema unete dane i
+                      obroke.
+                    </div>
+                  }
+                </div>
+              }
+
+              <footer class="plan-card__footer">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="togglePlan(plan.id)"
+                >
+                  {{
+                    isExpanded(plan.id)
+                      ? 'Sakrij plan'
+                      : 'Pogledaj ceo plan'
+                  }}
+                </button>
+
+                @if (isNutritionist()) {
+                  <button
+                    class="delete-button"
+                    type="button"
+                    [disabled]="
+                      deletingId() === plan.id
+                    "
+                    (click)="deletePlan(plan)"
+                  >
+                    @if (
+                      deletingId() === plan.id
+                    ) {
+                      Brisanje...
+                    } @else {
+                      Obriši plan
+                    }
+                  </button>
+                }
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
+</section>
+
+@if (
+  isNutritionist() &&
+  createModalOpen()
+) {
+  <div
+    class="plan-modal-backdrop"
+    role="presentation"
+    (click)="closeCreateModal()"
+  >
+    <section
+      class="plan-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-plan-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="plan-modal__header">
+        <div>
+          <span>Plan ishrane</span>
+
+          <h2 id="create-plan-title">
+            Napravi novi plan
+          </h2>
+
+          <p>
+            Izaberi klijenta i unesi dane,
+            obroke i preporuke.
+          </p>
+        </div>
+
+        <button
+          class="plan-modal__close"
+          type="button"
+          aria-label="Zatvori formu"
+          [disabled]="saving()"
+          (click)="closeCreateModal()"
+        >
+          ×
+        </button>
+      </header>
+
+      @if (saveSuccessful()) {
+        <div class="plan-modal__success">
+          <span>✓</span>
+
+          <h3>Plan je uspešno napravljen</h3>
+
+          <p>
+            Klijent je dobio obaveštenje o
+            novom planu ishrane.
+          </p>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="closeCreateModal()"
+          >
+            Zatvori
+          </button>
+        </div>
+      } @else {
+        <form
+          class="plan-form"
+          [formGroup]="planForm"
+          (ngSubmit)="submitPlan()"
+        >
+          <section class="plan-form__section">
+            <div class="plan-form__section-heading">
+              <span>1</span>
+
+              <div>
+                <h3>Osnovni podaci</h3>
+
+                <p>
+                  Izaberi klijenta i period
+                  važenja plana.
+                </p>
+              </div>
+            </div>
+
+            @if (appointmentsLoading()) {
+              <div class="plan-form__loading">
+                Učitavanje klijenata...
+              </div>
+            } @else if (
+              eligibleClients().length === 0
+            ) {
+              <div class="plan-form__notice">
+                <strong>
+                  Nema dostupnih klijenata
+                </strong>
+
+                <p>
+                  Plan možeš napraviti samo
+                  klijentu sa kojim imaš završenu
+                  konsultaciju.
+                </p>
+              </div>
+            } @else {
+              <label class="plan-form__field">
+                <span>Klijent</span>
+
+                <select formControlName="clientId">
+                  <option [ngValue]="0">
+                    Izaberi klijenta
+                  </option>
+
+                  @for (
+                    client of eligibleClients();
+                    track client.id
+                  ) {
+                    <option
+                      [ngValue]="client.id"
+                    >
+                      {{ client.firstName }}
+                      {{ client.lastName }}
+                    </option>
+                  }
+                </select>
+
+                @if (
+                  hasControlError(
+                    'clientId',
+                    'min'
+                  )
+                ) {
+                  <small>
+                    Izaberi klijenta.
+                  </small>
+                }
+              </label>
+            }
+
+            <label class="plan-form__field">
+              <span>Naziv plana</span>
+
+              <input
+                type="text"
+                formControlName="title"
+                placeholder="Na primer: Plan ishrane za prvi mesec"
+              />
+
+              @if (
+                hasControlError(
+                  'title',
+                  'required'
+                )
+              ) {
+                <small>
+                  Naziv plana je obavezan.
+                </small>
+              }
+            </label>
+
+            <label class="plan-form__field">
+              <span>Opis plana</span>
+
+              <textarea
+                rows="3"
+                formControlName="description"
+                placeholder="Kratko opiši cilj plana..."
+              ></textarea>
+            </label>
+
+            <div class="plan-form__row">
+              <label class="plan-form__field">
+                <span>Datum početka</span>
+
+                <input
+                  type="date"
+                  formControlName="startDate"
+                />
+
+                @if (
+                  hasControlError(
+                    'startDate',
+                    'required'
+                  )
+                ) {
+                  <small>
+                    Datum početka je obavezan.
+                  </small>
+                }
+              </label>
+
+              <label class="plan-form__field">
+                <span>Datum završetka</span>
+
+                <input
+                  type="date"
+                  formControlName="endDate"
+                />
+
+                @if (
+                  hasControlError(
+                    'endDate',
+                    'endBeforeStart'
+                  )
+                ) {
+                  <small>
+                    Završetak ne može biti pre
+                    početka plana.
+                  </small>
+                }
+              </label>
+            </div>
+          </section>
+
+          <section class="plan-form__section">
+            <div class="plan-form__section-heading">
+              <span>2</span>
+
+              <div>
+                <h3>Opšte preporuke</h3>
+
+                <p>
+                  Unesi pravila koja važe za ceo
+                  plan ishrane.
+                </p>
+              </div>
+            </div>
+
+            <label class="plan-form__field">
+              <span>Opšta uputstva</span>
+
+              <textarea
+                rows="4"
+                formControlName="generalInstructions"
+                placeholder="Na primer: Obroke rasporediti ravnomerno tokom dana..."
+              ></textarea>
+
+              @if (
+                hasControlError(
+                  'generalInstructions',
+                  'required'
+                )
+              ) {
+                <small>
+                  Opšta uputstva su obavezna.
+                </small>
+              }
+            </label>
+
+            <label class="plan-form__field">
+              <span>Preporučeni unos vode</span>
+
+              <input
+                type="text"
+                formControlName="dailyWaterIntake"
+                placeholder="Na primer: 2–2,5 litra dnevno"
+              />
+
+              @if (
+                hasControlError(
+                  'dailyWaterIntake',
+                  'required'
+                )
+              ) {
+                <small>
+                  Unos vode je obavezan.
+                </small>
+              }
+            </label>
+          </section>
+
+          <section
+            class="
+              plan-form__section
+              plan-form__section--days
+            "
+          >
+            <div class="plan-form__section-heading">
+              <span>3</span>
+
+              <div>
+                <h3>Dani i obroci</h3>
+
+                <p>
+                  Za svaki dan dodaj jedan ili
+                  više obroka.
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="plan-form__days"
+              formArrayName="days"
+            >
+              @for (
+                dayControl of days.controls;
+                track $index;
+                let dayIndex = $index
+              ) {
+                <article
+                  class="plan-form__day"
+                  [formGroupName]="dayIndex"
+                >
+                  <header class="plan-form__day-header">
+                    <div>
+                      <span>
+                        Dan {{ dayIndex + 1 }}
+                      </span>
+
+                      <h4>
+                        Raspored obroka
+                      </h4>
+                    </div>
+
+                    @if (days.length > 1) {
+                      <button
+                        type="button"
+                        (click)="
+                          removeDay(dayIndex)
+                        "
+                      >
+                        Ukloni dan
+                      </button>
+                    }
+                  </header>
+
+                  <label class="plan-form__field">
+                    <span>Naziv dana</span>
+
+                    <input
+                      type="text"
+                      formControlName="day"
+                      placeholder="Na primer: Ponedeljak"
+                    />
+                  </label>
+
+                  <div
+                    class="plan-form__meals"
+                    formArrayName="meals"
+                  >
+                    @for (
+                      mealControl of
+                        getMeals(dayIndex)
+                          .controls;
+                      track $index;
+                      let mealIndex = $index
+                    ) {
+                      <div
+                        class="plan-form__meal"
+                        [formGroupName]="
+                          mealIndex
+                        "
+                      >
+                        <div
+                          class="plan-form__meal-heading"
+                        >
+                          <strong>
+                            Obrok
+                            {{ mealIndex + 1 }}
+                          </strong>
+
+                          @if (
+                            getMeals(dayIndex)
+                              .length > 1
+                          ) {
+                            <button
+                              type="button"
+                              (click)="
+                                removeMeal(
+                                  dayIndex,
+                                  mealIndex
+                                )
+                              "
+                            >
+                              Ukloni
+                            </button>
+                          }
+                        </div>
+
+                        <div
+                          class="plan-form__meal-row"
+                        >
+                          <label
+                            class="plan-form__field"
+                          >
+                            <span>
+                              Naziv obroka
+                            </span>
+
+                            <input
+                              type="text"
+                              formControlName="name"
+                              placeholder="Doručak"
+                            />
+                          </label>
+
+                          <label
+                            class="plan-form__field"
+                          >
+                            <span>Vreme</span>
+
+                            <input
+                              type="time"
+                              formControlName="time"
+                            />
+                          </label>
+                        </div>
+
+                        <label
+                          class="plan-form__field"
+                        >
+                          <span>
+                            Namirnice i količine
+                          </span>
+
+                          <textarea
+                            rows="3"
+                            formControlName="description"
+                            placeholder="Na primer: Ovsene pahuljice 60 g, grčki jogurt 150 g..."
+                          ></textarea>
+                        </label>
+                      </div>
+                    }
+                  </div>
+
+                  <button
+                    class="plan-form__add-meal"
+                    type="button"
+                    (click)="addMeal(dayIndex)"
+                  >
+                    + Dodaj još jedan obrok
+                  </button>
+                </article>
+              }
+            </div>
+
+            <button
+              class="plan-form__add-day"
+              type="button"
+              (click)="addDay()"
+            >
+              + Dodaj još jedan dan
+            </button>
+          </section>
+
+          @if (saveError()) {
+            <div
+              class="plan-form__error"
+              role="alert"
+            >
+              {{ saveError() }}
+            </div>
+          }
+
+          <footer class="plan-form__actions">
+            <button
+              class="secondary-button"
+              type="button"
+              [disabled]="saving()"
+              (click)="closeCreateModal()"
+            >
+              Otkaži
+            </button>
+
+            <button
+              class="primary-button"
+              type="submit"
+              [disabled]="
+                saving() ||
+                eligibleClients().length === 0
+              "
+            >
+              @if (saving()) {
+                Čuvanje plana...
+              } @else {
+                Sačuvaj plan ishrane
+              }
+            </button>
+          </footer>
+        </form>
+      }
+    </section>
+  </div>
+}

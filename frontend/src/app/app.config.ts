@@ -18,6 +18,8 @@ import {
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { AppointmentsEffects } from './store/appointments/appointments.effects';
+import { appointmentsFeature } from './store/appointments/appointments.reducer';
 import { AvailabilityEffects } from './store/availability/availability.effects';
 import { availabilityFeature } from './store/availability/availability.reducer';
 import { AuthEffects } from './store/auth/auth.effects';
@@ -26,6 +28,10 @@ import { CitiesEffects } from './store/cities/cities.effects';
 import { citiesFeature } from './store/cities/cities.reducer';
 import { ProfessionalsEffects } from './store/professionals/professionals.effects';
 import { professionalsFeature } from './store/professionals/professionals.reducer';
+import { NotificationsEffects } from './store/notifications/notifications.effects';
+import { notificationsFeature } from './store/notifications/notifications.reducer';
+import { PlansEffects } from './store/plans/plans.effects';
+import { plansFeature } from './store/plans/plans.reducer';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -49,11 +55,20 @@ export const appConfig: ApplicationConfig = {
 
     provideState(authFeature),
 
+    provideState(appointmentsFeature),
+
+    provideState(notificationsFeature),
+
+    provideState(plansFeature),
+
     provideEffects(
       CitiesEffects,
       ProfessionalsEffects,
       AvailabilityEffects,
       AuthEffects,
+      AppointmentsEffects,
+      NotificationsEffects,
+      PlansEffects,
     ),
 
     provideStoreDevtools({

@@ -138,9 +138,7 @@
 
             <h2>Biografija</h2>
 
-            <p
-              class="profile-section__biography"
-            >
+            <p class="profile-section__biography">
               {{ profile.biography }}
             </p>
           </article>
@@ -246,6 +244,7 @@
                 class="availability-modal__close"
                 type="button"
                 aria-label="Zatvori prozor"
+                [disabled]="creatingAppointment()"
                 (click)="closeAvailabilityModal()"
               >
                 ×
@@ -253,7 +252,23 @@
             </header>
 
             <div class="availability-modal__body">
-              @if (slotsLoading()) {
+              @if (appointmentCreated()) {
+                <div class="booking-success">
+                  <span class="booking-success__icon">
+                    ✓
+                  </span>
+
+                  <h3>
+                    Rezervacija je poslata!
+                  </h3>
+
+                  <p>
+                    Profesionalac će pregledati
+                    tvoj zahtev. Status rezervacije
+                    možeš pratiti na svom profilu.
+                  </p>
+                </div>
+              } @else if (slotsLoading()) {
                 <div class="slots-status">
                   <span class="loader"></span>
 
@@ -290,7 +305,11 @@
                   </p>
                 </div>
               } @else {
-                <p class="availability-modal__instruction">
+                <p
+                  class="
+                    availability-modal__instruction
+                  "
+                >
                   Izaberi datum i vreme koji ti
                   najviše odgovaraju.
                 </p>
@@ -305,6 +324,9 @@
                       type="button"
                       [class.slot-card--selected]="
                         selectedSlotId() === slot.id
+                      "
+                      [disabled]="
+                        creatingAppointment()
                       "
                       (click)="selectSlot(slot.id)"
                     >
@@ -345,37 +367,179 @@
                     </button>
                   }
                 </div>
+
+                @if (
+                  selectedSlotId() !== null
+                ) {
+                  <form
+                    class="booking-note"
+                    [formGroup]="bookingForm"
+                  >
+                    <label>
+                      <span>
+                        Napomena za profesionalca
+
+                        <small>Opciono</small>
+                      </span>
+
+                      <textarea
+                        rows="4"
+                        formControlName="clientNote"
+                        placeholder="Napiši ukratko razlog zakazivanja ili cilj koji želiš da postigneš."
+                      ></textarea>
+                    </label>
+
+                    <div
+                      class="booking-note__details"
+                    >
+                      <span>
+                        {{
+                          bookingForm.controls
+                            .clientNote.value
+                            .length
+                        }}
+                        / 1000
+                      </span>
+                    </div>
+
+                    @if (
+                      bookingForm.controls
+                        .clientNote.touched &&
+                      bookingForm.controls
+                        .clientNote.hasError(
+                          'minlength'
+                        )
+                    ) {
+                      <small
+                        class="booking-note__error"
+                      >
+                        Napomena mora imati
+                        najmanje 2 karaktera ili
+                        ostati prazna.
+                      </small>
+                    }
+
+                    @if (
+                      bookingForm.controls
+                        .clientNote.touched &&
+                      bookingForm.controls
+                        .clientNote.hasError(
+                          'maxlength'
+                        )
+                    ) {
+                      <small
+                        class="booking-note__error"
+                      >
+                        Napomena može imati najviše
+                        1000 karaktera.
+                      </small>
+                    }
+                  </form>
+                }
+
+                @if (
+                  createAppointmentError()
+                ) {
+                  <div
+                    class="booking-error"
+                    role="alert"
+                  >
+                    {{
+                      createAppointmentError()
+                    }}
+                  </div>
+                }
               }
             </div>
 
-            @if (
-              !slotsLoading() &&
-              !slotsError() &&
-              availableSlots().length > 0
-            ) {
-              <footer
-                class="availability-modal__footer"
-              >
+            <footer
+              class="availability-modal__footer"
+            >
+              @if (appointmentCreated()) {
+                <div>
+                  <strong>
+                    Zahtev je kreiran
+                  </strong>
+
+                  <span>
+                    Rezervacija trenutno čeka
+                    potvrdu.
+                  </span>
+                </div>
+
+                <div
+                  class="
+                    availability-modal__actions
+                  "
+                >
+                  <button
+                    class="secondary-button"
+                    type="button"
+                    (click)="
+                      closeAvailabilityModal()
+                    "
+                  >
+                    Zatvori
+                  </button>
+
+                  <button
+                    class="primary-button"
+                    type="button"
+                    (click)="goToMyProfile()"
+                  >
+                    Moj profil
+                  </button>
+                </div>
+              } @else {
                 <div>
                   @if (
-                    selectedSlotId() !== null
+                    selectedSlotId() === null
                   ) {
-                    <strong>
-                      Termin je izabran
-                    </strong>
-
-                    <span>
-                      Možeš nastaviti na rezervaciju.
-                    </span>
-                  } @else {
                     <strong>
                       Izaberi jedan termin
                     </strong>
 
                     <span>
-                      Nakon izbora moći ćeš da
-                      nastaviš.
+                      Nakon izbora možeš
+                      nastaviti.
                     </span>
+                  } @else if (
+                    !isAuthenticated()
+                  ) {
+                    <strong>
+                      Potrebna je prijava
+                    </strong>
+
+                    <span>
+                      Prijavi se da rezervišeš
+                      termin.
+                    </span>
+                  } @else if (
+                    currentUser();
+                    as loggedInUser
+                  ) {
+                    @if (
+                      loggedInUser.role !==
+                      'client'
+                    ) {
+                      <strong>
+                        Rezervacija nije dostupna
+                      </strong>
+
+                      <span>
+                        Samo klijent može
+                        rezervisati termin.
+                      </span>
+                    } @else {
+                      <strong>
+                        Termin je izabran
+                      </strong>
+
+                      <span>
+                        Pošalji zahtev
+                        profesionalcu.
+                      </span>
+                    }
                   }
                 </div>
 
@@ -383,13 +547,30 @@
                   class="primary-button"
                   type="button"
                   [disabled]="
-                    selectedSlotId() === null
+                    selectedSlotId() === null ||
+                    creatingAppointment() ||
+                    (
+                      isAuthenticated() &&
+                      currentUser()?.role !==
+                        'client'
+                    )
                   "
+                  (click)="confirmBooking()"
                 >
-                  Nastavi na rezervaciju
+                  @if (
+                    creatingAppointment()
+                  ) {
+                    Slanje rezervacije...
+                  } @else if (
+                    !isAuthenticated()
+                  ) {
+                    Prijavi se i rezerviši
+                  } @else {
+                    Potvrdi rezervaciju
+                  }
                 </button>
-              </footer>
-            }
+              }
+            </footer>
           </section>
         </div>
       }

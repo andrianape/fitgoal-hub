@@ -1,0 +1,411 @@
+<section class="register-page">
+  <div class="register-page__decoration"></div>
+
+  <div class="container register-page__container">
+    <div class="register-introduction">
+      <span class="register-introduction__label">
+        Pridruži se FitGoal Hub zajednici
+      </span>
+
+      <h1>
+        Napravi nalog prilagođen svojim ciljevima.
+      </h1>
+
+      <p>
+        Registruj se kao klijent, trener ili nutricionista
+        i koristi mogućnosti koje odgovaraju tvojoj ulozi.
+      </p>
+
+      <div class="register-benefits">
+        <div>
+          <span>01</span>
+
+          <p>
+            <strong>Klijent</strong>
+
+            Pronađi profesionalce, rezerviši termine i
+            prati svoje planove ishrane.
+          </p>
+        </div>
+
+        <div>
+          <span>02</span>
+
+          <p>
+            <strong>Lični trener</strong>
+
+            Predstavi svoje iskustvo, dodaj slobodne termine
+            i upravljaj rezervacijama treninga.
+          </p>
+        </div>
+
+        <div>
+          <span>03</span>
+
+          <p>
+            <strong>Nutricionista</strong>
+
+            Organizuj konsultacije i napravi plan ishrane
+            nakon završenog termina.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="register-card">
+      <header class="register-card__header">
+        <span>Registracija naloga</span>
+
+        <h2>Kreiraj svoj nalog</h2>
+
+        <p>
+          Popuni osnovne podatke i izaberi način na koji
+          želiš da koristiš aplikaciju.
+        </p>
+      </header>
+
+      <form
+        class="register-form"
+        [formGroup]="registerForm"
+        (ngSubmit)="submit()"
+      >
+        <div class="register-form__row">
+          <label class="register-form__field">
+            <span>Ime</span>
+
+            <input
+              type="text"
+              formControlName="firstName"
+              placeholder="Unesi ime"
+              autocomplete="given-name"
+            />
+
+            @if (
+              hasError(
+                'firstName',
+                'required'
+              )
+            ) {
+              <small>
+                Ime je obavezno.
+              </small>
+            } @else if (
+              hasError(
+                'firstName',
+                'minlength'
+              )
+            ) {
+              <small>
+                Ime mora imati najmanje 2 karaktera.
+              </small>
+            } @else if (
+              hasError(
+                'firstName',
+                'maxlength'
+              )
+            ) {
+              <small>
+                Ime može imati najviše 100 karaktera.
+              </small>
+            }
+          </label>
+
+          <label class="register-form__field">
+            <span>Prezime</span>
+
+            <input
+              type="text"
+              formControlName="lastName"
+              placeholder="Unesi prezime"
+              autocomplete="family-name"
+            />
+
+            @if (
+              hasError(
+                'lastName',
+                'required'
+              )
+            ) {
+              <small>
+                Prezime je obavezno.
+              </small>
+            } @else if (
+              hasError(
+                'lastName',
+                'minlength'
+              )
+            ) {
+              <small>
+                Prezime mora imati najmanje 2 karaktera.
+              </small>
+            } @else if (
+              hasError(
+                'lastName',
+                'maxlength'
+              )
+            ) {
+              <small>
+                Prezime može imati najviše 100 karaktera.
+              </small>
+            }
+          </label>
+        </div>
+
+        <label class="register-form__field">
+          <span>Email adresa</span>
+
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="ime@email.com"
+            autocomplete="email"
+          />
+
+          @if (
+            hasError(
+              'email',
+              'required'
+            )
+          ) {
+            <small>
+              Email adresa je obavezna.
+            </small>
+          } @else if (
+            hasError(
+              'email',
+              'email'
+            )
+          ) {
+            <small>
+              Unesi ispravnu email adresu.
+            </small>
+          }
+        </label>
+
+        <div class="register-form__row">
+          <label class="register-form__field">
+            <span>Broj telefona</span>
+
+            <input
+              type="tel"
+              formControlName="phoneNumber"
+              placeholder="+381 60 123 4567"
+              autocomplete="tel"
+            />
+
+            @if (
+              hasError(
+                'phoneNumber',
+                'pattern'
+              )
+            ) {
+              <small>
+                Broj telefona nije u ispravnom formatu.
+              </small>
+            }
+          </label>
+
+          <label class="register-form__field">
+            <span>Grad</span>
+
+            <select formControlName="cityId">
+              <option [ngValue]="null">
+                Izaberi grad
+              </option>
+
+              @for (
+                city of cities();
+                track city.id
+              ) {
+                <option [ngValue]="city.id">
+                  {{ city.name }}
+                </option>
+              }
+            </select>
+
+            @if (
+              hasError(
+                'cityId',
+                'required'
+              )
+            ) {
+              <small>
+                Izbor grada je obavezan.
+              </small>
+            }
+          </label>
+        </div>
+
+        <fieldset class="register-form__roles">
+          <legend>
+            Kako želiš da koristiš aplikaciju?
+          </legend>
+
+          <div class="register-form__role-options">
+            <label class="role-option">
+              <input
+                type="radio"
+                formControlName="role"
+                value="client"
+              />
+
+              <span class="role-option__content">
+                <strong>Klijent</strong>
+
+                <small>
+                  Rezervacije i planovi
+                </small>
+              </span>
+            </label>
+
+            <label class="role-option">
+              <input
+                type="radio"
+                formControlName="role"
+                value="trainer"
+              />
+
+              <span class="role-option__content">
+                <strong>Lični trener</strong>
+
+                <small>
+                  Treninzi i termini
+                </small>
+              </span>
+            </label>
+
+            <label class="role-option">
+              <input
+                type="radio"
+                formControlName="role"
+                value="nutritionist"
+              />
+
+              <span class="role-option__content">
+                <strong>Nutricionista</strong>
+
+                <small>
+                  Konsultacije i planovi
+                </small>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="register-form__row">
+          <label class="register-form__field">
+            <span>Lozinka</span>
+
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Najmanje 8 karaktera"
+              autocomplete="new-password"
+            />
+
+            @if (
+              hasError(
+                'password',
+                'required'
+              )
+            ) {
+              <small>
+                Lozinka je obavezna.
+              </small>
+            } @else if (
+              hasError(
+                'password',
+                'minlength'
+              )
+            ) {
+              <small>
+                Lozinka mora imati najmanje 8 karaktera.
+              </small>
+            } @else if (
+              hasError(
+                'password',
+                'maxlength'
+              )
+            ) {
+              <small>
+                Lozinka može imati najviše 72 karaktera.
+              </small>
+            } @else if (
+              hasError(
+                'password',
+                'pattern'
+              )
+            ) {
+              <small>
+                Lozinka mora sadržati malo slovo, veliko
+                slovo i cifru.
+              </small>
+            }
+          </label>
+
+          <label class="register-form__field">
+            <span>Potvrdi lozinku</span>
+
+            <input
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Ponovi lozinku"
+              autocomplete="new-password"
+            />
+
+            @if (
+              hasError(
+                'confirmPassword',
+                'required'
+              )
+            ) {
+              <small>
+                Potvrda lozinke je obavezna.
+              </small>
+            } @else if (
+              hasPasswordMismatch()
+            ) {
+              <small>
+                Lozinke se ne podudaraju.
+              </small>
+            }
+          </label>
+        </div>
+
+        <p class="register-form__password-note">
+          Lozinka mora imati najmanje 8 karaktera i
+          sadržati malo slovo, veliko slovo i cifru.
+        </p>
+
+        @if (error()) {
+          <div
+            class="register-form__error"
+            role="alert"
+          >
+            {{ error() }}
+          </div>
+        }
+
+        <button
+          class="primary-button register-form__submit"
+          type="submit"
+          [disabled]="loading()"
+        >
+          @if (loading()) {
+            Kreiranje naloga...
+          } @else {
+            Napravi nalog
+          }
+        </button>
+      </form>
+
+      <footer class="register-card__footer">
+        Već imaš nalog?
+
+        <a routerLink="/login">
+          Prijavi se
+        </a>
+      </footer>
+    </div>
+  </div>
+</section>

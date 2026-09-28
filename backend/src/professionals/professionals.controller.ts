@@ -16,59 +16,118 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 import { UserRole } from '../users/enums/user-role.enum';
 import { CreateProfessionalProfileDto } from './dto/create-professional-profile.dto';
+import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
 import { UpdateProfessionalProfileDto } from './dto/update-professional-profile.dto';
 import { UpdateVerificationDto } from './dto/update-verification.dto';
 import { ProfessionalsService } from './professionals.service';
-import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
 
 @Controller('professionals')
 export class ProfessionalsController {
-  constructor(private readonly professionalsService: ProfessionalsService) {}
+  constructor(
+    private readonly professionalsService:
+      ProfessionalsService,
+  ) {}
 
   @Get()
-  findAll(@Query() filters: FilterProfessionalsDto) {
-    return this.professionalsService.findAll(filters);
+  findAll(
+    @Query()
+    filters: FilterProfessionalsDto,
+  ) {
+    return this.professionalsService.findAll(
+      filters,
+    );
+  }
+
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  findAllForAdmin() {
+    return this.professionalsService
+      .findAllForAdmin();
   }
 
   @Get('profile/me')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
-  findOwn(@CurrentUser() currentUser: AuthenticatedUser) {
-    return this.professionalsService.findOwn(currentUser.id);
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.professionalsService.findOne(id);
+  @Roles(
+    UserRole.TRAINER,
+    UserRole.NUTRITIONIST,
+  )
+  findOwn(
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+  ) {
+    return this.professionalsService.findOwn(
+      currentUser.id,
+    );
   }
 
   @Post('profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
+  @Roles(
+    UserRole.TRAINER,
+    UserRole.NUTRITIONIST,
+  )
   create(
-    @CurrentUser() currentUser: AuthenticatedUser,
-    @Body() dto: CreateProfessionalProfileDto,
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Body()
+    dto: CreateProfessionalProfileDto,
   ) {
-    return this.professionalsService.create(currentUser.id, dto);
+    return this.professionalsService.create(
+      currentUser.id,
+      dto,
+    );
   }
 
   @Patch('profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
+  @Roles(
+    UserRole.TRAINER,
+    UserRole.NUTRITIONIST,
+  )
   update(
-    @CurrentUser() currentUser: AuthenticatedUser,
-    @Body() dto: UpdateProfessionalProfileDto,
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Body()
+    dto: UpdateProfessionalProfileDto,
   ) {
-    return this.professionalsService.update(currentUser.id, dto);
+    return this.professionalsService.update(
+      currentUser.id,
+      dto,
+    );
   }
 
   @Patch(':id/verification')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   updateVerification(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateVerificationDto,
+    @Param('id', ParseIntPipe)
+    id: number,
+
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Body()
+    dto: UpdateVerificationDto,
   ) {
-    return this.professionalsService.updateVerification(id, dto.isVerified);
+    return this.professionalsService
+      .updateVerification(
+        id,
+        dto.isVerified,
+        dto.verificationNote,
+        currentUser.id,
+      );
+  }
+
+  @Get(':id')
+  findOne(
+    @Param('id', ParseIntPipe)
+    id: number,
+  ) {
+    return this.professionalsService.findOne(
+      id,
+    );
   }
 }

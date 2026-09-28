@@ -3,8 +3,12 @@ import {
   createReducer,
   on,
 } from '@ngrx/store';
-import { ProfessionalsActions } from './professionals.actions';
-import { initialProfessionalsState } from './professionals.state';
+import {
+  ProfessionalsActions,
+} from './professionals.actions';
+import {
+  initialProfessionalsState,
+} from './professionals.state';
 
 export const professionalsFeature =
   createFeature({
@@ -14,8 +18,12 @@ export const professionalsFeature =
       initialProfessionalsState,
 
       on(
-        ProfessionalsActions.loadProfessionals,
-        (state, { filters }) => ({
+        ProfessionalsActions
+          .loadProfessionals,
+        (
+          state,
+          { filters },
+        ) => ({
           ...state,
           filters,
           loading: true,
@@ -26,11 +34,17 @@ export const professionalsFeature =
       on(
         ProfessionalsActions
           .loadProfessionalsSuccess,
-        (state, { response }) => ({
+        (
+          state,
+          { response },
+        ) => ({
           ...state,
-          professionals: response.data,
-          total: response.total,
-          totalPages: response.totalPages,
+          professionals:
+            response.data,
+          total:
+            response.total,
+          totalPages:
+            response.totalPages,
           loading: false,
           loaded: true,
           error: null,
@@ -40,7 +54,10 @@ export const professionalsFeature =
       on(
         ProfessionalsActions
           .loadProfessionalsFailure,
-        (state, { error }) => ({
+        (
+          state,
+          { error },
+        ) => ({
           ...state,
           loading: false,
           loaded: false,
@@ -49,34 +66,50 @@ export const professionalsFeature =
       ),
 
       on(
-        ProfessionalsActions.loadProfessional,
+        ProfessionalsActions
+          .loadProfessional,
         (state) => ({
           ...state,
-          selectedProfessional: null,
-          selectedProfessionalLoading: true,
-          selectedProfessionalError: null,
+          selectedProfessional:
+            null,
+          selectedProfessionalLoading:
+            true,
+          selectedProfessionalError:
+            null,
         }),
       ),
 
       on(
         ProfessionalsActions
           .loadProfessionalSuccess,
-        (state, { professional }) => ({
+        (
+          state,
+          { professional },
+        ) => ({
           ...state,
-          selectedProfessional: professional,
-          selectedProfessionalLoading: false,
-          selectedProfessionalError: null,
+          selectedProfessional:
+            professional,
+          selectedProfessionalLoading:
+            false,
+          selectedProfessionalError:
+            null,
         }),
       ),
 
       on(
         ProfessionalsActions
           .loadProfessionalFailure,
-        (state, { error }) => ({
+        (
+          state,
+          { error },
+        ) => ({
           ...state,
-          selectedProfessional: null,
-          selectedProfessionalLoading: false,
-          selectedProfessionalError: error,
+          selectedProfessional:
+            null,
+          selectedProfessionalLoading:
+            false,
+          selectedProfessionalError:
+            error,
         }),
       ),
 
@@ -85,15 +118,156 @@ export const professionalsFeature =
           .clearSelectedProfessional,
         (state) => ({
           ...state,
-          selectedProfessional: null,
-          selectedProfessionalLoading: false,
-          selectedProfessionalError: null,
+          selectedProfessional:
+            null,
+          selectedProfessionalLoading:
+            false,
+          selectedProfessionalError:
+            null,
         }),
       ),
 
       on(
-        ProfessionalsActions.clearProfessionals,
-        () => initialProfessionalsState,
+        ProfessionalsActions
+          .loadOwnProfessionalProfile,
+        (state) => ({
+          ...state,
+          ownProfessionalProfileLoading:
+            true,
+          ownProfessionalProfileLoaded:
+            false,
+          ownProfessionalProfileError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .loadOwnProfessionalProfileSuccess,
+        (
+          state,
+          { professional },
+        ) => ({
+          ...state,
+          ownProfessionalProfile:
+            professional,
+          ownProfessionalProfileLoading:
+            false,
+          ownProfessionalProfileLoaded:
+            true,
+          ownProfessionalProfileError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .loadOwnProfessionalProfileFailure,
+        (
+          state,
+          { error },
+        ) => ({
+          ...state,
+          ownProfessionalProfile:
+            null,
+          ownProfessionalProfileLoading:
+            false,
+          ownProfessionalProfileLoaded:
+            true,
+          ownProfessionalProfileError:
+            error || null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .createProfessionalProfile,
+        ProfessionalsActions
+          .updateProfessionalProfile,
+        (state) => ({
+          ...state,
+          professionalProfileSaving:
+            true,
+          professionalProfileSaveSuccessful:
+            false,
+          professionalProfileSaveError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .createProfessionalProfileSuccess,
+        ProfessionalsActions
+          .updateProfessionalProfileSuccess,
+        (
+          state,
+          { professional },
+        ) => ({
+          ...state,
+          ownProfessionalProfile:
+            professional,
+          ownProfessionalProfileLoading:
+            false,
+          ownProfessionalProfileLoaded:
+            true,
+          ownProfessionalProfileError:
+            null,
+          professionalProfileSaving:
+            false,
+          professionalProfileSaveSuccessful:
+            true,
+          professionalProfileSaveError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .createProfessionalProfileFailure,
+        ProfessionalsActions
+          .updateProfessionalProfileFailure,
+        (
+          state,
+          { error },
+        ) => ({
+          ...state,
+          professionalProfileSaving:
+            false,
+          professionalProfileSaveSuccessful:
+            false,
+          professionalProfileSaveError:
+            error,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .clearOwnProfessionalProfileState,
+        (state) => ({
+          ...state,
+          ownProfessionalProfile:
+            null,
+          ownProfessionalProfileLoading:
+            false,
+          ownProfessionalProfileLoaded:
+            false,
+          ownProfessionalProfileError:
+            null,
+          professionalProfileSaving:
+            false,
+          professionalProfileSaveSuccessful:
+            false,
+          professionalProfileSaveError:
+            null,
+        }),
+      ),
+
+      on(
+        ProfessionalsActions
+          .clearProfessionals,
+        () =>
+          initialProfessionalsState,
       ),
     ),
   });

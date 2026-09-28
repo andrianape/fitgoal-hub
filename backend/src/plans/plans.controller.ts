@@ -24,20 +24,40 @@ import { PlansService } from './plans.service';
 @Controller('plans')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PlansController {
-  constructor(private readonly plansService: PlansService) {}
+  constructor(
+    private readonly plansService:
+      PlansService,
+  ) {}
 
   @Post()
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
+  @Roles(UserRole.NUTRITIONIST)
   create(
-    @CurrentUser() currentUser: AuthenticatedUser,
-    @Body() dto: CreatePlanDto,
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Body()
+    dto: CreatePlanDto,
   ) {
-    return this.plansService.create(currentUser.id, currentUser.role, dto);
+    return this.plansService.create(
+      currentUser.id,
+      dto,
+    );
   }
 
   @Get('me')
-  findMine(@CurrentUser() currentUser: AuthenticatedUser) {
-    return this.plansService.findMine(currentUser.id, currentUser.role);
+  @Roles(
+    UserRole.CLIENT,
+    UserRole.NUTRITIONIST,
+    UserRole.ADMIN,
+  )
+  findMine(
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+  ) {
+    return this.plansService.findMine(
+      currentUser.id,
+      currentUser.role,
+    );
   }
 
   @Get()
@@ -47,9 +67,17 @@ export class PlansController {
   }
 
   @Get(':id')
+  @Roles(
+    UserRole.CLIENT,
+    UserRole.NUTRITIONIST,
+    UserRole.ADMIN,
+  )
   findOne(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param('id', ParseIntPipe)
+    id: number,
+
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
   ) {
     return this.plansService.findOneForUser(
       id,
@@ -59,22 +87,41 @@ export class PlansController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
+  @Roles(UserRole.NUTRITIONIST)
   update(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() currentUser: AuthenticatedUser,
-    @Body() dto: UpdatePlanDto,
+    @Param('id', ParseIntPipe)
+    id: number,
+
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Body()
+    dto: UpdatePlanDto,
   ) {
-    return this.plansService.update(id, currentUser.id, dto);
+    return this.plansService.update(
+      id,
+      currentUser.id,
+      dto,
+    );
   }
 
   @Delete(':id')
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST, UserRole.ADMIN)
+  @Roles(
+    UserRole.NUTRITIONIST,
+    UserRole.ADMIN,
+  )
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param('id', ParseIntPipe)
+    id: number,
+
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
   ) {
-    return this.plansService.remove(id, currentUser.id, currentUser.role);
+    return this.plansService.remove(
+      id,
+      currentUser.id,
+      currentUser.role,
+    );
   }
 }

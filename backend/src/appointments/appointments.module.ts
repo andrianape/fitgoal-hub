@@ -6,6 +6,7 @@ import { User } from '../users/entities/user.entity';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsService } from './appointments.service';
 import { Appointment } from './entities/appointment.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Appointment } from './entities/appointment.entity';
       ProfessionalProfile,
       User,
     ]),
+    NotificationsModule,
   ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],

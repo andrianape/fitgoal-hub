@@ -15,9 +15,35 @@ export interface ProfessionalsState {
   loaded: boolean;
   error: string | null;
 
-  selectedProfessional: Professional | null;
-  selectedProfessionalLoading: boolean;
-  selectedProfessionalError: string | null;
+  selectedProfessional:
+    Professional | null;
+
+  selectedProfessionalLoading:
+    boolean;
+
+  selectedProfessionalError:
+    string | null;
+
+  ownProfessionalProfile:
+    Professional | null;
+
+  ownProfessionalProfileLoading:
+    boolean;
+
+  ownProfessionalProfileLoaded:
+    boolean;
+
+  ownProfessionalProfileError:
+    string | null;
+
+  professionalProfileSaving:
+    boolean;
+
+  professionalProfileSaveSuccessful:
+    boolean;
+
+  professionalProfileSaveError:
+    string | null;
 }
 
 export const initialProfessionalsState:
@@ -39,4 +65,23 @@ export const initialProfessionalsState:
     selectedProfessional: null,
     selectedProfessionalLoading: false,
     selectedProfessionalError: null,
+
+    ownProfessionalProfile: null,
+    ownProfessionalProfileLoading:
+      false,
+
+    ownProfessionalProfileLoaded:
+      false,
+
+    ownProfessionalProfileError:
+      null,
+
+    professionalProfileSaving:
+      false,
+
+    professionalProfileSaveSuccessful:
+      false,
+
+    professionalProfileSaveError:
+      null,
   };

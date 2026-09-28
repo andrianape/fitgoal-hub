@@ -5,3 +5,8 @@ export interface AvailabilitySlot {
   isBooked: boolean;
   createdAt: string;
 }
+
+export interface CreateAvailabilitySlotRequest {
+  startsAt: string;
+  endsAt: string;
+}

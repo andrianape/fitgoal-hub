@@ -48,28 +48,250 @@
       >
         Profesionalci
       </a>
+
+      <div class="header__mobile-actions">
+        @if (isAuthenticated()) {
+          <a
+            routerLink="/my-profile"
+            routerLinkActive="header__link--active"
+            (click)="closeMenu()"
+          >
+            Moj profil
+          </a>
+
+          <button
+            class="header__mobile-notifications"
+            type="button"
+            (click)="toggleNotifications($event)"
+          >
+            <span>Obaveštenja</span>
+
+            @if (unreadCount() > 0) {
+              <strong>
+                {{
+                  unreadCount() > 99
+                    ? '99+'
+                    : unreadCount()
+                }}
+              </strong>
+            }
+          </button>
+
+          <button
+            class="header__mobile-logout"
+            type="button"
+            (click)="logout()"
+          >
+            Odjavi se
+          </button>
+        } @else {
+          <a
+            routerLink="/login"
+            routerLinkActive="header__link--active"
+            (click)="closeMenu()"
+          >
+            Prijavi se
+          </a>
+
+          <a
+            routerLink="/register"
+            routerLinkActive="header__link--active"
+            (click)="closeMenu()"
+          >
+            Napravi nalog
+          </a>
+        }
+      </div>
     </nav>
 
     <div class="header__actions">
-      @if (
-        isAuthenticated() &&
-        currentUser();
-        as user
-      ) {
-        <div class="header__user">
-          <span class="header__user-avatar">
-            {{ user.firstName.charAt(0) }}
-            {{ user.lastName.charAt(0) }}
-          </span>
+      @if (isAuthenticated()) {
+        <div
+          class="notifications"
+          (click)="$event.stopPropagation()"
+        >
+          <button
+            class="notifications__trigger"
+            type="button"
+            aria-label="Prikaži obaveštenja"
+            [attr.aria-expanded]="
+              isNotificationsOpen()
+            "
+            (click)="toggleNotifications($event)"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"
+              />
+            </svg>
 
-          <div class="header__user-details">
-            <strong>
-              {{ user.firstName }}
-            </strong>
+            @if (unreadCount() > 0) {
+              <span class="notifications__badge">
+                {{
+                  unreadCount() > 99
+                    ? '99+'
+                    : unreadCount()
+                }}
+              </span>
+            }
+          </button>
 
-            <small>{{ user.role }}</small>
-          </div>
+          @if (isNotificationsOpen()) {
+            <section
+              class="notifications__panel"
+              aria-label="Obaveštenja"
+            >
+              <header class="notifications__header">
+                <div>
+                  <span>FitGoal Hub</span>
+                  <h2>Obaveštenja</h2>
+                </div>
+
+                @if (unreadCount() > 0) {
+                  <button
+                    type="button"
+                    (click)="markAllAsRead()"
+                  >
+                    Označi sve kao pročitano
+                  </button>
+                }
+              </header>
+
+              <div class="notifications__content">
+                @if (notificationsLoading()) {
+                  <div class="notifications__status">
+                    <span class="notifications__loader">
+                    </span>
+
+                    <p>Učitavanje obaveštenja...</p>
+                  </div>
+                } @else if (
+                  notifications().length === 0
+                ) {
+                  <div class="notifications__status">
+                    <span
+                      class="notifications__empty-icon"
+                    >
+                      ✓
+                    </span>
+
+                    <h3>Nema novih obaveštenja</h3>
+
+                    <p>
+                      Ovde će se prikazati promene
+                      vezane za termine i planove.
+                    </p>
+                  </div>
+                } @else {
+                  <div class="notifications__list">
+                    @for (
+                      notification of notifications();
+                      track notification.id
+                    ) {
+                      <button
+                        class="notification-item"
+                        [class.notification-item--unread]="
+                          !notification.isRead
+                        "
+                        type="button"
+                        (click)="
+                          markAsRead(notification.id)
+                        "
+                      >
+                        <span
+                          class="notification-item__icon"
+                        >
+                          @switch (notification.type) {
+                            @case (
+                              'appointment_confirmed'
+                            ) {
+                              ✓
+                            }
+
+                            @case (
+                              'appointment_rejected'
+                            ) {
+                              ×
+                            }
+
+                            @case (
+                              'appointment_cancelled'
+                            ) {
+                              ×
+                            }
+
+                            @case (
+                              'appointment_completed'
+                            ) {
+                              ✓
+                            }
+
+                            @case ('plan_created') {
+                              ≡
+                            }
+
+                            @default {
+                              +
+                            }
+                          }
+                        </span>
+
+                        <span
+                          class="notification-item__content"
+                        >
+                          <strong>
+                            {{ notification.title }}
+                          </strong>
+
+                          <span>
+                            {{ notification.message }}
+                          </span>
+
+                          <small>
+                            {{
+                              formatNotificationDate(
+                                notification.createdAt
+                              )
+                            }}
+                          </small>
+                        </span>
+
+                        @if (!notification.isRead) {
+                          <span
+                            class="notification-item__dot"
+                            aria-label="Nepročitano"
+                          >
+                          </span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <footer class="notifications__footer">
+                <a
+                  routerLink="/my-appointments"
+                  (click)="closeNotifications()"
+                >
+                  Pogledaj moje rezervacije
+                </a>
+              </footer>
+            </section>
+          }
         </div>
+
+        <a
+          class="header__profile-link"
+          routerLink="/my-profile"
+          routerLinkActive="header__link--active"
+          (click)="closeMenu()"
+        >
+          Moj profil
+        </a>
 
         <button
           class="header__logout"
@@ -82,6 +304,7 @@
         <a
           class="header__login"
           routerLink="/login"
+          routerLinkActive="header__link--active"
         >
           Prijavi se
         </a>
@@ -94,5 +317,128 @@
         </a>
       }
     </div>
+
+    @if (
+      isAuthenticated() &&
+      isNotificationsOpen()
+    ) {
+      <div
+        class="notifications-mobile-panel"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="notifications__header">
+          <div>
+            <span>FitGoal Hub</span>
+            <h2>Obaveštenja</h2>
+          </div>
+
+          <button
+            class="notifications-mobile-panel__close"
+            type="button"
+            aria-label="Zatvori obaveštenja"
+            (click)="closeNotifications()"
+          >
+            ×
+          </button>
+        </header>
+
+        <div class="notifications__content">
+          @if (notificationsLoading()) {
+            <div class="notifications__status">
+              <span class="notifications__loader">
+              </span>
+
+              <p>Učitavanje obaveštenja...</p>
+            </div>
+          } @else if (
+            notifications().length === 0
+          ) {
+            <div class="notifications__status">
+              <span
+                class="notifications__empty-icon"
+              >
+                ✓
+              </span>
+
+              <h3>Nema novih obaveštenja</h3>
+
+              <p>
+                Ovde će se prikazati promene
+                vezane za termine i planove.
+              </p>
+            </div>
+          } @else {
+            <div class="notifications__list">
+              @for (
+                notification of notifications();
+                track notification.id
+              ) {
+                <button
+                  class="notification-item"
+                  [class.notification-item--unread]="
+                    !notification.isRead
+                  "
+                  type="button"
+                  (click)="
+                    markAsRead(notification.id)
+                  "
+                >
+                  <span
+                    class="notification-item__icon"
+                  >
+                    !
+                  </span>
+
+                  <span
+                    class="notification-item__content"
+                  >
+                    <strong>
+                      {{ notification.title }}
+                    </strong>
+
+                    <span>
+                      {{ notification.message }}
+                    </span>
+
+                    <small>
+                      {{
+                        formatNotificationDate(
+                          notification.createdAt
+                        )
+                      }}
+                    </small>
+                  </span>
+
+                  @if (!notification.isRead) {
+                    <span
+                      class="notification-item__dot"
+                    >
+                    </span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <footer class="notifications__footer">
+          @if (unreadCount() > 0) {
+            <button
+              type="button"
+              (click)="markAllAsRead()"
+            >
+              Označi sve kao pročitano
+            </button>
+          }
+
+          <a
+            routerLink="/my-appointments"
+            (click)="closeNotifications()"
+          >
+            Moje rezervacije
+          </a>
+        </footer>
+      </div>
+    }
   </div>
 </header>

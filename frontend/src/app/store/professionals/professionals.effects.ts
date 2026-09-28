@@ -1,4 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import {
+  HttpErrorResponse,
+} from '@angular/common/http';
+import {
+  inject,
+  Injectable,
+} from '@angular/core';
 import {
   Actions,
   createEffect,
@@ -10,21 +16,27 @@ import {
   of,
   switchMap,
 } from 'rxjs';
-import { ProfessionalsService } from '../../core/services/professionals.service';
-import { ProfessionalsActions } from './professionals.actions';
+import {
+  ProfessionalsService,
+} from '../../core/services/professionals.service';
+import {
+  ProfessionalsActions,
+} from './professionals.actions';
 
 @Injectable()
 export class ProfessionalsEffects {
-  private readonly actions$ = inject(Actions);
+  private readonly actions$ =
+    inject(Actions);
 
   private readonly professionalsService =
     inject(ProfessionalsService);
 
-  readonly loadProfessionals$ = createEffect(
-    () =>
+  readonly loadProfessionals$ =
+    createEffect(() =>
       this.actions$.pipe(
         ofType(
-          ProfessionalsActions.loadProfessionals,
+          ProfessionalsActions
+            .loadProfessionals,
         ),
 
         switchMap(({ filters }) =>
@@ -38,25 +50,30 @@ export class ProfessionalsEffects {
                   }),
               ),
 
-              catchError(() =>
-                of(
-                  ProfessionalsActions
-                    .loadProfessionalsFailure({
-                      error:
-                        'Profesionalci trenutno ne mogu da se učitaju.',
-                    }),
-                ),
+              catchError(
+                (error: unknown) =>
+                  of(
+                    ProfessionalsActions
+                      .loadProfessionalsFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                            'Profesionalci trenutno ne mogu da se učitaju.',
+                          ),
+                      }),
+                  ),
               ),
             ),
         ),
       ),
-  );
+    );
 
-  readonly loadProfessional$ = createEffect(
-    () =>
+  readonly loadProfessional$ =
+    createEffect(() =>
       this.actions$.pipe(
         ofType(
-          ProfessionalsActions.loadProfessional,
+          ProfessionalsActions
+            .loadProfessional,
         ),
 
         switchMap(({ id }) =>
@@ -70,17 +87,171 @@ export class ProfessionalsEffects {
                   }),
               ),
 
-              catchError(() =>
-                of(
-                  ProfessionalsActions
-                    .loadProfessionalFailure({
-                      error:
-                        'Profesionalni profil ne postoji ili trenutno ne može da se učita.',
-                    }),
-                ),
+              catchError(
+                (error: unknown) =>
+                  of(
+                    ProfessionalsActions
+                      .loadProfessionalFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                            'Profesionalni profil ne postoji ili trenutno ne može da se učita.',
+                          ),
+                      }),
+                  ),
               ),
             ),
         ),
       ),
-  );
+    );
+
+  readonly loadOwnProfessionalProfile$ =
+    createEffect(() =>
+      this.actions$.pipe(
+        ofType(
+          ProfessionalsActions
+            .loadOwnProfessionalProfile,
+        ),
+
+        switchMap(() =>
+          this.professionalsService
+            .getOwnProfile()
+            .pipe(
+              map((professional) =>
+                ProfessionalsActions
+                  .loadOwnProfessionalProfileSuccess({
+                    professional,
+                  }),
+              ),
+
+              catchError(
+                (error: unknown) => {
+                  if (
+                    error instanceof
+                      HttpErrorResponse &&
+                    error.status === 404
+                  ) {
+                    return of(
+                      ProfessionalsActions
+                        .loadOwnProfessionalProfileFailure({
+                          error: '',
+                        }),
+                    );
+                  }
+
+                  return of(
+                    ProfessionalsActions
+                      .loadOwnProfessionalProfileFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                            'Profesionalni profil trenutno nije moguće učitati.',
+                          ),
+                      }),
+                  );
+                },
+              ),
+            ),
+        ),
+      ),
+    );
+
+  readonly createProfessionalProfile$ =
+    createEffect(() =>
+      this.actions$.pipe(
+        ofType(
+          ProfessionalsActions
+            .createProfessionalProfile,
+        ),
+
+        switchMap(({ data }) =>
+          this.professionalsService
+            .createProfile(data)
+            .pipe(
+              map((professional) =>
+                ProfessionalsActions
+                  .createProfessionalProfileSuccess({
+                    professional,
+                  }),
+              ),
+
+              catchError(
+                (error: unknown) =>
+                  of(
+                    ProfessionalsActions
+                      .createProfessionalProfileFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                            'Profesionalni profil trenutno nije moguće napraviti.',
+                          ),
+                      }),
+                  ),
+              ),
+            ),
+        ),
+      ),
+    );
+
+  readonly updateProfessionalProfile$ =
+    createEffect(() =>
+      this.actions$.pipe(
+        ofType(
+          ProfessionalsActions
+            .updateProfessionalProfile,
+        ),
+
+        switchMap(({ data }) =>
+          this.professionalsService
+            .updateProfile(data)
+            .pipe(
+              map((professional) =>
+                ProfessionalsActions
+                  .updateProfessionalProfileSuccess({
+                    professional,
+                  }),
+              ),
+
+              catchError(
+                (error: unknown) =>
+                  of(
+                    ProfessionalsActions
+                      .updateProfessionalProfileFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                            'Profesionalni profil trenutno nije moguće izmeniti.',
+                          ),
+                      }),
+                  ),
+              ),
+            ),
+        ),
+      ),
+    );
+
+  private getErrorMessage(
+    error: unknown,
+    fallbackMessage: string,
+  ): string {
+    if (
+      error instanceof
+      HttpErrorResponse
+    ) {
+      const message: unknown =
+        error.error?.message;
+
+      if (
+        typeof message === 'string'
+      ) {
+        return message;
+      }
+
+      if (Array.isArray(message)) {
+        return message.join(' ');
+      }
+    }
+
+    return fallbackMessage;
+  }
 }
