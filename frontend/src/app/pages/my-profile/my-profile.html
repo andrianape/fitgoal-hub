@@ -89,6 +89,14 @@
           </button>
 
           <button
+            class="secondary-button"
+            type="button"
+            (click)="openPasswordModal()"
+          >
+            Promeni lozinku
+          </button>
+
+          <button
             class="dashboard-header__logout"
             type="button"
             (click)="logout()"
@@ -104,6 +112,7 @@
             <section class="dashboard-section">
               <div class="dashboard-section__heading">
                 <span>Aktivnosti</span>
+                <h2>Tvoj nalog</h2>
               </div>
 
               <div class="dashboard-cards">
@@ -513,6 +522,14 @@
               <dd>{{ getRoleLabel(user.role) }}</dd>
             </div>
           </dl>
+
+          <button
+            class="secondary-button account-card__password-button"
+            type="button"
+            (click)="openPasswordModal()"
+          >
+            Promeni lozinku
+          </button>
         </aside>
       </div>
 
@@ -1052,6 +1069,238 @@
                     Čuvanje...
                   } @else {
                     Sačuvaj izmene
+                  }
+                </button>
+              </footer>
+            </form>
+          </section>
+        </div>
+      }
+
+      @if (passwordModalOpen()) {
+        <div
+          class="edit-modal-backdrop"
+          role="presentation"
+          (click)="closePasswordModal()"
+        >
+          <section
+            class="edit-modal password-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="password-modal-title"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="edit-modal__header">
+              <div>
+                <span>Bezbednost naloga</span>
+
+                <h2 id="password-modal-title">
+                  Promeni lozinku
+                </h2>
+
+                <p>
+                  Unesi trenutnu lozinku, a zatim
+                  izaberi novu sigurnu lozinku.
+                </p>
+              </div>
+
+              <button
+                class="edit-modal__close"
+                type="button"
+                aria-label="Zatvori prozor"
+                [disabled]="passwordChanging()"
+                (click)="closePasswordModal()"
+              >
+                ×
+              </button>
+            </header>
+
+            <form
+              class="
+                edit-profile-form
+                password-form
+              "
+              [formGroup]="passwordForm"
+              (ngSubmit)="submitPasswordChange()"
+            >
+              <label class="edit-profile-form__field">
+                <span>Trenutna lozinka</span>
+
+                <input
+                  type="password"
+                  formControlName="currentPassword"
+                  autocomplete="current-password"
+                  placeholder="Unesi trenutnu lozinku"
+                />
+
+                @if (
+                  hasPasswordError(
+                    'currentPassword',
+                    'required'
+                  )
+                ) {
+                  <small>
+                    Trenutna lozinka je obavezna.
+                  </small>
+                } @else if (
+                  hasPasswordError(
+                    'currentPassword',
+                    'minlength'
+                  )
+                ) {
+                  <small>
+                    Lozinka mora imati najmanje
+                    8 karaktera.
+                  </small>
+                }
+              </label>
+
+              <label class="edit-profile-form__field">
+                <span>Nova lozinka</span>
+
+                <input
+                  type="password"
+                  formControlName="newPassword"
+                  autocomplete="new-password"
+                  placeholder="Unesi novu lozinku"
+                />
+
+                @if (
+                  hasPasswordError(
+                    'newPassword',
+                    'required'
+                  )
+                ) {
+                  <small>
+                    Nova lozinka je obavezna.
+                  </small>
+                } @else if (
+                  hasPasswordError(
+                    'newPassword',
+                    'minlength'
+                  )
+                ) {
+                  <small>
+                    Nova lozinka mora imati najmanje
+                    8 karaktera.
+                  </small>
+                } @else if (
+                  hasPasswordError(
+                    'newPassword',
+                    'maxlength'
+                  )
+                ) {
+                  <small>
+                    Nova lozinka može imati najviše
+                    72 karaktera.
+                  </small>
+                } @else if (
+                  hasPasswordError(
+                    'newPassword',
+                    'pattern'
+                  )
+                ) {
+                  <small>
+                    Lozinka mora sadržati malo slovo,
+                    veliko slovo i cifru.
+                  </small>
+                }
+              </label>
+
+              <label class="edit-profile-form__field">
+                <span>Potvrdi novu lozinku</span>
+
+                <input
+                  type="password"
+                  formControlName="confirmPassword"
+                  autocomplete="new-password"
+                  placeholder="Ponovi novu lozinku"
+                />
+
+                @if (
+                  hasPasswordError(
+                    'confirmPassword',
+                    'required'
+                  )
+                ) {
+                  <small>
+                    Potvrda nove lozinke je obavezna.
+                  </small>
+                } @else if (
+                  passwordsDoNotMatch()
+                ) {
+                  <small>
+                    Nova lozinka i potvrda se ne
+                    podudaraju.
+                  </small>
+                }
+              </label>
+
+              <div class="password-form__requirements">
+                <strong>Nova lozinka mora sadržati:</strong>
+
+                <ul>
+                  <li>najmanje 8 karaktera;</li>
+                  <li>najmanje jedno malo slovo;</li>
+                  <li>najmanje jedno veliko slovo;</li>
+                  <li>najmanje jednu cifru.</li>
+                </ul>
+              </div>
+
+              @if (passwordValidationError()) {
+                <div
+                  class="edit-profile-form__error"
+                  role="alert"
+                >
+                  {{ passwordValidationError() }}
+                </div>
+              }
+
+              @if (passwordChangeError()) {
+                <div
+                  class="edit-profile-form__error"
+                  role="alert"
+                >
+                  {{ passwordChangeError() }}
+                </div>
+              }
+
+              @if (passwordChangeSuccessful()) {
+                <div
+                  class="password-form__success"
+                  role="status"
+                >
+                  Lozinka je uspešno promenjena.
+                  Sledeći put se prijavi novom lozinkom.
+                </div>
+              }
+
+              <footer class="edit-profile-form__actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  [disabled]="passwordChanging()"
+                  (click)="closePasswordModal()"
+                >
+                  Zatvori
+                </button>
+
+                <button
+                  class="primary-button"
+                  type="submit"
+                  [disabled]="
+                    passwordChanging() ||
+                    passwordChangeSuccessful()
+                  "
+                >
+                  @if (passwordChanging()) {
+                    Menjanje lozinke...
+                  } @else if (
+                    passwordChangeSuccessful()
+                  ) {
+                    Lozinka je promenjena
+                  } @else {
+                    Promeni lozinku
                   }
                 </button>
               </footer>

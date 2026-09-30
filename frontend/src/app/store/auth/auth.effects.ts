@@ -363,6 +363,40 @@ export class AuthEffects {
       );
     });
 
+  readonly changePassword$ =
+    createEffect(() => {
+      return this.actions$.pipe(
+        ofType(
+          AuthActions.changePassword,
+        ),
+
+        switchMap(({ data }) => {
+          return this.usersService
+            .changePassword(data)
+            .pipe(
+              map(() => {
+                return AuthActions
+                  .changePasswordSuccess();
+              }),
+
+              catchError(
+                (error: unknown) => {
+                  return of(
+                    AuthActions
+                      .changePasswordFailure({
+                        error:
+                          this.getErrorMessage(
+                            error,
+                          ),
+                      }),
+                  );
+                },
+              ),
+            );
+        }),
+      );
+    });
+
   readonly logout$ = createEffect(
     () => {
       return this.actions$.pipe(

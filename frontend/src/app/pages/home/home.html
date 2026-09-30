@@ -7,14 +7,14 @@
       </span>
 
       <h1>
-        Ne moraš sama do
-        <span>najbolje verzije sebe.</span>
+        Do najbolje verzije sebe uz
+        <span>pravu podršku.</span>
       </h1>
 
       <p class="hero__description">
-        Poveži se sa verifikovanim trenerima i nutricionistima,
-        rezerviši termin za nekoliko minuta i prati plan napravljen
-        baš za tebe.
+        Poveži se sa verifikovanim trenerima i
+        nutricionistima, rezerviši termin za nekoliko
+        minuta i prati plan napravljen baš za tebe.
       </p>
 
       <form class="search">
@@ -32,13 +32,18 @@
           <span aria-hidden="true">⌖</span>
 
           <select aria-label="Izaberite grad">
-            <option value="">Svi gradovi</option>
+            <option value="">
+              Svi gradovi
+            </option>
 
-            @for (city of cities(); track city.id) {
+            @for (
+              city of cities();
+              track city.id
+            ) {
               <option [value]="city.id">
                 {{ city.name }}
               </option>
-            } 
+            }
           </select>
         </label>
 
@@ -71,10 +76,13 @@
 
     <div
       class="hero__visual"
-      aria-label="Primer rezervacije termina"
+      aria-label="Pretraga slobodnih termina"
     >
       <div class="hero__shape">
-        <div class="hero__main-icon" aria-hidden="true">
+        <div
+          class="hero__main-icon"
+          aria-hidden="true"
+        >
           ✦
         </div>
       </div>
@@ -82,43 +90,311 @@
       <article class="availability-preview">
         <div class="availability-preview__header">
           <strong>Slobodni termini</strong>
-          <small>Septembar</small>
+
+          <small>
+            {{ selectedMonth() }}
+          </small>
         </div>
 
         <div class="availability-preview__days">
-          <button type="button">
-            <small>UTO</small>
-            <strong>16</strong>
-          </button>
-
-          <button
-            class="availability-preview__day--selected"
-            type="button"
-          >
-            <small>ČET</small>
-            <strong>18</strong>
-          </button>
-
-          <button type="button">
-            <small>PET</small>
-            <strong>19</strong>
-          </button>
-
-          <button type="button">
-            <small>PON</small>
-            <strong>22</strong>
-          </button>
+          @for (
+            day of calendarDays();
+            track day.date
+          ) {
+            <button
+              type="button"
+              [class.availability-preview__day--selected]="
+                selectedDate() === day.date
+              "
+              [attr.aria-pressed]="
+                selectedDate() === day.date
+              "
+              [attr.aria-label]="
+                'Prikaži termine za ' +
+                day.fullLabel
+              "
+              (click)="selectDate(day.date)"
+            >
+              <small>{{ day.weekday }}</small>
+              <strong>{{ day.dayNumber }}</strong>
+            </button>
+          }
         </div>
+
+        <button
+          class="availability-preview__show"
+          type="button"
+          (click)="showSelectedDateSlots()"
+        >
+          Pogledaj termine
+        </button>
       </article>
     </div>
   </div>
 </section>
+
+@if (resultsVisible()) {
+  <section
+    class="home-availability"
+    id="slobodni-termini"
+  >
+    <div class="container">
+      <header class="home-availability__heading">
+        <div>
+          <span>Slobodni termini</span>
+
+          <h2>
+            Termini za
+            {{ selectedDateLabel() }}
+          </h2>
+
+          <p>
+            Izaberi vrstu stručnjaka i pronađi
+            vreme koje ti odgovara.
+          </p>
+        </div>
+
+        <button
+          class="home-availability__close"
+          type="button"
+          aria-label="Sakrij rezultate"
+          (click)="closeResults()"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="home-availability__filters">
+        <button
+          type="button"
+          [class.home-availability__filter--active]="
+            selectedRole() === 'all'
+          "
+          (click)="selectRole('all')"
+        >
+          Svi stručnjaci
+        </button>
+
+        <button
+          type="button"
+          [class.home-availability__filter--active]="
+            selectedRole() === 'trainer'
+          "
+          (click)="selectRole('trainer')"
+        >
+          Lični treneri
+        </button>
+
+        <button
+          type="button"
+          [class.home-availability__filter--active]="
+            selectedRole() === 'nutritionist'
+          "
+          (click)="selectRole('nutritionist')"
+        >
+          Nutricionisti
+        </button>
+      </div>
+
+      @if (slotsLoading()) {
+        <div class="home-availability__status">
+          <span class="home-availability__loader">
+          </span>
+
+          <h3>Tražimo slobodne termine</h3>
+
+          <p>
+            Sačekaj trenutak dok proverimo raspoložive
+            trenere i nutricioniste.
+          </p>
+        </div>
+      } @else if (slotsError()) {
+        <div
+          class="
+            home-availability__status
+            home-availability__status--error
+          "
+        >
+          <span class="home-availability__status-icon">
+            !
+          </span>
+
+          <h3>Termine nije moguće učitati</h3>
+
+          <p>{{ slotsError() }}</p>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="retrySlots()"
+          >
+            Pokušaj ponovo
+          </button>
+        </div>
+      } @else if (
+        availableSlots().length === 0
+      ) {
+        <div class="home-availability__status">
+          <span class="home-availability__status-icon">
+            ◷
+          </span>
+
+          <h3>
+            Nema slobodnih termina
+          </h3>
+
+          <p>
+            Za izabrani datum i vrstu stručnjaka
+            trenutno nema slobodnih termina. Izaberi
+            drugi datum ili drugi filter.
+          </p>
+
+          <a
+            class="secondary-button"
+            routerLink="/professionals"
+          >
+            Pregledaj sve profesionalce
+          </a>
+        </div>
+      } @else {
+        <div class="home-availability__summary">
+          Pronađeno termina:
+          <strong>
+            {{ availableSlots().length }}
+          </strong>
+        </div>
+
+        <div class="home-availability__grid">
+          @for (
+            slot of availableSlots();
+            track slot.id
+          ) {
+            <article class="home-slot-card">
+              <header class="home-slot-card__header">
+                <div class="home-slot-card__avatar">
+                  <span>
+                    {{
+                      getInitials(
+                        slot.professional.user.firstName,
+                        slot.professional.user.lastName
+                      )
+                    }}
+                  </span>
+                </div>
+
+                <div class="home-slot-card__person">
+                  <span>
+                    {{
+                      getRoleLabel(
+                        slot.professional.user.role
+                      )
+                    }}
+                  </span>
+
+                  <h3>
+                    {{
+                      slot.professional.user.firstName
+                    }}
+                    {{
+                      slot.professional.user.lastName
+                    }}
+                  </h3>
+
+                  <p>
+                    {{
+                      slot.professional.user.city?.name ??
+                        'Grad nije naveden'
+                    }}
+                  </p>
+                </div>
+              </header>
+
+              <div class="home-slot-card__time">
+                <span>Vreme termina</span>
+
+                <strong>
+                  {{ formatTime(slot.startsAt) }}
+                  –
+                  {{ formatTime(slot.endsAt) }}
+                </strong>
+              </div>
+
+              @if (
+                slot.professional.workplaceName ||
+                slot.professional.address
+              ) {
+                <div class="home-slot-card__location">
+                  <span>Lokacija</span>
+
+                  <p>
+                    @if (
+                      slot.professional.workplaceName
+                    ) {
+                      <strong>
+                        {{
+                          slot.professional.workplaceName
+                        }}
+                      </strong>
+                    }
+
+                    @if (slot.professional.address) {
+                      <small>
+                        {{ slot.professional.address }}
+                      </small>
+                    }
+                  </p>
+                </div>
+              }
+
+              <div class="home-slot-card__specialties">
+                @for (
+                  specialty of
+                    slot.professional.specialties.slice(
+                      0,
+                      3
+                    );
+                  track specialty
+                ) {
+                  <span>{{ specialty }}</span>
+                }
+              </div>
+
+              <footer class="home-slot-card__footer">
+                <div>
+                  <span>Cena termina</span>
+
+                  <strong>
+                    {{
+                      slot.professional.pricePerSession
+                    }}
+                    RSD
+                  </strong>
+                </div>
+
+                <a
+                  class="primary-button"
+                  [routerLink]="[
+                    '/professionals',
+                    slot.professional.id
+                  ]"
+                >
+                  Pogledaj i rezerviši
+                </a>
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </section>
+}
 
 <section class="goals">
   <div class="container">
     <div class="section-heading">
       <div>
         <span>Pronađi pravu podršku</span>
+
         <h2>Šta želiš da postigneš?</h2>
 
         <p>
@@ -188,12 +464,16 @@
   <div class="container">
     <div class="how-it-works__heading">
       <span>Jednostavan proces</span>
-      <h2>Do stručne podrške u tri koraka</h2>
+
+      <h2>
+        Do stručne podrške u tri koraka
+      </h2>
     </div>
 
     <div class="how-it-works__grid">
       <article class="step-card">
         <span class="step-card__number">01</span>
+
         <h3>Pronađi profesionalca</h3>
 
         <p>
@@ -204,6 +484,7 @@
 
       <article class="step-card">
         <span class="step-card__number">02</span>
+
         <h3>Rezerviši termin</h3>
 
         <p>
@@ -214,6 +495,7 @@
 
       <article class="step-card">
         <span class="step-card__number">03</span>
+
         <h3>Prati svoj plan</h3>
 
         <p>

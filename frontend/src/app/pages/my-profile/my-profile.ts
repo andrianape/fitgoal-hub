@@ -22,6 +22,7 @@ import {
   CreateAvailabilitySlotRequest,
 } from '../../core/models/availability-slot.model';
 import {
+  ChangePasswordRequest,
   UpdateUserRequest,
   UserRole,
 } from '../../core/models/user.model';
@@ -31,10 +32,13 @@ import {
 import {
   selectAuthInitialized,
   selectCurrentUser,
+  selectIsPasswordChanging,
   selectIsProfileImageUpdating,
   selectIsProfileUpdating,
+  selectPasswordChangeErrorMessage,
   selectProfileImageErrorMessage,
   selectProfileUpdateErrorMessage,
+  selectWasPasswordChangeSuccessful,
   selectWasProfileImageUpdateSuccessful,
   selectWasProfileUpdateSuccessful,
 } from '../../store/auth/auth.selectors';
@@ -139,6 +143,21 @@ export class MyProfile
       selectProfileImageErrorMessage,
     );
 
+  protected readonly passwordChanging =
+    this.store.selectSignal(
+      selectIsPasswordChanging,
+    );
+
+  protected readonly passwordChangeSuccessful =
+    this.store.selectSignal(
+      selectWasPasswordChangeSuccessful,
+    );
+
+  protected readonly passwordChangeError =
+    this.store.selectSignal(
+      selectPasswordChangeErrorMessage,
+    );
+
   protected readonly mySlots =
     this.store.selectSignal(
       selectProfessionalOwnSlots,
@@ -193,6 +212,12 @@ export class MyProfile
 
   protected readonly editModalOpen =
     signal(false);
+
+  protected readonly passwordModalOpen =
+    signal(false);
+
+  protected readonly passwordValidationError =
+    signal<string | null>(null);
 
   protected readonly slotModalOpen =
     signal(false);
@@ -255,6 +280,47 @@ export class MyProfile
           number | null
         >(null),
     });
+
+  protected readonly passwordForm =
+    this.formBuilder
+      .nonNullable.group({
+        currentPassword: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(8),
+            Validators.maxLength(72),
+          ],
+        ],
+
+        newPassword: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(8),
+            Validators.maxLength(72),
+
+            Validators.pattern(
+              /[a-z]/,
+            ),
+
+            Validators.pattern(
+              /[A-Z]/,
+            ),
+
+            Validators.pattern(
+              /[0-9]/,
+            ),
+          ],
+        ],
+
+        confirmPassword: [
+          '',
+          [
+            Validators.required,
+          ],
+        ],
+      });
 
   protected readonly slotForm =
     this.formBuilder.group({
@@ -325,6 +391,24 @@ export class MyProfile
       }
     });
 
+  private readonly resetPasswordFormOnSuccess =
+    effect(() => {
+      if (
+        this.passwordChangeSuccessful() &&
+        this.passwordModalOpen()
+      ) {
+        this.passwordForm.reset({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+
+        this.passwordValidationError.set(
+          null,
+        );
+      }
+    });
+
   private readonly closeSlotModalOnSuccess =
     effect(() => {
       if (
@@ -355,6 +439,15 @@ export class MyProfile
     'document:keydown.escape',
   )
   protected handleEscapeKey(): void {
+    if (
+      this.passwordModalOpen() &&
+      !this.passwordChanging()
+    ) {
+      this.closePasswordModal();
+
+      return;
+    }
+
     if (
       this.slotModalOpen() &&
       !this.creatingSlot()
@@ -719,6 +812,7 @@ export class MyProfile
       | 'lastName'
       | 'email'
       | 'phoneNumber',
+
     errorName: string,
   ): boolean {
     const control =
@@ -729,6 +823,150 @@ export class MyProfile
     return (
       control.touched &&
       control.hasError(errorName)
+    );
+  }
+
+  protected openPasswordModal():
+    void {
+    this.store.dispatch(
+      AuthActions
+        .clearPasswordChangeState(),
+    );
+
+    this.passwordValidationError.set(
+      null,
+    );
+
+    this.passwordForm.reset({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+
+    this.passwordModalOpen.set(
+      true,
+    );
+  }
+
+  protected closePasswordModal():
+    void {
+    if (this.passwordChanging()) {
+      return;
+    }
+
+    this.passwordModalOpen.set(
+      false,
+    );
+
+    this.passwordValidationError.set(
+      null,
+    );
+
+    this.passwordForm.reset({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+
+    this.store.dispatch(
+      AuthActions
+        .clearPasswordChangeState(),
+    );
+  }
+
+  protected submitPasswordChange():
+    void {
+    this.passwordValidationError.set(
+      null,
+    );
+
+    this.store.dispatch(
+      AuthActions
+        .clearPasswordChangeState(),
+    );
+
+    if (this.passwordForm.invalid) {
+      this.passwordForm
+        .markAllAsTouched();
+
+      return;
+    }
+
+    const formValue =
+      this.passwordForm
+        .getRawValue();
+
+    if (
+      formValue.newPassword !==
+      formValue.confirmPassword
+    ) {
+      this.passwordValidationError.set(
+        'Nova lozinka i potvrda lozinke se ne podudaraju.',
+      );
+
+      return;
+    }
+
+    if (
+      formValue.currentPassword ===
+      formValue.newPassword
+    ) {
+      this.passwordValidationError.set(
+        'Nova lozinka mora biti drugačija od trenutne lozinke.',
+      );
+
+      return;
+    }
+
+    const data:
+      ChangePasswordRequest = {
+        currentPassword:
+          formValue.currentPassword,
+
+        newPassword:
+          formValue.newPassword,
+      };
+
+    this.store.dispatch(
+      AuthActions.changePassword({
+        data,
+      }),
+    );
+  }
+
+  protected hasPasswordError(
+    controlName:
+      | 'currentPassword'
+      | 'newPassword'
+      | 'confirmPassword',
+
+    errorName: string,
+  ): boolean {
+    const control =
+      this.passwordForm.controls[
+        controlName
+      ];
+
+    return (
+      control.touched &&
+      control.hasError(errorName)
+    );
+  }
+
+  protected passwordsDoNotMatch():
+    boolean {
+    const {
+      newPassword,
+      confirmPassword,
+    } =
+      this.passwordForm
+        .getRawValue();
+
+    return (
+      this.passwordForm.controls
+        .confirmPassword.touched &&
+      confirmPassword.length > 0 &&
+      newPassword !== confirmPassword
     );
   }
 

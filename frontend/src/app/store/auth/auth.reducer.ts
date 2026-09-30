@@ -24,6 +24,10 @@ export interface AuthState {
   profileImageUpdating: boolean;
   profileImageUpdateSuccessful: boolean;
   profileImageError: string | null;
+
+  passwordChanging: boolean;
+  passwordChangeSuccessful: boolean;
+  passwordChangeError: string | null;
 }
 
 const initialState: AuthState = {
@@ -40,6 +44,10 @@ const initialState: AuthState = {
   profileImageUpdating: false,
   profileImageUpdateSuccessful: false,
   profileImageError: null,
+
+  passwordChanging: false,
+  passwordChangeSuccessful: false,
+  passwordChangeError: null,
 };
 
 export const authFeature =
@@ -253,6 +261,46 @@ export const authFeature =
       ),
 
       on(
+        AuthActions.changePassword,
+        (state) => ({
+          ...state,
+          passwordChanging: true,
+          passwordChangeSuccessful: false,
+          passwordChangeError: null,
+        }),
+      ),
+
+      on(
+        AuthActions.changePasswordSuccess,
+        (state) => ({
+          ...state,
+          passwordChanging: false,
+          passwordChangeSuccessful: true,
+          passwordChangeError: null,
+        }),
+      ),
+
+      on(
+        AuthActions.changePasswordFailure,
+        (state, { error }) => ({
+          ...state,
+          passwordChanging: false,
+          passwordChangeSuccessful: false,
+          passwordChangeError: error,
+        }),
+      ),
+
+      on(
+        AuthActions.clearPasswordChangeState,
+        (state) => ({
+          ...state,
+          passwordChanging: false,
+          passwordChangeSuccessful: false,
+          passwordChangeError: null,
+        }),
+      ),
+
+      on(
         AuthActions.logout,
         () => ({
           ...initialState,
@@ -287,4 +335,8 @@ export const {
   selectProfileImageUpdating,
   selectProfileImageUpdateSuccessful,
   selectProfileImageError,
+
+  selectPasswordChanging,
+  selectPasswordChangeSuccessful,
+  selectPasswordChangeError,
 } = authFeature;

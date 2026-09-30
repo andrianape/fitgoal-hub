@@ -8,6 +8,7 @@ import {
   RegisterData,
 } from '../../core/models/auth.model';
 import {
+  ChangePasswordRequest,
   UpdateUserRequest,
   User,
 } from '../../core/models/user.model';
@@ -95,6 +96,21 @@ export const AuthActions =
         }>(),
 
       'Clear Profile Image State':
+        emptyProps(),
+
+      'Change Password': props<{
+        data: ChangePasswordRequest;
+      }>(),
+
+      'Change Password Success':
+        emptyProps(),
+
+      'Change Password Failure':
+        props<{
+          error: string;
+        }>(),
+
+      'Clear Password Change State':
         emptyProps(),
 
       Logout: emptyProps(),

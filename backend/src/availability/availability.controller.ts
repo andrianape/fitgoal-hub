@@ -8,54 +8,133 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
-import { UserRole } from '../users/enums/user-role.enum';
-import { CreateAvailabilitySlotDto } from './dto/create-availability-slot.dto';
-import { AvailabilityService } from './availability.service';
+import {
+  CurrentUser,
+} from '../auth/decorators/current-user.decorator';
+import {
+  Roles,
+} from '../auth/decorators/roles.decorator';
+import {
+  JwtAuthGuard,
+} from '../auth/guards/jwt-auth.guard';
+import {
+  RolesGuard,
+} from '../auth/guards/roles.guard';
+import type {
+  AuthenticatedUser,
+} from '../auth/interfaces/authenticated-user.interface';
+import {
+  UserRole,
+} from '../users/enums/user-role.enum';
+import {
+  AvailabilityService,
+} from './availability.service';
+import {
+  CreateAvailabilitySlotDto,
+} from './dto/create-availability-slot.dto';
+import {
+  FindAvailableSlotsByDateDto,
+} from './dto/find-available-slots-by-date.dto';
 
 @Controller('availability')
 export class AvailabilityController {
-  constructor(private readonly availabilityService: AvailabilityService) {}
+  constructor(
+    private readonly availabilityService:
+      AvailabilityService,
+  ) {}
+
+  @Get('date')
+  findAvailableByDate(
+    @Query()
+    dto: FindAvailableSlotsByDateDto,
+  ) {
+    return this.availabilityService
+      .findAvailableByDate(dto);
+  }
 
   @Get('professional/:professionalId')
   findAvailableByProfessional(
-    @Param('professionalId', ParseIntPipe)
+    @Param(
+      'professionalId',
+      ParseIntPipe,
+    )
     professionalId: number,
   ) {
-    return this.availabilityService.findAvailableByProfessional(professionalId);
+    return this.availabilityService
+      .findAvailableByProfessional(
+        professionalId,
+      );
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
-  findOwn(@CurrentUser() currentUser: AuthenticatedUser) {
-    return this.availabilityService.findOwn(currentUser.id);
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles(
+    UserRole.TRAINER,
+    UserRole.NUTRITIONIST,
+  )
+  findOwn(
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+  ) {
+    return this.availabilityService
+      .findOwn(currentUser.id);
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles(
+    UserRole.TRAINER,
+    UserRole.NUTRITIONIST,
+  )
   create(
-    @CurrentUser() currentUser: AuthenticatedUser,
-    @Body() dto: CreateAvailabilitySlotDto,
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Body()
+    dto: CreateAvailabilitySlotDto,
   ) {
-    return this.availabilityService.create(currentUser.id, dto);
+    return this.availabilityService
+      .create(
+        currentUser.id,
+        dto,
+      );
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TRAINER, UserRole.NUTRITIONIST)
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles(
+    UserRole.TRAINER,
+    UserRole.NUTRITIONIST,
+  )
+  @HttpCode(
+    HttpStatus.NO_CONTENT,
+  )
   remove(
-    @CurrentUser() currentUser: AuthenticatedUser,
-    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser()
+    currentUser: AuthenticatedUser,
+
+    @Param(
+      'id',
+      ParseIntPipe,
+    )
+    id: number,
   ) {
-    return this.availabilityService.remove(currentUser.id, id);
+    return this.availabilityService
+      .remove(
+        currentUser.id,
+        id,
+      );
   }
 }

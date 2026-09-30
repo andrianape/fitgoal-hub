@@ -1,4 +1,6 @@
-import { City } from './city.model';
+import {
+  City,
+} from './city.model';
 
 export type UserRole =
   | 'client'
@@ -26,6 +28,11 @@ export interface UpdateUserRequest {
   email?: string;
   phoneNumber?: string;
   cityId?: number | null;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface UpdateUserRoleRequest {

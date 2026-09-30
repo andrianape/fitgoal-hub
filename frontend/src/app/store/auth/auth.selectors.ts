@@ -6,6 +6,9 @@ import {
   selectError,
   selectInitialized,
   selectLoading,
+  selectPasswordChangeError,
+  selectPasswordChangeSuccessful,
+  selectPasswordChanging,
   selectProfileImageError,
   selectProfileImageUpdateSuccessful,
   selectProfileImageUpdating,
@@ -65,3 +68,12 @@ export const selectWasProfileImageUpdateSuccessful =
 
 export const selectProfileImageErrorMessage =
   selectProfileImageError;
+
+export const selectIsPasswordChanging =
+  selectPasswordChanging;
+
+export const selectWasPasswordChangeSuccessful =
+  selectPasswordChangeSuccessful;
+
+export const selectPasswordChangeErrorMessage =
+  selectPasswordChangeError;

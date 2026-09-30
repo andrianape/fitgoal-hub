@@ -9,6 +9,7 @@ import {
   Observable,
 } from 'rxjs';
 import {
+  ChangePasswordRequest,
   UpdateUserRequest,
   UpdateUserRoleRequest,
   UpdateUserStatusRequest,
@@ -37,6 +38,15 @@ export class UsersService {
   ): Observable<User> {
     return this.http.patch<User>(
       `${this.apiUrl}/${userId}`,
+      data,
+    );
+  }
+
+  changePassword(
+    data: ChangePasswordRequest,
+  ): Observable<void> {
+    return this.http.patch<void>(
+      `${this.apiUrl}/me/password`,
       data,
     );
   }
