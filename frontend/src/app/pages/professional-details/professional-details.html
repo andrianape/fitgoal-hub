@@ -1,24 +1,17 @@
 <section class="profile-page">
   <div class="container">
-    <a
-      class="back-link"
-      routerLink="/professionals"
-    >
+    <a class="back-link" routerLink="/professionals">
       ← Nazad na profesionalce
     </a>
 
     @if (loading()) {
       <div class="profile-status">
         <span class="loader"></span>
-
-        <p>
-          Učitavanje profesionalnog profila...
-        </p>
+        <p>Učitavanje profesionalnog profila...</p>
       </div>
     } @else if (error()) {
       <div class="profile-status">
         <h1>Profil nije dostupan</h1>
-
         <p>{{ error() }}</p>
 
         <div class="profile-status__actions">
@@ -42,20 +35,13 @@
       <header class="profile-header">
         <div class="profile-header__avatar">
           @if (
-            getProfileImageUrl(
-              profile.user.profileImageUrl
-            );
+            getProfileImageUrl(profile.user.profileImageUrl);
             as profileImageUrl
           ) {
             @if (!imageLoadFailed()) {
               <img
                 [src]="profileImageUrl"
-                [alt]="
-                  'Profilna fotografija korisnika ' +
-                  profile.user.firstName +
-                  ' ' +
-                  profile.user.lastName
-                "
+                [alt]="'Profilna fotografija korisnika ' + profile.user.firstName + ' ' + profile.user.lastName"
                 (error)="handleImageError()"
               />
             } @else {
@@ -82,11 +68,7 @@
 
         <div class="profile-header__content">
           <span class="profile-header__role">
-            {{
-              getRoleLabel(
-                profile.user.role
-              )
-            }}
+            {{ getRoleLabel(profile.user.role) }}
           </span>
 
           <h1>
@@ -95,10 +77,7 @@
           </h1>
 
           <p>
-            {{
-              profile.user.city?.name ??
-                'Grad nije naveden'
-            }}
+            {{ profile.user.city?.name ?? 'Grad nije naveden' }}
           </p>
 
           <div class="profile-header__badges">
@@ -108,6 +87,23 @@
               {{ profile.yearsOfExperience }}
               godina iskustva
             </span>
+
+            @if (
+              !reviewsLoading() &&
+              !reviewsError() &&
+              reviewsTotal() > 0
+            ) {
+              <a
+                class="profile-header__rating"
+                href="#recenzije"
+              >
+                <strong>
+                  ★ {{ averageRating().toFixed(1) }}
+                </strong>
+              </a>
+            } @else if (!reviewsLoading() && !reviewsError()) {
+              <span>Još nema ocena</span>
+            }
           </div>
         </div>
 
@@ -115,8 +111,7 @@
           <small>Cena jednog termina</small>
 
           <strong>
-            {{ profile.pricePerSession }}
-            RSD
+            {{ profile.pricePerSession }} RSD
           </strong>
 
           <button
@@ -151,13 +146,72 @@
             <h2>Specijalnosti</h2>
 
             <div class="specialties">
-              @for (
-                specialty of profile.specialties;
-                track specialty
-              ) {
+              @for (specialty of profile.specialties; track specialty) {
                 <span>{{ specialty }}</span>
               }
             </div>
+          </article>
+
+          <article
+            class="profile-section reviews-section"
+            id="recenzije"
+          >
+            <span class="profile-section__label">
+              Ocene klijenata
+            </span>
+
+            <h2>Prosečna ocena</h2>
+
+            @if (reviewsLoading()) {
+              <div class="reviews-status">
+                <span class="loader"></span>
+                <p>Učitavanje ocene...</p>
+              </div>
+            } @else if (reviewsError()) {
+              <div class="reviews-status reviews-status--error">
+                <p>{{ reviewsError() }}</p>
+
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="reloadReviews()"
+                >
+                  Pokušaj ponovo
+                </button>
+              </div>
+            } @else if (reviewsTotal() === 0) {
+              <div class="reviews-status">
+                <span class="reviews-status__icon">☆</span>
+                <p>Još nema ocena.</p>
+              </div>
+            } @else {
+              <div
+                class="reviews-summary"
+                [attr.aria-label]="'Prosečna ocena ' + averageRating() + ' od 5'"
+              >
+                <div
+                  class="review-card__rating"
+                  aria-hidden="true"
+                >
+                  @for (star of ratingValues; track star) {
+                    <span
+                      class="review-card__star"
+                      style="position: relative; display: inline-block"
+                    >
+                      ★
+                      <span
+                        style="position: absolute; left: 0; top: 0; overflow: hidden; color: #f2ad2e"
+                        [style.width.%]="averageRating() >= star ? 100 : averageRating() > star - 1 ? (averageRating() - star + 1) * 100 : 0"
+                      >★</span>
+                    </span>
+                  }
+                </div>
+
+                <strong>
+                  {{ averageRating().toFixed(1) }} / 5
+                </strong>
+              </div>
+            }
           </article>
         </main>
 
@@ -168,42 +222,43 @@
             <dl>
               <div>
                 <dt>Uloga</dt>
-
-                <dd>
-                  {{
-                    getRoleLabel(
-                      profile.user.role
-                    )
-                  }}
-                </dd>
+                <dd>{{ getRoleLabel(profile.user.role) }}</dd>
               </div>
 
               <div>
                 <dt>Iskustvo</dt>
-
                 <dd>
-                  {{ profile.yearsOfExperience }}
-                  godina
+                  {{ profile.yearsOfExperience }} godina
                 </dd>
               </div>
 
               <div>
                 <dt>Grad</dt>
-
                 <dd>
-                  {{
-                    profile.user.city?.name ??
-                      'Nije naveden'
-                  }}
+                  {{ profile.user.city?.name ?? 'Nije naveden' }}
                 </dd>
               </div>
 
               <div>
                 <dt>Cena termina</dt>
+                <dd>{{ profile.pricePerSession }} RSD</dd>
+              </div>
+
+              <div>
+                <dt>Prosečna ocena</dt>
 
                 <dd>
-                  {{ profile.pricePerSession }}
-                  RSD
+                  @if (reviewsLoading()) {
+                    Učitavanje...
+                  } @else if (reviewsError()) {
+                    Ocena nije dostupna
+                  } @else if (reviewsTotal() > 0) {
+                    <span class="information-card__rating">
+                      ★ {{ averageRating().toFixed(1) }}
+                    </span>
+                  } @else {
+                    Još nema ocena
+                  }
                 </dd>
               </div>
             </dl>
@@ -254,32 +309,23 @@
             <div class="availability-modal__body">
               @if (appointmentCreated()) {
                 <div class="booking-success">
-                  <span class="booking-success__icon">
-                    ✓
-                  </span>
+                  <span class="booking-success__icon">✓</span>
 
-                  <h3>
-                    Rezervacija je poslata!
-                  </h3>
+                  <h3>Rezervacija je poslata!</h3>
 
                   <p>
-                    Profesionalac će pregledati
-                    tvoj zahtev. Status rezervacije
-                    možeš pratiti na svom profilu.
+                    Profesionalac će pregledati tvoj zahtev.
+                    Status rezervacije možeš pratiti na svom profilu.
                   </p>
                 </div>
               } @else if (slotsLoading()) {
                 <div class="slots-status">
                   <span class="loader"></span>
-
-                  <p>
-                    Učitavanje slobodnih termina...
-                  </p>
+                  <p>Učitavanje slobodnih termina...</p>
                 </div>
               } @else if (slotsError()) {
                 <div class="slots-status">
                   <h3>Termini nisu dostupni</h3>
-
                   <p>{{ slotsError() }}</p>
 
                   <button
@@ -290,75 +336,41 @@
                     Pokušaj ponovo
                   </button>
                 </div>
-              } @else if (
-                availableSlots().length === 0
-              ) {
+              } @else if (availableSlots().length === 0) {
                 <div class="slots-status">
-                  <h3>
-                    Trenutno nema slobodnih termina
-                  </h3>
+                  <h3>Trenutno nema slobodnih termina</h3>
 
                   <p>
-                    Profesionalac još nije objavio
-                    nove termine. Proveri ponovo
-                    kasnije.
+                    Profesionalac još nije objavio nove termine.
+                    Proveri ponovo kasnije.
                   </p>
                 </div>
               } @else {
-                <p
-                  class="
-                    availability-modal__instruction
-                  "
-                >
-                  Izaberi datum i vreme koji ti
-                  najviše odgovaraju.
+                <p class="availability-modal__instruction">
+                  Izaberi datum i vreme koji ti najviše odgovaraju.
                 </p>
 
                 <div class="slots-grid">
-                  @for (
-                    slot of availableSlots();
-                    track slot.id
-                  ) {
+                  @for (slot of availableSlots(); track slot.id) {
                     <button
                       class="slot-card"
                       type="button"
-                      [class.slot-card--selected]="
-                        selectedSlotId() === slot.id
-                      "
-                      [disabled]="
-                        creatingAppointment()
-                      "
+                      [class.slot-card--selected]="selectedSlotId() === slot.id"
+                      [disabled]="creatingAppointment()"
                       (click)="selectSlot(slot.id)"
                     >
                       <span class="slot-card__date">
-                        {{
-                          formatSlotDate(
-                            slot.startsAt
-                          )
-                        }}
+                        {{ formatSlotDate(slot.startsAt) }}
                       </span>
 
                       <span class="slot-card__time">
-                        {{
-                          formatSlotTime(
-                            slot.startsAt
-                          )
-                        }}
+                        {{ formatSlotTime(slot.startsAt) }}
                         –
-                        {{
-                          formatSlotTime(
-                            slot.endsAt
-                          )
-                        }}
+                        {{ formatSlotTime(slot.endsAt) }}
                       </span>
 
-                      <span
-                        class="slot-card__selection"
-                      >
-                        @if (
-                          selectedSlotId() ===
-                          slot.id
-                        ) {
+                      <span class="slot-card__selection">
+                        @if (selectedSlotId() === slot.id) {
                           ✓ Izabran termin
                         } @else {
                           Izaberi termin
@@ -368,9 +380,7 @@
                   }
                 </div>
 
-                @if (
-                  selectedSlotId() !== null
-                ) {
+                @if (selectedSlotId() !== null) {
                   <form
                     class="booking-note"
                     [formGroup]="bookingForm"
@@ -378,7 +388,6 @@
                     <label>
                       <span>
                         Napomena za profesionalca
-
                         <small>Opciono</small>
                       </span>
 
@@ -389,95 +398,54 @@
                       ></textarea>
                     </label>
 
-                    <div
-                      class="booking-note__details"
-                    >
+                    <div class="booking-note__details">
                       <span>
-                        {{
-                          bookingForm.controls
-                            .clientNote.value
-                            .length
-                        }}
+                        {{ bookingForm.controls.clientNote.value.length }}
                         / 1000
                       </span>
                     </div>
 
                     @if (
-                      bookingForm.controls
-                        .clientNote.touched &&
-                      bookingForm.controls
-                        .clientNote.hasError(
-                          'minlength'
-                        )
+                      bookingForm.controls.clientNote.touched &&
+                      bookingForm.controls.clientNote.hasError('minlength')
                     ) {
-                      <small
-                        class="booking-note__error"
-                      >
-                        Napomena mora imati
-                        najmanje 2 karaktera ili
-                        ostati prazna.
+                      <small class="booking-note__error">
+                        Napomena mora imati najmanje 2 karaktera
+                        ili ostati prazna.
                       </small>
                     }
 
                     @if (
-                      bookingForm.controls
-                        .clientNote.touched &&
-                      bookingForm.controls
-                        .clientNote.hasError(
-                          'maxlength'
-                        )
+                      bookingForm.controls.clientNote.touched &&
+                      bookingForm.controls.clientNote.hasError('maxlength')
                     ) {
-                      <small
-                        class="booking-note__error"
-                      >
-                        Napomena može imati najviše
-                        1000 karaktera.
+                      <small class="booking-note__error">
+                        Napomena može imati najviše 1000 karaktera.
                       </small>
                     }
                   </form>
                 }
 
-                @if (
-                  createAppointmentError()
-                ) {
-                  <div
-                    class="booking-error"
-                    role="alert"
-                  >
-                    {{
-                      createAppointmentError()
-                    }}
+                @if (createAppointmentError()) {
+                  <div class="booking-error" role="alert">
+                    {{ createAppointmentError() }}
                   </div>
                 }
               }
             </div>
 
-            <footer
-              class="availability-modal__footer"
-            >
+            <footer class="availability-modal__footer">
               @if (appointmentCreated()) {
                 <div>
-                  <strong>
-                    Zahtev je kreiran
-                  </strong>
-
-                  <span>
-                    Rezervacija trenutno čeka
-                    potvrdu.
-                  </span>
+                  <strong>Zahtev je kreiran</strong>
+                  <span>Rezervacija trenutno čeka potvrdu.</span>
                 </div>
 
-                <div
-                  class="
-                    availability-modal__actions
-                  "
-                >
+                <div class="availability-modal__actions">
                   <button
                     class="secondary-button"
                     type="button"
-                    (click)="
-                      closeAvailabilityModal()
-                    "
+                    (click)="closeAvailabilityModal()"
                   >
                     Zatvori
                   </button>
@@ -492,53 +460,21 @@
                 </div>
               } @else {
                 <div>
-                  @if (
-                    selectedSlotId() === null
-                  ) {
-                    <strong>
-                      Izaberi jedan termin
-                    </strong>
-
-                    <span>
-                      Nakon izbora možeš
-                      nastaviti.
-                    </span>
-                  } @else if (
-                    !isAuthenticated()
-                  ) {
-                    <strong>
-                      Potrebna je prijava
-                    </strong>
-
-                    <span>
-                      Prijavi se da rezervišeš
-                      termin.
-                    </span>
-                  } @else if (
-                    currentUser();
-                    as loggedInUser
-                  ) {
-                    @if (
-                      loggedInUser.role !==
-                      'client'
-                    ) {
-                      <strong>
-                        Rezervacija nije dostupna
-                      </strong>
-
+                  @if (selectedSlotId() === null) {
+                    <strong>Izaberi jedan termin</strong>
+                    <span>Nakon izbora možeš nastaviti.</span>
+                  } @else if (!isAuthenticated()) {
+                    <strong>Potrebna je prijava</strong>
+                    <span>Prijavi se da rezervišeš termin.</span>
+                  } @else if (currentUser(); as loggedInUser) {
+                    @if (loggedInUser.role !== 'client') {
+                      <strong>Rezervacija nije dostupna</strong>
                       <span>
-                        Samo klijent može
-                        rezervisati termin.
+                        Samo klijent može rezervisati termin.
                       </span>
                     } @else {
-                      <strong>
-                        Termin je izabran
-                      </strong>
-
-                      <span>
-                        Pošalji zahtev
-                        profesionalcu.
-                      </span>
+                      <strong>Termin je izabran</strong>
+                      <span>Pošalji zahtev profesionalcu.</span>
                     }
                   }
                 </div>
@@ -546,24 +482,12 @@
                 <button
                   class="primary-button"
                   type="button"
-                  [disabled]="
-                    selectedSlotId() === null ||
-                    creatingAppointment() ||
-                    (
-                      isAuthenticated() &&
-                      currentUser()?.role !==
-                        'client'
-                    )
-                  "
+                  [disabled]="selectedSlotId() === null || creatingAppointment() || (isAuthenticated() && currentUser()?.role !== 'client')"
                   (click)="confirmBooking()"
                 >
-                  @if (
-                    creatingAppointment()
-                  ) {
+                  @if (creatingAppointment()) {
                     Slanje rezervacije...
-                  } @else if (
-                    !isAuthenticated()
-                  ) {
+                  } @else if (!isAuthenticated()) {
                     Prijavi se i rezerviši
                   } @else {
                     Potvrdi rezervaciju

@@ -20,33 +20,25 @@
 
         <p>
           @if (isProfessional()) {
-            Pregledaj zahteve klijenata, potvrdi
-            ili odbij rezervacije i označi održane
-            termine kao završene.
+            Pregledaj zahteve klijenata, potvrdi ili odbij
+            rezervacije i označi održane termine kao završene.
           } @else {
-            Pregledaj svoje predstojeće i završene
-            termine i prati njihov status.
+            Pregledaj svoje predstojeće i završene termine,
+            prati njihov status i oceni profesionalca nakon
+            završene saradnje.
           }
         </p>
       </div>
 
-      <a
-        class="secondary-button"
-        routerLink="/my-profile"
-      >
+      <a class="secondary-button" routerLink="/my-profile">
         ← Moj profil
       </a>
     </header>
 
-    <div
-      class="appointment-filters"
-      aria-label="Filter rezervacija"
-    >
+    <div class="appointment-filters" aria-label="Filter rezervacija">
       <button
         type="button"
-        [class.appointment-filters__button--active]="
-          selectedFilter() === 'upcoming'
-        "
+        [class.appointment-filters__button--active]="selectedFilter() === 'upcoming'"
         (click)="selectFilter('upcoming')"
       >
         Predstojeće
@@ -54,9 +46,7 @@
 
       <button
         type="button"
-        [class.appointment-filters__button--active]="
-          selectedFilter() === 'completed'
-        "
+        [class.appointment-filters__button--active]="selectedFilter() === 'completed'"
         (click)="selectFilter('completed')"
       >
         Završene
@@ -64,9 +54,7 @@
 
       <button
         type="button"
-        [class.appointment-filters__button--active]="
-          selectedFilter() === 'cancelled'
-        "
+        [class.appointment-filters__button--active]="selectedFilter() === 'cancelled'"
         (click)="selectFilter('cancelled')"
       >
         Otkazane
@@ -78,17 +66,10 @@
         <span class="loader"></span>
         <p>Učitavanje rezervacija...</p>
       </div>
-    } @else if (
-      error() &&
-      appointments().length === 0
-    ) {
+    } @else if (error() && appointments().length === 0) {
       <div class="appointments-status">
-        <span class="appointments-status__icon">
-          !
-        </span>
-
+        <span class="appointments-status__icon">!</span>
         <h2>Rezervacije nisu učitane</h2>
-
         <p>{{ error() }}</p>
 
         <button
@@ -104,36 +85,20 @@
         <div class="appointments-error">
           <span>{{ error() }}</span>
 
-          <button
-            type="button"
-            (click)="loadAppointments()"
-          >
+          <button type="button" (click)="loadAppointments()">
             Pokušaj ponovo
           </button>
         </div>
       }
 
-      @if (
-        filteredAppointments().length === 0
-      ) {
-        <div
-          class="
-            appointments-status
-            appointments-status--compact
-          "
-        >
-          <span class="appointments-status__icon">
-            ✓
-          </span>
+      @if (filteredAppointments().length === 0) {
+        <div class="appointments-status appointments-status--compact">
+          <span class="appointments-status__icon">✓</span>
 
           <h2>
-            @if (
-              selectedFilter() === 'upcoming'
-            ) {
+            @if (selectedFilter() === 'upcoming') {
               Nema predstojećih rezervacija
-            } @else if (
-              selectedFilter() === 'completed'
-            ) {
+            } @else if (selectedFilter() === 'completed') {
               Nema završenih rezervacija
             } @else {
               Nema otkazanih rezervacija
@@ -142,60 +107,40 @@
 
           <p>
             @if (isProfessional()) {
-              Nove rezervacije klijenata
-              pojaviće se ovde.
+              Nove rezervacije klijenata pojaviće se ovde.
             } @else {
-              Kada zakažeš termin, rezervacija
-              će se pojaviti ovde.
+              Kada zakažeš termin, rezervacija će se pojaviti ovde.
             }
           </p>
 
           @if (!isProfessional()) {
-            <a
-              class="primary-button"
-              routerLink="/professionals"
-            >
+            <a class="primary-button" routerLink="/professionals">
               Pronađi stručnjaka
             </a>
           }
         </div>
       } @else {
         <div class="appointments-list">
-          @for (
-            appointment of
-              filteredAppointments();
-            track appointment.id
-          ) {
+          @for (appointment of filteredAppointments(); track appointment.id) {
             <article class="appointment-card">
               <header class="appointment-card__header">
                 @if (isProfessional()) {
                   <div class="appointment-card__person">
                     <div class="appointment-card__avatar">
                       @if (
-                        getProfileImageUrl(
-                          appointment.client
-                            .profileImageUrl
-                        );
+                        getProfileImageUrl(appointment.client.profileImageUrl);
                         as imageUrl
                       ) {
                         <img
                           [src]="imageUrl"
-                          [alt]="
-                            appointment.client
-                              .firstName +
-                            ' ' +
-                            appointment.client
-                              .lastName
-                          "
+                          [alt]="appointment.client.firstName + ' ' + appointment.client.lastName"
                         />
                       } @else {
                         <span>
                           {{
                             getInitials(
-                              appointment.client
-                                .firstName,
-                              appointment.client
-                                .lastName
+                              appointment.client.firstName,
+                              appointment.client.lastName
                             )
                           }}
                         </span>
@@ -206,22 +151,12 @@
                       <small>Klijent</small>
 
                       <h2>
-                        {{
-                          appointment.client
-                            .firstName
-                        }}
-                        {{
-                          appointment.client
-                            .lastName
-                        }}
+                        {{ appointment.client.firstName }}
+                        {{ appointment.client.lastName }}
                       </h2>
 
                       <p>
-                        {{
-                          appointment.client
-                            .city?.name ??
-                            'Grad nije naveden'
-                        }}
+                        {{ appointment.client.city?.name ?? 'Grad nije naveden' }}
                       </p>
                     </div>
                   </div>
@@ -230,29 +165,20 @@
                     <div class="appointment-card__avatar">
                       @if (
                         getProfileImageUrl(
-                          appointment.professional
-                            .user.profileImageUrl
+                          appointment.professional.user.profileImageUrl
                         );
                         as imageUrl
                       ) {
                         <img
                           [src]="imageUrl"
-                          [alt]="
-                            appointment.professional
-                              .user.firstName +
-                            ' ' +
-                            appointment.professional
-                              .user.lastName
-                          "
+                          [alt]="appointment.professional.user.firstName + ' ' + appointment.professional.user.lastName"
                         />
                       } @else {
                         <span>
                           {{
                             getInitials(
-                              appointment.professional
-                                .user.firstName,
-                              appointment.professional
-                                .user.lastName
+                              appointment.professional.user.firstName,
+                              appointment.professional.user.lastName
                             )
                           }}
                         </span>
@@ -263,21 +189,14 @@
                       <small>Profesionalac</small>
 
                       <h2>
-                        {{
-                          appointment.professional
-                            .user.firstName
-                        }}
-                        {{
-                          appointment.professional
-                            .user.lastName
-                        }}
+                        {{ appointment.professional.user.firstName }}
+                        {{ appointment.professional.user.lastName }}
                       </h2>
 
                       <p>
                         {{
-                          appointment.professional
-                            .user.city?.name ??
-                            'Grad nije naveden'
+                          appointment.professional.user.city?.name ??
+                          'Grad nije naveden'
                         }}
                       </p>
                     </div>
@@ -285,58 +204,33 @@
                 }
 
                 <span
-                  [class]="
-                    'appointment-status ' +
-                    getStatusClass(
-                      appointment.status
-                    )
-                  "
+                  [class]="'appointment-status ' + getStatusClass(appointment.status)"
                 >
-                  {{
-                    getStatusLabel(
-                      appointment.status
-                    )
-                  }}
+                  {{ getStatusLabel(appointment.status) }}
                 </span>
               </header>
 
               <div class="appointment-card__schedule">
                 <div>
                   <small>Datum</small>
-
                   <strong>
-                    {{
-                      formatDate(
-                        appointment.slot.startsAt
-                      )
-                    }}
+                    {{ formatDate(appointment.slot.startsAt) }}
                   </strong>
                 </div>
 
                 <div>
                   <small>Vreme</small>
-
                   <strong>
-                    {{
-                      formatTime(
-                        appointment.slot.startsAt
-                      )
-                    }}
+                    {{ formatTime(appointment.slot.startsAt) }}
                     –
-                    {{
-                      formatTime(
-                        appointment.slot.endsAt
-                      )
-                    }}
+                    {{ formatTime(appointment.slot.endsAt) }}
                   </strong>
                 </div>
 
                 <div>
                   <small>Cena</small>
-
                   <strong>
-                    {{ appointment.priceAtBooking }}
-                    RSD
+                    {{ appointment.priceAtBooking }} RSD
                   </strong>
                 </div>
               </div>
@@ -351,107 +245,87 @@
                     }
                   </small>
 
-                  <p>
-                    {{ appointment.clientNote }}
-                  </p>
+                  <p>{{ appointment.clientNote }}</p>
                 </div>
               }
 
-              @if (
-                appointment.professionalNote &&
-                !isProfessional()
-              ) {
+              @if (appointment.professionalNote && !isProfessional()) {
                 <div
-                  class="
-                    appointment-card__note
-                    appointment-card__note--professional
-                  "
+                  class="appointment-card__note appointment-card__note--professional"
                 >
-                  <small>
-                    Napomena profesionalca
-                  </small>
-
-                  <p>
-                    {{
-                      appointment.professionalNote
-                    }}
-                  </p>
+                  <small>Napomena profesionalca</small>
+                  <p>{{ appointment.professionalNote }}</p>
                 </div>
               }
 
               @if (
                 isProfessional() &&
                 (
-                  appointment.status ===
-                    'pending' ||
-                  appointment.status ===
-                    'confirmed'
+                  appointment.status === 'pending' ||
+                  appointment.status === 'confirmed'
                 )
               ) {
-                <label
-                  class="
-                    appointment-card__professional-note
-                  "
-                >
+                <label class="appointment-card__professional-note">
                   <span>Napomena za klijenta</span>
 
                   <textarea
                     rows="3"
                     maxlength="1000"
-                    placeholder="
-                      Napiši kratku napomenu uz odluku...
-                    "
-                    [ngModel]="
-                      getProfessionalNote(
-                        appointment
-                      )
-                    "
-                    (ngModelChange)="
-                      setProfessionalNote(
-                        appointment.id,
-                        $event
-                      )
-                    "
+                    placeholder="Napiši kratku napomenu uz odluku..."
+                    [ngModel]="getProfessionalNote(appointment)"
+                    (ngModelChange)="setProfessionalNote(appointment.id, $event)"
                   ></textarea>
                 </label>
               }
 
+              @if (!isProfessional() && appointment.review) {
+                <div class="appointment-card__review">
+                  <div class="appointment-card__review-header">
+                    <div>
+                      <small>Tvoja ocena</small>
+                      <strong>
+                        Ocena {{ appointment.review.rating }}/5
+                      </strong>
+                    </div>
+
+                    <div
+                      class="appointment-card__review-stars"
+                      [attr.aria-label]="'Ocena ' + appointment.review.rating + ' od 5'"
+                    >
+                      @for (rating of ratingValues; track rating) {
+                        <span
+                          [class.appointment-card__review-star--active]="rating <= appointment.review.rating"
+                        >
+                          ★
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+
+              @if (isClient() && appointment.review && deleteReviewError()) {
+                <p class="review-form__error" role="alert">
+                  {{ deleteReviewError() }}
+                </p>
+              }
+
               <footer class="appointment-card__footer">
                 <span
-                  [class]="
-                    'appointment-status ' +
-                    getStatusClass(
-                      appointment.status
-                    )
-                  "
+                  [class]="'appointment-status ' + getStatusClass(appointment.status)"
                 >
-                  {{
-                    getStatusLabel(
-                      appointment.status
-                    )
-                  }}
+                  {{ getStatusLabel(appointment.status) }}
                 </span>
 
-                @if (
-                  isProfessional() &&
-                  appointment.status === 'pending'
-                ) {
+                @if (isProfessional() && appointment.status === 'pending') {
                   <div class="appointment-card__actions">
                     <button
                       class="reject-button"
                       type="button"
-                      [disabled]="
-                        isUpdating(appointment.id)
-                      "
-                      (click)="
-                        rejectAppointment(
-                          appointment
-                        )
-                      "
+                      [disabled]="isUpdating(appointment.id)"
+                      (click)="rejectAppointment(appointment)"
                     >
-                      @if (
-                        isUpdating(appointment.id)
-                      ) {
+                      @if (isUpdating(appointment.id)) {
                         Čuvanje...
                       } @else {
                         Odbij
@@ -461,84 +335,77 @@
                     <button
                       class="confirm-button"
                       type="button"
-                      [disabled]="
-                        isUpdating(appointment.id)
-                      "
-                      (click)="
-                        confirmAppointment(
-                          appointment
-                        )
-                      "
+                      [disabled]="isUpdating(appointment.id)"
+                      (click)="confirmAppointment(appointment)"
                     >
-                      @if (
-                        isUpdating(appointment.id)
-                      ) {
+                      @if (isUpdating(appointment.id)) {
                         Čuvanje...
                       } @else {
                         Potvrdi termin
                       }
                     </button>
                   </div>
-                } @else if (
-                  isProfessional() &&
-                  canComplete(appointment)
-                ) {
+                } @else if (isProfessional() && canComplete(appointment)) {
                   <button
                     class="complete-button"
                     type="button"
-                    [disabled]="
-                      isUpdating(appointment.id)
-                    "
-                    (click)="
-                      completeAppointment(
-                        appointment
-                      )
-                    "
+                    [disabled]="isUpdating(appointment.id)"
+                    (click)="completeAppointment(appointment)"
                   >
-                    @if (
-                      isUpdating(appointment.id)
-                    ) {
+                    @if (isUpdating(appointment.id)) {
                       Čuvanje...
                     } @else {
                       Označi kao završeno
                     }
                   </button>
-                } @else if (
-                  canCreateNutritionPlan(
-                    appointment
-                  )
-                ) {
+                } @else if (canCreateNutritionPlan(appointment)) {
                   <a
                     class="create-plan-button"
                     routerLink="/my-plans"
-                    [queryParams]="{
-                      clientId:
-                        appointment.client.id
-                    }"
+                    [queryParams]="{ clientId: appointment.client.id }"
                   >
                     Napravi plan ishrane
                   </a>
-                } @else if (
-                  !isProfessional() &&
-                  canCancel(appointment)
-                ) {
+                } @else if (canReview(appointment)) {
+                  <button
+                    class="review-button"
+                    type="button"
+                    (click)="openReviewModal(appointment)"
+                  >
+                    ★ Ostavi ocenu
+                  </button>
+                } @else if (hasReviewedAppointment(appointment)) {
+                  <div class="appointment-card__actions">
+                    <button
+                      class="review-button"
+                      type="button"
+                      [disabled]="savingReview() || reviewDeletingId() !== null"
+                      (click)="openEditReviewModal(appointment)"
+                    >
+                      Izmeni ocenu
+                    </button>
+
+                    <button
+                      class="cancel-button"
+                      type="button"
+                      [disabled]="savingReview() || reviewDeletingId() !== null"
+                      (click)="deleteReview(appointment)"
+                    >
+                      {{
+                        reviewDeletingId() === appointment.review?.id
+                          ? 'Brisanje...'
+                          : 'Obriši ocenu'
+                      }}
+                    </button>
+                  </div>
+                } @else if (!isProfessional() && canCancel(appointment)) {
                   <button
                     class="cancel-button"
                     type="button"
-                    [disabled]="
-                      cancellingId() ===
-                      appointment.id
-                    "
-                    (click)="
-                      cancelAppointment(
-                        appointment
-                      )
-                    "
+                    [disabled]="cancellingId() === appointment.id"
+                    (click)="cancelAppointment(appointment)"
                   >
-                    @if (
-                      cancellingId() ===
-                      appointment.id
-                    ) {
+                    @if (cancellingId() === appointment.id) {
                       Otkazivanje...
                     } @else {
                       Otkaži rezervaciju
@@ -553,3 +420,153 @@
     }
   </div>
 </section>
+
+@if (
+  reviewModalOpen() && selectedReviewAppointment();
+  as appointment
+) {
+  <div
+    class="review-modal-backdrop"
+    role="presentation"
+    (click)="closeReviewModal()"
+  >
+    <section
+      class="review-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="review-modal__header">
+        <div>
+          <span>Ocena saradnje</span>
+
+          <h2 id="review-modal-title">
+            {{
+              editingReviewId() !== null
+                ? 'Izmeni ocenu'
+                : 'Ostavi ocenu'
+            }}
+          </h2>
+
+          <p>
+            {{ appointment.professional.user.firstName }}
+            {{ appointment.professional.user.lastName }}
+          </p>
+        </div>
+
+        <button
+          class="review-modal__close"
+          type="button"
+          aria-label="Zatvori"
+          [disabled]="savingReview()"
+          (click)="closeReviewModal()"
+        >
+          ×
+        </button>
+      </header>
+
+      <form
+        class="review-form"
+        [formGroup]="reviewForm"
+        (ngSubmit)="submitReview()"
+      >
+        <div class="review-form__appointment">
+          <div>
+            <small>Datum termina</small>
+            <strong>
+              {{ formatDate(appointment.slot.startsAt) }}
+            </strong>
+          </div>
+
+          <div>
+            <small>Vreme</small>
+            <strong>
+              {{ formatTime(appointment.slot.startsAt) }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="review-form__rating">
+          <span>Kako ocenjuješ saradnju?</span>
+
+          <div
+            class="review-form__stars"
+            role="radiogroup"
+            aria-label="Ocena"
+          >
+            @for (rating of ratingValues; track rating) {
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-label]="rating + ' od 5 zvezdica'"
+                [attr.aria-checked]="reviewForm.controls.rating.value === rating"
+                [class.review-form__star--active]="isRatingSelected(rating)"
+                [disabled]="savingReview()"
+                (click)="selectRating(rating)"
+              >
+                ★
+              </button>
+            }
+          </div>
+
+          @if (
+            hasReviewError('rating', 'min') ||
+            hasReviewError('rating', 'required')
+          ) {
+            <small class="review-form__validation">
+              Izaberi ocenu od 1 do 5.
+            </small>
+          }
+        </div>
+
+        @if (reviewValidationError()) {
+          <div class="review-form__error" role="alert">
+            {{ reviewValidationError() }}
+          </div>
+        }
+
+        @if (
+          editingReviewId() !== null
+            ? updateReviewError()
+            : createReviewError()
+        ) {
+          <div class="review-form__error" role="alert">
+            {{
+              editingReviewId() !== null
+                ? updateReviewError()
+                : createReviewError()
+            }}
+          </div>
+        }
+
+        <div class="review-form__actions">
+          <button
+            class="secondary-button"
+            type="button"
+            [disabled]="savingReview()"
+            (click)="closeReviewModal()"
+          >
+            Odustani
+          </button>
+
+          <button
+            class="primary-button"
+            type="submit"
+            [disabled]="savingReview()"
+          >
+            @if (savingReview()) {
+              Slanje...
+            } @else {
+              {{
+                editingReviewId() !== null
+                  ? 'Sačuvaj izmene'
+                  : 'Pošalji ocenu'
+              }}
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}

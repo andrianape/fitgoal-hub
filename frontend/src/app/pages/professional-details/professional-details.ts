@@ -16,15 +16,23 @@ import {
   Router,
   RouterLink,
 } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { UserRole } from '../../core/models/user.model';
-import { AppointmentsActions } from '../../store/appointments/appointments.actions';
+import {
+  Store,
+} from '@ngrx/store';
+import {
+  UserRole,
+} from '../../core/models/user.model';
+import {
+  AppointmentsActions,
+} from '../../store/appointments/appointments.actions';
 import {
   selectCreateAppointmentError,
   selectIsCreatingAppointment,
   selectWasAppointmentCreated,
 } from '../../store/appointments/appointments.selectors';
-import { AvailabilityActions } from '../../store/availability/availability.actions';
+import {
+  AvailabilityActions,
+} from '../../store/availability/availability.actions';
 import {
   selectAvailableSlots,
   selectAvailableSlotsError,
@@ -34,28 +42,50 @@ import {
   selectCurrentUser,
   selectIsAuthenticated,
 } from '../../store/auth/auth.selectors';
-import { ProfessionalsActions } from '../../store/professionals/professionals.actions';
+import {
+  ProfessionalsActions,
+} from '../../store/professionals/professionals.actions';
 import {
   selectSelectedProfessional,
   selectSelectedProfessionalError,
   selectSelectedProfessionalLoading,
 } from '../../store/professionals/professionals.selectors';
+import {
+  ReviewsActions,
+} from '../../store/reviews/reviews.actions';
+import {
+  selectProfessionalAverageRating,
+  selectProfessionalReviews,
+  selectProfessionalReviewsError,
+  selectProfessionalReviewsLoading,
+  selectProfessionalReviewsTotal,
+} from '../../store/reviews/reviews.selectors';
 
 @Component({
   selector: 'app-professional-details',
+
   imports: [
     RouterLink,
     ReactiveFormsModule,
   ],
-  templateUrl: './professional-details.html',
-  styleUrl: './professional-details.scss',
+
+  templateUrl:
+    './professional-details.html',
+
+  styleUrl:
+    './professional-details.scss',
 })
 export class ProfessionalDetails
   implements OnInit, OnDestroy
 {
-  private readonly store = inject(Store);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly store =
+    inject(Store);
+
+  private readonly route =
+    inject(ActivatedRoute);
+
+  private readonly router =
+    inject(Router);
 
   private readonly formBuilder =
     inject(FormBuilder);
@@ -115,6 +145,31 @@ export class ProfessionalDetails
       selectCreateAppointmentError,
     );
 
+  protected readonly reviews =
+    this.store.selectSignal(
+      selectProfessionalReviews,
+    );
+
+  protected readonly reviewsTotal =
+    this.store.selectSignal(
+      selectProfessionalReviewsTotal,
+    );
+
+  protected readonly averageRating =
+    this.store.selectSignal(
+      selectProfessionalAverageRating,
+    );
+
+  protected readonly reviewsLoading =
+    this.store.selectSignal(
+      selectProfessionalReviewsLoading,
+    );
+
+  protected readonly reviewsError =
+    this.store.selectSignal(
+      selectProfessionalReviewsError,
+    );
+
   protected readonly imageLoadFailed =
     signal(false);
 
@@ -122,21 +177,28 @@ export class ProfessionalDetails
     signal(false);
 
   protected readonly selectedSlotId =
-    signal<number | null>(null);
+    signal<number | null>(
+      null,
+    );
+
+  protected readonly ratingValues =
+    [1, 2, 3, 4, 5];
 
   protected readonly bookingForm =
-    this.formBuilder.nonNullable.group({
-      clientNote: [
-        '',
-        [
-          Validators.minLength(2),
-          Validators.maxLength(1000),
+    this.formBuilder
+      .nonNullable.group({
+        clientNote: [
+          '',
+          [
+            Validators.minLength(2),
+            Validators.maxLength(1000),
+          ],
         ],
-      ],
-    });
+      });
 
   ngOnInit(): void {
-    const id = this.getProfessionalId();
+    const id =
+      this.getProfessionalId();
 
     if (id === null) {
       void this.router.navigate([
@@ -147,6 +209,7 @@ export class ProfessionalDetails
     }
 
     this.loadProfessional(id);
+    this.loadReviews(id);
   }
 
   ngOnDestroy(): void {
@@ -164,9 +227,16 @@ export class ProfessionalDetails
       AppointmentsActions
         .clearCreateAppointmentState(),
     );
+
+    this.store.dispatch(
+      ReviewsActions
+        .clearReviews(),
+    );
   }
 
-  @HostListener('document:keydown.escape')
+  @HostListener(
+    'document:keydown.escape',
+  )
   protected handleEscapeKey(): void {
     if (
       this.availabilityModalOpen() &&
@@ -193,7 +263,9 @@ export class ProfessionalDetails
       return 'Lični trener';
     }
 
-    if (role === 'nutritionist') {
+    if (
+      role === 'nutritionist'
+    ) {
       return 'Nutricionista';
     }
 
@@ -209,32 +281,49 @@ export class ProfessionalDetails
   }
 
   protected getProfileImageUrl(
-    profileImageUrl: string | null,
+    profileImageUrl:
+      string | null,
   ): string | null {
     if (!profileImageUrl) {
       return null;
     }
 
-    if (profileImageUrl.startsWith('http')) {
+    if (
+      profileImageUrl.startsWith(
+        'http',
+      )
+    ) {
       return profileImageUrl;
     }
 
-    return `http://localhost:3000${profileImageUrl}`;
+    return (
+      `http://localhost:3000` +
+      profileImageUrl
+    );
   }
 
-  protected handleImageError(): void {
-    this.imageLoadFailed.set(true);
+  protected handleImageError():
+    void {
+    this.imageLoadFailed.set(
+      true,
+    );
   }
 
-  protected openAvailabilityModal(): void {
+  protected openAvailabilityModal():
+    void {
     const professionalId =
       this.getProfessionalId();
 
-    if (professionalId === null) {
+    if (
+      professionalId === null
+    ) {
       return;
     }
 
-    this.selectedSlotId.set(null);
+    this.selectedSlotId.set(
+      null,
+    );
+
     this.bookingForm.reset();
 
     this.store.dispatch(
@@ -242,22 +331,34 @@ export class ProfessionalDetails
         .clearCreateAppointmentState(),
     );
 
-    this.availabilityModalOpen.set(true);
+    this.availabilityModalOpen.set(
+      true,
+    );
 
     this.store.dispatch(
-      AvailabilityActions.loadAvailableSlots({
-        professionalId,
-      }),
+      AvailabilityActions
+        .loadAvailableSlots({
+          professionalId,
+        }),
     );
   }
 
-  protected closeAvailabilityModal(): void {
-    if (this.creatingAppointment()) {
+  protected closeAvailabilityModal():
+    void {
+    if (
+      this.creatingAppointment()
+    ) {
       return;
     }
 
-    this.availabilityModalOpen.set(false);
-    this.selectedSlotId.set(null);
+    this.availabilityModalOpen.set(
+      false,
+    );
+
+    this.selectedSlotId.set(
+      null,
+    );
+
     this.bookingForm.reset();
 
     this.store.dispatch(
@@ -270,30 +371,69 @@ export class ProfessionalDetails
     value: string,
   ): string {
     return new Intl.DateTimeFormat(
-      'sr-RS',
+      'sr-Latn-RS',
       {
         weekday: 'long',
         day: '2-digit',
         month: 'long',
         year: 'numeric',
       },
-    ).format(new Date(value));
+    ).format(
+      new Date(value),
+    );
   }
 
   protected formatSlotTime(
     value: string,
   ): string {
     return new Intl.DateTimeFormat(
-      'sr-RS',
+      'sr-Latn-RS',
       {
         hour: '2-digit',
         minute: '2-digit',
       },
-    ).format(new Date(value));
+    ).format(
+      new Date(value),
+    );
   }
 
-  protected selectSlot(slotId: number): void {
-    if (this.creatingAppointment()) {
+  protected formatReviewDate(
+    value: string,
+  ): string {
+    const date =
+      new Date(value);
+
+    if (
+      Number.isNaN(
+        date.getTime(),
+      )
+    ) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat(
+      'sr-Latn-RS',
+      {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      },
+    ).format(date);
+  }
+
+  protected isRatingStarActive(
+    star: number,
+    rating: number,
+  ): boolean {
+    return star <= rating;
+  }
+
+  protected selectSlot(
+    slotId: number,
+  ): void {
+    if (
+      this.creatingAppointment()
+    ) {
       return;
     }
 
@@ -302,30 +442,44 @@ export class ProfessionalDetails
         .clearCreateAppointmentState(),
     );
 
-    if (this.selectedSlotId() === slotId) {
-      this.selectedSlotId.set(null);
+    if (
+      this.selectedSlotId() ===
+      slotId
+    ) {
+      this.selectedSlotId.set(
+        null,
+      );
 
       return;
     }
 
-    this.selectedSlotId.set(slotId);
+    this.selectedSlotId.set(
+      slotId,
+    );
   }
 
-  protected confirmBooking(): void {
-    const slotId = this.selectedSlotId();
+  protected confirmBooking():
+    void {
+    const slotId =
+      this.selectedSlotId();
 
     if (slotId === null) {
       return;
     }
 
-    if (!this.isAuthenticated()) {
+    if (
+      !this.isAuthenticated()
+    ) {
       this.closeAvailabilityModal();
 
       void this.router.navigate(
-        ['/login'],
+        [
+          '/login',
+        ],
         {
           queryParams: {
-            returnUrl: this.router.url,
+            returnUrl:
+              this.router.url,
           },
         },
       );
@@ -333,14 +487,21 @@ export class ProfessionalDetails
       return;
     }
 
-    const user = this.currentUser();
+    const user =
+      this.currentUser();
 
-    if (!user || user.role !== 'client') {
+    if (
+      !user ||
+      user.role !== 'client'
+    ) {
       return;
     }
 
-    if (this.bookingForm.invalid) {
-      this.bookingForm.markAllAsTouched();
+    if (
+      this.bookingForm.invalid
+    ) {
+      this.bookingForm
+        .markAllAsTouched();
 
       return;
     }
@@ -351,47 +512,73 @@ export class ProfessionalDetails
         .trim();
 
     this.store.dispatch(
-      AppointmentsActions.createAppointment({
-        data: {
-          slotId,
+      AppointmentsActions
+        .createAppointment({
+          data: {
+            slotId,
 
-          ...(clientNote.length > 0
-            ? {
-                clientNote,
-              }
-            : {}),
-        },
-      }),
+            ...(clientNote.length > 0
+              ? {
+                  clientNote,
+                }
+              : {}),
+          },
+        }),
     );
   }
 
   protected reload(): void {
-    const id = this.getProfessionalId();
+    const id =
+      this.getProfessionalId();
 
     if (id === null) {
       return;
     }
 
-    this.imageLoadFailed.set(false);
+    this.imageLoadFailed.set(
+      false,
+    );
+
     this.loadProfessional(id);
+    this.loadReviews(id);
+  }
+
+  protected reloadReviews():
+    void {
+    const professionalId =
+      this.getProfessionalId();
+
+    if (
+      professionalId === null
+    ) {
+      return;
+    }
+
+    this.loadReviews(
+      professionalId,
+    );
   }
 
   protected reloadSlots(): void {
     const professionalId =
       this.getProfessionalId();
 
-    if (professionalId === null) {
+    if (
+      professionalId === null
+    ) {
       return;
     }
 
     this.store.dispatch(
-      AvailabilityActions.loadAvailableSlots({
-        professionalId,
-      }),
+      AvailabilityActions
+        .loadAvailableSlots({
+          professionalId,
+        }),
     );
   }
 
-  protected goToMyProfile(): void {
+  protected goToMyProfile():
+    void {
     this.closeAvailabilityModal();
 
     void this.router.navigate([
@@ -399,12 +586,18 @@ export class ProfessionalDetails
     ]);
   }
 
-  private getProfessionalId(): number | null {
-    const id = Number(
-      this.route.snapshot.paramMap.get('id'),
-    );
+  private getProfessionalId():
+    number | null {
+    const id =
+      Number(
+        this.route.snapshot
+          .paramMap.get('id'),
+      );
 
-    if (!Number.isInteger(id) || id < 1) {
+    if (
+      !Number.isInteger(id) ||
+      id < 1
+    ) {
       return null;
     }
 
@@ -415,9 +608,21 @@ export class ProfessionalDetails
     professionalId: number,
   ): void {
     this.store.dispatch(
-      ProfessionalsActions.loadProfessional({
-        id: professionalId,
-      }),
+      ProfessionalsActions
+        .loadProfessional({
+          id: professionalId,
+        }),
+    );
+  }
+
+  private loadReviews(
+    professionalId: number,
+  ): void {
+    this.store.dispatch(
+      ReviewsActions
+        .loadProfessionalReviews({
+          professionalId,
+        }),
     );
   }
 }

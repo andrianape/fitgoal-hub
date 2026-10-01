@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { AppointmentStatus } from '../appointments/enums/appointment-status.enum';
 import { ProfessionalProfile } from '../professionals/entities/professional-profile.entity';
@@ -27,7 +27,7 @@ export class ReviewsService {
     private readonly profileRepository: Repository<ProfessionalProfile>,
   ) {}
 
-  async create(clientId: number, dto: CreateReviewDto): Promise<Review> {
+  async create(clientId: number, dto: CreateReviewDto) {
     const appointment = await this.appointmentRepository.findOne({
       where: {
         id: dto.appointmentId,
@@ -71,10 +71,22 @@ export class ReviewsService {
       client: appointment.client,
       professional: appointment.professional,
       rating: dto.rating,
-      comment: dto.comment?.trim() ?? null,
+      comment: null,
     });
 
-    return this.reviewRepository.save(review);
+    try {
+      const saved = await this.reviewRepository.save(review);
+      return this.toResponse(saved);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error.driverError as { code?: string }).code === '23505'
+      ) {
+        throw new ConflictException('Za ovaj termin već postoji recenzija.');
+      }
+
+      throw error;
+    }
   }
 
   async findByProfessional(professionalId: number) {
@@ -111,18 +123,7 @@ export class ReviewsService {
         : reviews.reduce((sum, review) => sum + review.rating, 0) / total;
 
     return {
-      data: reviews.map((review) => ({
-        id: review.id,
-        rating: review.rating,
-        comment: review.comment,
-        client: {
-          id: review.client.id,
-          firstName: review.client.firstName,
-          lastName: review.client.lastName,
-        },
-        createdAt: review.createdAt,
-        updatedAt: review.updatedAt,
-      })),
+      data: reviews.map((review) => this.toResponse(review)),
       total,
       averageRating: Math.round(averageRating * 10) / 10,
     };
@@ -132,7 +133,7 @@ export class ReviewsService {
     reviewId: number,
     clientId: number,
     dto: UpdateReviewDto,
-  ): Promise<Review> {
+  ) {
     const review = await this.reviewRepository.findOne({
       where: {
         id: reviewId,
@@ -152,15 +153,24 @@ export class ReviewsService {
       throw new ForbiddenException('Možete menjati samo svoju recenziju.');
     }
 
-    if (dto.rating !== undefined) {
-      review.rating = dto.rating;
-    }
+    review.rating = dto.rating;
+    review.comment = null;
 
-    if (dto.comment !== undefined) {
-      review.comment = dto.comment.trim();
-    }
+    return this.toResponse(await this.reviewRepository.save(review));
+  }
 
-    return this.reviewRepository.save(review);
+  private toResponse(review: Review) {
+    return {
+      id: review.id,
+      rating: review.rating,
+      client: {
+        id: review.client.id,
+        firstName: review.client.firstName,
+        lastName: review.client.lastName,
+      },
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+    };
   }
 
   async remove(
@@ -182,11 +192,12 @@ export class ReviewsService {
     }
 
     const isOwner = review.client.id === currentUserId;
-
     const isAdmin = currentUserRole === UserRole.ADMIN;
 
     if (!isOwner && !isAdmin) {
-      throw new ForbiddenException('Nemate dozvolu da obrišete ovu recenziju.');
+      throw new ForbiddenException(
+        'Nemate dozvolu da obrišete ovu recenziju.',
+      );
     }
 
     await this.reviewRepository.remove(review);

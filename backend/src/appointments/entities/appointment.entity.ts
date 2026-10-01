@@ -4,45 +4,77 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AvailabilitySlot } from '../../availability/entities/availability-slot.entity';
-import { ProfessionalProfile } from '../../professionals/entities/professional-profile.entity';
-import { User } from '../../users/entities/user.entity';
-import { AppointmentStatus } from '../enums/appointment-status.enum';
+import {
+  AvailabilitySlot,
+} from '../../availability/entities/availability-slot.entity';
+import {
+  ProfessionalProfile,
+} from '../../professionals/entities/professional-profile.entity';
+import {
+  Review,
+} from '../../reviews/entities/review.entity';
+import {
+  User,
+} from '../../users/entities/user.entity';
+import {
+  AppointmentStatus,
+} from '../enums/appointment-status.enum';
 
-@Entity({ name: 'appointments' })
+@Entity({
+  name: 'appointments',
+})
 export class Appointment {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(
+    () => User,
+    {
+      nullable: false,
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn({
     name: 'client_id',
   })
   client!: User;
 
-  @ManyToOne(() => ProfessionalProfile, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(
+    () => ProfessionalProfile,
+    {
+      nullable: false,
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn({
     name: 'professional_id',
   })
   professional!: ProfessionalProfile;
 
-  @ManyToOne(() => AvailabilitySlot, {
-    nullable: false,
-    onDelete: 'RESTRICT',
-  })
+  @ManyToOne(
+    () => AvailabilitySlot,
+    {
+      nullable: false,
+      onDelete: 'RESTRICT',
+    },
+  )
   @JoinColumn({
     name: 'availability_slot_id',
   })
   slot!: AvailabilitySlot;
+
+  @OneToOne(
+    () => Review,
+    (review) => review.appointment,
+    {
+      nullable: true,
+    },
+  )
+  review!: Review | null;
 
   @Column({
     type: 'enum',

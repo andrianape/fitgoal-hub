@@ -45,7 +45,8 @@
 
   .secondary-button {
     flex-shrink: 0;
-    border-color: rgb(255 255 255 / 30%);
+    border-color:
+      rgb(255 255 255 / 30%);
     color: #ffffff;
     background: transparent;
 
@@ -63,10 +64,14 @@
   gap: 5px;
   margin-bottom: 24px;
   padding: 6px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid
+    rgb(255 255 255 / 18%);
   border-radius: 18px;
-  background: rgb(255 255 255 / 10%);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 8%);
+  background:
+    rgb(255 255 255 / 10%);
+  box-shadow:
+    0 10px 30px
+    rgb(0 0 0 / 8%);
   backdrop-filter: blur(8px);
 }
 
@@ -89,7 +94,8 @@
 
   &:hover {
     color: #ffffff;
-    background: rgb(255 255 255 / 10%);
+    background:
+      rgb(255 255 255 / 10%);
   }
 
   &:active {
@@ -98,10 +104,12 @@
 }
 
 .appointment-filters
-  .appointment-filters__button--active {
+.appointment-filters__button--active {
   color: var(--color-primary);
   background: #ffffff;
-  box-shadow: 0 7px 20px rgb(0 0 0 / 13%);
+  box-shadow:
+    0 7px 20px
+    rgb(0 0 0 / 13%);
 }
 
 .appointments-list {
@@ -114,7 +122,9 @@
   border-radius: 22px;
   color: var(--color-text);
   background: #ffffff;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 15%);
+  box-shadow:
+    0 18px 45px
+    rgb(0 0 0 / 15%);
 }
 
 .appointment-card__header {
@@ -158,7 +168,8 @@
   place-items: center;
   border-radius: 18px;
   color: var(--color-primary);
-  background: var(--color-primary-soft);
+  background:
+    var(--color-primary-soft);
   font-size: 14px;
   font-weight: 800;
 
@@ -209,9 +220,12 @@
 .appointment-card__note {
   margin-top: 14px;
   padding: 14px 16px;
-  border-left: 3px solid var(--color-primary);
-  border-radius: 0 12px 12px 0;
-  background: var(--color-primary-soft);
+  border-left: 3px solid
+    var(--color-primary);
+  border-radius:
+    0 12px 12px 0;
+  background:
+    var(--color-primary-soft);
 
   small {
     color: var(--color-primary);
@@ -257,7 +271,8 @@
     min-height: 90px;
     resize: vertical;
     padding: 13px 15px;
-    border: 1px solid var(--color-border);
+    border: 1px solid
+      var(--color-border);
     border-radius: 13px;
     outline: none;
     color: var(--color-text);
@@ -267,15 +282,86 @@
     line-height: 1.6;
 
     &:focus {
-      border-color: var(--color-primary);
+      border-color:
+        var(--color-primary);
       box-shadow:
-        0 0 0 3px rgb(15 76 58 / 10%);
+        0 0 0 3px
+        rgb(15 76 58 / 10%);
     }
 
     &::placeholder {
       color: #949d98;
     }
   }
+}
+
+/* Postojeća recenzija */
+
+.appointment-card__review {
+  margin-top: 16px;
+  padding: 17px;
+  border: 1px solid #efd493;
+  border-radius: 15px;
+  background: #fffaf0;
+
+  > p {
+    margin: 14px 0 0;
+    padding-top: 13px;
+    border-top: 1px solid #f0dfb7;
+    color: #675b42;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-line;
+  }
+}
+
+.appointment-card__review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  small {
+    color: #9b721c;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--color-text);
+    font-size: 13px;
+  }
+}
+
+.appointment-card__review-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  span {
+    color: #d9ddd9;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .appointment-card__review-star--active {
+    color: #f2ad2e;
+    text-shadow:
+      0 2px 7px
+      rgb(242 173 46 / 28%);
+  }
+}
+
+.appointment-card__review-empty {
+  font-style: italic;
 }
 
 .appointment-card__footer {
@@ -285,7 +371,8 @@
   gap: 15px;
   margin-top: 18px;
   padding-top: 17px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid
+    var(--color-border);
 }
 
 .appointment-card__actions {
@@ -328,7 +415,8 @@
 .reject-button,
 .confirm-button,
 .complete-button,
-.create-plan-button {
+.create-plan-button,
+.review-button {
   display: inline-flex;
   min-height: 38px;
   align-items: center;
@@ -371,9 +459,11 @@
 
 .confirm-button,
 .create-plan-button {
-  border: 1px solid var(--color-primary);
+  border: 1px solid
+    var(--color-primary);
   color: #ffffff;
-  background: var(--color-primary);
+  background:
+    var(--color-primary);
 
   &:hover {
     color: #ffffff;
@@ -389,6 +479,31 @@
   &:hover:not(:disabled) {
     background: #263d4e;
   }
+}
+
+.review-button {
+  border: 1px solid #d99b24;
+  color: #68490b;
+  background: #ffd978;
+
+  &:hover:not(:disabled) {
+    border-color: #c48715;
+    color: #ffffff;
+    background: #c48715;
+  }
+}
+
+.review-submitted {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 9px 13px;
+  border: 1px solid #b8ddc7;
+  border-radius: 10px;
+  color: #17603f;
+  background: #e5f5eb;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .appointments-error {
@@ -453,7 +568,8 @@
   place-items: center;
   border-radius: 50%;
   color: var(--color-primary);
-  background: var(--color-primary-soft);
+  background:
+    var(--color-primary-soft);
   font-size: 26px;
 }
 
@@ -461,15 +577,275 @@
   width: 42px;
   height: 42px;
   margin-bottom: 16px;
-  border: 4px solid var(--color-primary-soft);
-  border-top-color: var(--color-primary);
+  border: 4px solid
+    var(--color-primary-soft);
+  border-top-color:
+    var(--color-primary);
   border-radius: 50%;
-  animation: rotate 800ms linear infinite;
+  animation:
+    rotate 800ms linear infinite;
 }
 
 @keyframes rotate {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Modal za recenziju */
+
+.review-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 24px;
+  background:
+    rgb(5 27 22 / 78%);
+  backdrop-filter: blur(7px);
+}
+
+.review-modal {
+  width: min(620px, 100%);
+  max-height:
+    calc(100vh - 48px);
+  overflow-y: auto;
+  border-radius: 25px;
+  color: var(--color-text);
+  background: #ffffff;
+  box-shadow:
+    0 30px 90px
+    rgb(0 0 0 / 35%);
+}
+
+.review-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 28px 21px;
+  border-bottom: 1px solid
+    var(--color-border);
+
+  > div > span {
+    color: var(--color-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 7px 0 5px;
+    font-size: 26px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+}
+
+.review-modal__close {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid
+    var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  background: #ffffff;
+  font-size: 25px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color:
+      var(--color-primary);
+    color: #ffffff;
+    background:
+      var(--color-primary);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.review-form {
+  display: grid;
+  gap: 21px;
+  padding: 25px 28px 28px;
+}
+
+.review-form__appointment {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid
+    var(--color-border);
+  border-radius: 14px;
+  background:
+    var(--color-border);
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 14px;
+    background: #f8faf8;
+  }
+
+  small {
+    color: var(--color-muted);
+    font-size: 9px;
+    text-transform: uppercase;
+  }
+
+  strong {
+    font-size: 12px;
+    text-transform: capitalize;
+  }
+}
+
+.review-form__rating {
+  display: grid;
+  gap: 10px;
+
+  > span {
+    color: var(--color-text);
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.review-form__stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  button {
+    padding: 0;
+    border: 0;
+    color: #d9ddd9;
+    background: transparent;
+    font: inherit;
+    font-size: 39px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      color 150ms ease,
+      transform 150ms ease,
+      text-shadow 150ms ease;
+
+    &:hover:not(:disabled) {
+      transform:
+        scale(1.12);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .review-form__star--active {
+    color: #f2ad2e;
+    text-shadow:
+      0 3px 9px
+      rgb(242 173 46 / 30%);
+  }
+}
+
+.review-form__field {
+  display: grid;
+  gap: 8px;
+
+  > span {
+    color: var(--color-text);
+    font-size: 12px;
+    font-weight: 700;
+
+    small {
+      margin-left: 5px;
+      color: var(--color-muted);
+      font-size: 10px;
+      font-weight: 500;
+    }
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+    padding: 13px 15px;
+    border: 1px solid
+      var(--color-border);
+    border-radius: 13px;
+    outline: none;
+    color: var(--color-text);
+    background: #fbfcfa;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.65;
+
+    &:focus {
+      border-color:
+        var(--color-primary);
+      background: #ffffff;
+      box-shadow:
+        0 0 0 3px
+        rgb(15 76 58 / 10%);
+    }
+
+    &::placeholder {
+      color: #949d98;
+    }
+  }
+}
+
+.review-form__details {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  color: var(--color-muted);
+
+  small {
+    font-size: 9px;
+  }
+}
+
+.review-form__validation {
+  color: #b73b32;
+  font-size: 10px;
+}
+
+.review-form__error {
+  padding: 12px 14px;
+  border: 1px solid #f0c5c1;
+  border-radius: 12px;
+  color: #8e2f28;
+  background: #fff1f0;
+  font-size: 12px;
+}
+
+.review-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
   }
 }
 
@@ -506,8 +882,43 @@
   .reject-button,
   .confirm-button,
   .complete-button,
-  .create-plan-button {
+  .create-plan-button,
+  .review-button {
     width: 100%;
+  }
+
+  .review-submitted {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .review-modal-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .review-modal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius:
+      24px 24px 0 0;
+  }
+
+  .review-modal__header,
+  .review-form {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .review-form__actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
   }
 }
 
@@ -537,5 +948,29 @@
     width: 54px;
     height: 54px;
     min-width: 54px;
+  }
+
+  .appointment-card__review-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .appointment-card__review-stars {
+    span {
+      font-size: 24px;
+    }
+  }
+
+  .review-form__appointment {
+    grid-template-columns: 1fr;
+  }
+
+  .review-form__stars {
+    justify-content: space-between;
+    gap: 2px;
+
+    button {
+      font-size: 36px;
+    }
   }
 }

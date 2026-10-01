@@ -5,20 +5,40 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import {
+  InjectRepository,
+} from '@nestjs/typeorm';
 import {
   DataSource,
   Repository,
 } from 'typeorm';
-import { AvailabilitySlot } from '../availability/entities/availability-slot.entity';
-import { NotificationType } from '../notifications/enums/notification-type.enum';
-import { NotificationsService } from '../notifications/notifications.service';
-import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/enums/user-role.enum';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
-import { Appointment } from './entities/appointment.entity';
-import { AppointmentStatus } from './enums/appointment-status.enum';
+import {
+  AvailabilitySlot,
+} from '../availability/entities/availability-slot.entity';
+import {
+  NotificationType,
+} from '../notifications/enums/notification-type.enum';
+import {
+  NotificationsService,
+} from '../notifications/notifications.service';
+import {
+  User,
+} from '../users/entities/user.entity';
+import {
+  UserRole,
+} from '../users/enums/user-role.enum';
+import {
+  CreateAppointmentDto,
+} from './dto/create-appointment.dto';
+import {
+  UpdateAppointmentStatusDto,
+} from './dto/update-appointment-status.dto';
+import {
+  Appointment,
+} from './entities/appointment.entity';
+import {
+  AppointmentStatus,
+} from './enums/appointment-status.enum';
 
 @Injectable()
 export class AppointmentsService {
@@ -27,7 +47,8 @@ export class AppointmentsService {
     private readonly appointmentRepository:
       Repository<Appointment>,
 
-    private readonly dataSource: DataSource,
+    private readonly dataSource:
+      DataSource,
 
     private readonly notificationsService:
       NotificationsService,
@@ -65,24 +86,27 @@ export class AppointmentsService {
             );
           }
 
-          const slot = await slotRepository
-            .createQueryBuilder('slot')
-            .setLock('pessimistic_write')
-            .innerJoinAndSelect(
-              'slot.professional',
-              'professional',
-            )
-            .innerJoinAndSelect(
-              'professional.user',
-              'professionalUser',
-            )
-            .where(
-              'slot.id = :slotId',
-              {
-                slotId: dto.slotId,
-              },
-            )
-            .getOne();
+          const slot =
+            await slotRepository
+              .createQueryBuilder('slot')
+              .setLock(
+                'pessimistic_write',
+              )
+              .innerJoinAndSelect(
+                'slot.professional',
+                'professional',
+              )
+              .innerJoinAndSelect(
+                'professional.user',
+                'professionalUser',
+              )
+              .where(
+                'slot.id = :slotId',
+                {
+                  slotId: dto.slotId,
+                },
+              )
+              .getOne();
 
           if (!slot) {
             throw new NotFoundException(
@@ -104,7 +128,9 @@ export class AppointmentsService {
             );
           }
 
-          if (slot.startsAt <= new Date()) {
+          if (
+            slot.startsAt <= new Date()
+          ) {
             throw new BadRequestException(
               'Termin koji je počeo ili prošao ne može biti rezervisan.',
             );
@@ -126,17 +152,23 @@ export class AppointmentsService {
           const appointment =
             appointmentRepository.create({
               client,
+
               professional:
                 slot.professional,
+
               slot,
+
               status:
                 AppointmentStatus.PENDING,
+
               priceAtBooking:
                 slot.professional
                   .pricePerSession,
+
               clientNote:
                 dto.clientNote?.trim() ??
                 null,
+
               professionalNote: null,
             });
 
@@ -174,7 +206,8 @@ export class AppointmentsService {
             appointment.slot.startsAt,
           )}.`,
 
-        appointmentId: appointment.id,
+        appointmentId:
+          appointment.id,
       });
 
     return appointment;
@@ -185,60 +218,66 @@ export class AppointmentsService {
     role: UserRole,
   ): Promise<Appointment[]> {
     if (role === UserRole.CLIENT) {
-      return this.appointmentRepository.find({
-        where: {
-          client: {
-            id: userId,
-          },
-        },
-
-        relations: {
-          client: true,
-
-          professional: {
-            user: {
-              city: true,
+      return this.appointmentRepository
+        .find({
+          where: {
+            client: {
+              id: userId,
             },
           },
 
-          slot: true,
-        },
+          relations: {
+            client: true,
 
-        order: {
-          createdAt: 'DESC',
-        },
-      });
+            professional: {
+              user: {
+                city: true,
+              },
+            },
+
+            slot: true,
+
+            review: true,
+          },
+
+          order: {
+            createdAt: 'DESC',
+          },
+        });
     }
 
     if (
       role === UserRole.TRAINER ||
       role === UserRole.NUTRITIONIST
     ) {
-      return this.appointmentRepository.find({
-        where: {
-          professional: {
-            user: {
-              id: userId,
+      return this.appointmentRepository
+        .find({
+          where: {
+            professional: {
+              user: {
+                id: userId,
+              },
             },
           },
-        },
 
-        relations: {
-          client: {
-            city: true,
+          relations: {
+            client: {
+              city: true,
+            },
+
+            professional: {
+              user: true,
+            },
+
+            slot: true,
+
+            review: true,
           },
 
-          professional: {
-            user: true,
+          order: {
+            createdAt: 'DESC',
           },
-
-          slot: true,
-        },
-
-        order: {
-          createdAt: 'DESC',
-        },
-      });
+        });
     }
 
     if (role === UserRole.ADMIN) {
@@ -249,25 +288,28 @@ export class AppointmentsService {
   }
 
   findAll(): Promise<Appointment[]> {
-    return this.appointmentRepository.find({
-      relations: {
-        client: {
-          city: true,
-        },
-
-        professional: {
-          user: {
+    return this.appointmentRepository
+      .find({
+        relations: {
+          client: {
             city: true,
           },
+
+          professional: {
+            user: {
+              city: true,
+            },
+          },
+
+          slot: true,
+
+          review: true,
         },
 
-        slot: true,
-      },
-
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+        order: {
+          createdAt: 'DESC',
+        },
+      });
   }
 
   async cancel(
@@ -348,7 +390,8 @@ export class AppointmentsService {
         appointment.status =
           AppointmentStatus.CANCELLED;
 
-        appointment.slot.isBooked = false;
+        appointment.slot.isBooked =
+          false;
 
         await slotRepository.save(
           appointment.slot,
@@ -385,7 +428,8 @@ export class AppointmentsService {
             appointment.slot.startsAt,
           )}.`,
 
-        appointmentId: appointment.id,
+        appointmentId:
+          appointment.id,
       });
 
     return appointment;
@@ -457,7 +501,8 @@ export class AppointmentsService {
           appointment.slot.startsAt,
         );
 
-        appointment.status = dto.status;
+        appointment.status =
+          dto.status;
 
         if (
           dto.professionalNote !==
@@ -552,7 +597,8 @@ export class AppointmentsService {
             NotificationType
               .APPOINTMENT_CONFIRMED,
 
-          title: 'Termin je potvrđen',
+          title:
+            'Termin je potvrđen',
 
           message:
             `${appointment.professional.user.firstName} ` +
@@ -582,7 +628,8 @@ export class AppointmentsService {
             NotificationType
               .APPOINTMENT_REJECTED,
 
-          title: 'Zahtev je odbijen',
+          title:
+            'Zahtev je odbijen',
 
           message:
             `${appointment.professional.user.firstName} ` +
@@ -612,7 +659,8 @@ export class AppointmentsService {
             NotificationType
               .APPOINTMENT_COMPLETED,
 
-          title: 'Termin je završen',
+          title:
+            'Termin je završen',
 
           message:
             `Termin kod profesionalca ` +
@@ -664,6 +712,8 @@ export class AppointmentsService {
             },
 
             slot: true,
+
+            review: true,
           },
         });
 

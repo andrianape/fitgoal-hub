@@ -74,6 +74,12 @@ import {
 import {
   professionalsFeature,
 } from './store/professionals/professionals.reducer';
+import {
+  ReviewsEffects,
+} from './store/reviews/reviews.effects';
+import {
+  reviewsFeature,
+} from './store/reviews/reviews.reducer';
 
 export const appConfig:
   ApplicationConfig = {
@@ -106,6 +112,8 @@ export const appConfig:
 
       provideState(adminUsersFeature),
 
+      provideState(reviewsFeature),
+
       provideEffects(
         CitiesEffects,
         ProfessionalsEffects,
@@ -115,6 +123,7 @@ export const appConfig:
         NotificationsEffects,
         PlansEffects,
         AdminUsersEffects,
+        ReviewsEffects,
       ),
 
       provideStoreDevtools({
