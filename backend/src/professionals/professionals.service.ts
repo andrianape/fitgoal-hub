@@ -5,105 +5,55 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  InjectRepository,
-} from '@nestjs/typeorm';
-import {
-  Repository,
-} from 'typeorm';
-import {
-  NotificationsService,
-} from '../notifications/notifications.service';
-import {
-  NotificationType,
-} from '../notifications/enums/notification-type.enum';
-import {
-  User,
-} from '../users/entities/user.entity';
-import {
-  UserRole,
-} from '../users/enums/user-role.enum';
-import {
-  CreateProfessionalProfileDto,
-} from './dto/create-professional-profile.dto';
-import {
-  FilterProfessionalsDto,
-} from './dto/filter-professionals.dto';
-import {
-  UpdateProfessionalProfileDto,
-} from './dto/update-professional-profile.dto';
-import {
-  ProfessionalProfile,
-} from './entities/professional-profile.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/enums/notification-type.enum';
+import { User } from '../users/entities/user.entity';
+import { UserRole } from '../users/enums/user-role.enum';
+import { CreateProfessionalProfileDto } from './dto/create-professional-profile.dto';
+import { FilterProfessionalsDto } from './dto/filter-professionals.dto';
+import { UpdateProfessionalProfileDto } from './dto/update-professional-profile.dto';
+import { ProfessionalProfile } from './entities/professional-profile.entity';
 
 @Injectable()
 export class ProfessionalsService {
   constructor(
-    @InjectRepository(
-      ProfessionalProfile,
-    )
-    private readonly profileRepository:
-      Repository<ProfessionalProfile>,
+    @InjectRepository(ProfessionalProfile)
+    private readonly profileRepository: Repository<ProfessionalProfile>,
 
     @InjectRepository(User)
-    private readonly userRepository:
-      Repository<User>,
+    private readonly userRepository: Repository<User>,
 
-    private readonly notificationsService:
-      NotificationsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
-  async findAll(
-    filters: FilterProfessionalsDto,
-  ) {
+  async findAll(filters: FilterProfessionalsDto) {
     const page = filters.page;
     const limit = filters.limit;
-    const skip =
-      (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-    const query =
-      this.profileRepository
-        .createQueryBuilder('profile')
-        .leftJoinAndSelect(
-          'profile.user',
-          'user',
-        )
-        .leftJoinAndSelect(
-          'user.city',
-          'city',
-        )
-        .where(
-          'profile.isVerified = :isVerified',
-          {
-            isVerified: true,
-          },
-        );
+    const query = this.profileRepository
+      .createQueryBuilder('profile')
+      .leftJoinAndSelect('profile.user', 'user')
+      .leftJoinAndSelect('user.city', 'city')
+      .where('profile.isVerified = :isVerified', {
+        isVerified: true,
+      });
 
-    if (
-      filters.role !== undefined
-    ) {
-      query.andWhere(
-        'user.role = :role',
-        {
-          role: filters.role,
-        },
-      );
+    if (filters.role !== undefined) {
+      query.andWhere('user.role = :role', {
+        role: filters.role,
+      });
     }
 
-    if (
-      filters.cityId !== undefined
-    ) {
-      query.andWhere(
-        'city.id = :cityId',
-        {
-          cityId: filters.cityId,
-        },
-      );
+    if (filters.cityId !== undefined) {
+      query.andWhere('city.id = :cityId', {
+        cityId: filters.cityId,
+      });
     }
 
-    if (
-      filters.specialty !== undefined
-    ) {
+    if (filters.specialty !== undefined) {
       query.andWhere(
         `
           EXISTS (
@@ -116,55 +66,41 @@ export class ProfessionalsService {
           )
         `,
         {
-          specialty:
-            `%${filters.specialty.trim()}%`,
+          specialty: `%${filters.specialty.trim()}%`,
         },
       );
     }
 
-    if (
-      filters.maxPrice !== undefined
-    ) {
+    if (filters.maxPrice !== undefined) {
       query.andWhere(
         `
           profile.pricePerSession
           <= :maxPrice
         `,
         {
-          maxPrice:
-            filters.maxPrice,
+          maxPrice: filters.maxPrice,
         },
       );
     }
 
-    if (
-      filters.search !== undefined
-    ) {
-      const search =
-        `%${filters.search.trim()}%`;
+    if (filters.search?.trim()) {
+      const search = `%${filters.search.trim()}%`;
 
       query.andWhere(
-        `
-          (
-            LOWER(user.firstName)
-              LIKE LOWER(:search)
-            OR LOWER(user.lastName)
-              LIKE LOWER(:search)
-            OR LOWER(
-              CONCAT(
-                user.firstName,
-                ' ',
-                user.lastName
-              )
-            ) LIKE LOWER(:search)
-            OR LOWER(
-              COALESCE(
-                profile.workplaceName,
-                ''
-              )
-            ) LIKE LOWER(:search)
-          )
-        `,
+        `(
+          LOWER("user"."first_name") LIKE LOWER(:search)
+          OR LOWER("user"."last_name") LIKE LOWER(:search)
+          OR LOWER(
+            CONCAT(
+              "user"."first_name",
+              ' ',
+              "user"."last_name"
+            )
+          ) LIKE LOWER(:search)
+          OR LOWER(
+            COALESCE("profile"."workplace_name", '')
+          ) LIKE LOWER(:search)
+        )`,
         {
           search,
         },
@@ -172,75 +108,45 @@ export class ProfessionalsService {
     }
 
     query
-      .orderBy(
-        'profile.createdAt',
-        'DESC',
-      )
+      .orderBy('profile.createdAt', 'DESC')
       .skip(skip)
       .take(limit);
 
-    const [
-      data,
-      total,
-    ] =
-      await query.getManyAndCount();
+    const [data, total] = await query.getManyAndCount();
 
     return {
       data,
       total,
       page,
       limit,
-      totalPages:
-        Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit),
     };
   }
 
-  async findAllForAdmin():
-    Promise<ProfessionalProfile[]> {
+  async findAllForAdmin(): Promise<ProfessionalProfile[]> {
     return this.profileRepository
       .createQueryBuilder('profile')
-      .addSelect(
-        'profile.credentialNumber',
-      )
-      .addSelect(
-        'profile.verificationNote',
-      )
-      .leftJoinAndSelect(
-        'profile.user',
-        'user',
-      )
-      .leftJoinAndSelect(
-        'user.city',
-        'city',
-      )
-      .leftJoinAndSelect(
-        'profile.verifiedBy',
-        'verifiedBy',
-      )
-      .orderBy(
-        'profile.createdAt',
-        'DESC',
-      )
+      .addSelect('profile.credentialNumber')
+      .addSelect('profile.verificationNote')
+      .leftJoinAndSelect('profile.user', 'user')
+      .leftJoinAndSelect('user.city', 'city')
+      .leftJoinAndSelect('profile.verifiedBy', 'verifiedBy')
+      .orderBy('profile.createdAt', 'DESC')
       .getMany();
   }
 
-  async findOne(
-    id: number,
-  ): Promise<ProfessionalProfile> {
-    const profile =
-      await this.profileRepository
-        .findOne({
-          where: {
-            id,
-            isVerified: true,
-          },
-
-          relations: {
-            user: {
-              city: true,
-            },
-          },
-        });
+  async findOne(id: number): Promise<ProfessionalProfile> {
+    const profile = await this.profileRepository.findOne({
+      where: {
+        id,
+        isVerified: true,
+      },
+      relations: {
+        user: {
+          city: true,
+        },
+      },
+    });
 
     if (!profile) {
       throw new NotFoundException(
@@ -251,37 +157,18 @@ export class ProfessionalsService {
     return profile;
   }
 
-  async findOwn(
-    userId: number,
-  ): Promise<ProfessionalProfile> {
-    const profile =
-      await this.profileRepository
-        .createQueryBuilder('profile')
-        .addSelect(
-          'profile.credentialNumber',
-        )
-        .addSelect(
-          'profile.verificationNote',
-        )
-        .leftJoinAndSelect(
-          'profile.user',
-          'user',
-        )
-        .leftJoinAndSelect(
-          'user.city',
-          'city',
-        )
-        .leftJoinAndSelect(
-          'profile.verifiedBy',
-          'verifiedBy',
-        )
-        .where(
-          'user.id = :userId',
-          {
-            userId,
-          },
-        )
-        .getOne();
+  async findOwn(userId: number): Promise<ProfessionalProfile> {
+    const profile = await this.profileRepository
+      .createQueryBuilder('profile')
+      .addSelect('profile.credentialNumber')
+      .addSelect('profile.verificationNote')
+      .leftJoinAndSelect('profile.user', 'user')
+      .leftJoinAndSelect('user.city', 'city')
+      .leftJoinAndSelect('profile.verifiedBy', 'verifiedBy')
+      .where('user.id = :userId', {
+        userId,
+      })
+      .getOne();
 
     if (!profile) {
       throw new NotFoundException(
@@ -296,14 +183,12 @@ export class ProfessionalsService {
     userId: number,
     dto: CreateProfessionalProfileDto,
   ): Promise<ProfessionalProfile> {
-    const user =
-      await this.userRepository
-        .findOne({
-          where: {
-            id: userId,
-            isActive: true,
-          },
-        });
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+        isActive: true,
+      },
+    });
 
     if (!user) {
       throw new NotFoundException(
@@ -311,19 +196,15 @@ export class ProfessionalsService {
       );
     }
 
-    this.validateProfessionalRole(
-      user.role,
-    );
+    this.validateProfessionalRole(user.role);
 
-    const existingProfile =
-      await this.profileRepository
-        .findOne({
-          where: {
-            user: {
-              id: userId,
-            },
-          },
-        });
+    const existingProfile = await this.profileRepository.findOne({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
 
     if (existingProfile) {
       throw new ConflictException(
@@ -331,204 +212,107 @@ export class ProfessionalsService {
       );
     }
 
-    const workplaceName =
-      dto.workplaceName?.trim() ??
-      null;
+    const workplaceName = dto.workplaceName?.trim() ?? null;
 
-    const specialties =
-      this.normalizeSpecialties(
-        dto.specialties,
-      );
+    const specialties = this.normalizeSpecialties(dto.specialties);
 
     this.validateProfessionalData({
       role: user.role,
       workplaceName,
-      address:
-        dto.address.trim(),
-      qualificationType:
-        dto.qualificationType.trim(),
-      qualificationName:
-        dto.qualificationName.trim(),
-      issuingInstitution:
-        dto.issuingInstitution.trim(),
-      credentialNumber:
-        dto.credentialNumber.trim(),
+      address: dto.address.trim(),
+      qualificationType: dto.qualificationType.trim(),
+      qualificationName: dto.qualificationName.trim(),
+      issuingInstitution: dto.issuingInstitution.trim(),
+      credentialNumber: dto.credentialNumber.trim(),
     });
 
-    const profile =
-      this.profileRepository.create({
-        user,
+    const profile = this.profileRepository.create({
+      user,
+      biography: dto.biography.trim(),
+      yearsOfExperience: dto.yearsOfExperience,
+      pricePerSession: dto.pricePerSession,
+      specialties,
+      workplaceName,
+      address: dto.address.trim(),
+      qualificationType: dto.qualificationType.trim(),
+      qualificationName: dto.qualificationName.trim(),
+      issuingInstitution: dto.issuingInstitution.trim(),
+      qualificationYear: dto.qualificationYear,
+      credentialNumber: dto.credentialNumber.trim(),
+      isVerified: false,
+      verificationNote: null,
+      verifiedAt: null,
+      verifiedBy: null,
+    });
 
-        biography:
-          dto.biography.trim(),
+    const savedProfile = await this.profileRepository.save(profile);
 
-        yearsOfExperience:
-          dto.yearsOfExperience,
-
-        pricePerSession:
-          dto.pricePerSession,
-
-        specialties,
-
-        workplaceName,
-
-        address:
-          dto.address.trim(),
-
-        qualificationType:
-          dto.qualificationType.trim(),
-
-        qualificationName:
-          dto.qualificationName.trim(),
-
-        issuingInstitution:
-          dto.issuingInstitution.trim(),
-
-        qualificationYear:
-          dto.qualificationYear,
-
-        credentialNumber:
-          dto.credentialNumber.trim(),
-
-        isVerified: false,
-
-        verificationNote: null,
-        verifiedAt: null,
-        verifiedBy: null,
-      });
-
-    const savedProfile =
-      await this.profileRepository
-        .save(profile);
-
-    return this.findOwn(
-      savedProfile.user.id,
-    );
+    return this.findOwn(savedProfile.user.id);
   }
 
   async update(
     userId: number,
     dto: UpdateProfessionalProfileDto,
   ): Promise<ProfessionalProfile> {
-    const profile =
-      await this.findOwn(userId);
+    const profile = await this.findOwn(userId);
 
-    this.validateProfessionalRole(
-      profile.user.role,
-    );
+    this.validateProfessionalRole(profile.user.role);
 
-    if (
-      dto.biography !== undefined
-    ) {
-      profile.biography =
-        dto.biography.trim();
+    if (dto.biography !== undefined) {
+      profile.biography = dto.biography.trim();
     }
 
-    if (
-      dto.yearsOfExperience !==
-      undefined
-    ) {
-      profile.yearsOfExperience =
-        dto.yearsOfExperience;
+    if (dto.yearsOfExperience !== undefined) {
+      profile.yearsOfExperience = dto.yearsOfExperience;
     }
 
-    if (
-      dto.pricePerSession !==
-      undefined
-    ) {
-      profile.pricePerSession =
-        dto.pricePerSession;
+    if (dto.pricePerSession !== undefined) {
+      profile.pricePerSession = dto.pricePerSession;
     }
 
-    if (
-      dto.specialties !== undefined
-    ) {
-      profile.specialties =
-        this.normalizeSpecialties(
-          dto.specialties,
-        );
+    if (dto.specialties !== undefined) {
+      profile.specialties = this.normalizeSpecialties(dto.specialties);
     }
 
-    if (
-      dto.workplaceName !==
-      undefined
-    ) {
-      const workplaceName =
-        dto.workplaceName.trim();
+    if (dto.workplaceName !== undefined) {
+      const workplaceName = dto.workplaceName.trim();
 
       profile.workplaceName =
-        workplaceName.length > 0
-          ? workplaceName
-          : null;
+        workplaceName.length > 0 ? workplaceName : null;
     }
 
-    if (
-      dto.address !== undefined
-    ) {
-      profile.address =
-        dto.address.trim();
+    if (dto.address !== undefined) {
+      profile.address = dto.address.trim();
     }
 
-    if (
-      dto.qualificationType !==
-      undefined
-    ) {
-      profile.qualificationType =
-        dto.qualificationType.trim();
+    if (dto.qualificationType !== undefined) {
+      profile.qualificationType = dto.qualificationType.trim();
     }
 
-    if (
-      dto.qualificationName !==
-      undefined
-    ) {
-      profile.qualificationName =
-        dto.qualificationName.trim();
+    if (dto.qualificationName !== undefined) {
+      profile.qualificationName = dto.qualificationName.trim();
     }
 
-    if (
-      dto.issuingInstitution !==
-      undefined
-    ) {
-      profile.issuingInstitution =
-        dto.issuingInstitution.trim();
+    if (dto.issuingInstitution !== undefined) {
+      profile.issuingInstitution = dto.issuingInstitution.trim();
     }
 
-    if (
-      dto.qualificationYear !==
-      undefined
-    ) {
-      profile.qualificationYear =
-        dto.qualificationYear;
+    if (dto.qualificationYear !== undefined) {
+      profile.qualificationYear = dto.qualificationYear;
     }
 
-    if (
-      dto.credentialNumber !==
-      undefined
-    ) {
-      profile.credentialNumber =
-        dto.credentialNumber.trim();
+    if (dto.credentialNumber !== undefined) {
+      profile.credentialNumber = dto.credentialNumber.trim();
     }
 
     this.validateProfessionalData({
       role: profile.user.role,
-
-      workplaceName:
-        profile.workplaceName,
-
-      address:
-        profile.address,
-
-      qualificationType:
-        profile.qualificationType,
-
-      qualificationName:
-        profile.qualificationName,
-
-      issuingInstitution:
-        profile.issuingInstitution,
-
-      credentialNumber:
-        profile.credentialNumber,
+      workplaceName: profile.workplaceName,
+      address: profile.address,
+      qualificationType: profile.qualificationType,
+      qualificationName: profile.qualificationName,
+      issuingInstitution: profile.issuingInstitution,
+      credentialNumber: profile.credentialNumber,
     });
 
     profile.isVerified = false;
@@ -536,8 +320,7 @@ export class ProfessionalsService {
     profile.verifiedAt = null;
     profile.verifiedBy = null;
 
-    await this.profileRepository
-      .save(profile);
+    await this.profileRepository.save(profile);
 
     return this.findOwn(userId);
   }
@@ -548,39 +331,26 @@ export class ProfessionalsService {
     verificationNote?: string,
     adminUserId?: number,
   ): Promise<ProfessionalProfile> {
-    const profile =
-      await this.findProfileForAdmin(
-        id,
-      );
+    const profile = await this.findProfileForAdmin(id);
 
-    const normalizedNote =
-      verificationNote?.trim() ??
-      '';
+    const normalizedNote = verificationNote?.trim() ?? '';
 
-    if (
-      !isVerified &&
-      normalizedNote.length < 2
-    ) {
+    if (!isVerified && normalizedNote.length < 2) {
       throw new BadRequestException(
         'Razlog odbijanja profesionalnog profila je obavezan.',
       );
     }
 
-    let administrator:
-      User | null = null;
+    let administrator: User | null = null;
 
-    if (
-      adminUserId !== undefined
-    ) {
-      administrator =
-        await this.userRepository
-          .findOne({
-            where: {
-              id: adminUserId,
-              role: UserRole.ADMIN,
-              isActive: true,
-            },
-          });
+    if (adminUserId !== undefined) {
+      administrator = await this.userRepository.findOne({
+        where: {
+          id: adminUserId,
+          role: UserRole.ADMIN,
+          isActive: true,
+        },
+      });
 
       if (!administrator) {
         throw new ForbiddenException(
@@ -589,93 +359,51 @@ export class ProfessionalsService {
       }
     }
 
-    profile.isVerified =
-      isVerified;
+    profile.isVerified = isVerified;
 
     profile.verificationNote =
-      normalizedNote.length > 0
-        ? normalizedNote
-        : null;
+      normalizedNote.length > 0 ? normalizedNote : null;
 
-    profile.verifiedAt =
-      new Date();
+    profile.verifiedAt = new Date();
+    profile.verifiedBy = administrator;
 
-    profile.verifiedBy =
-      administrator;
-
-    await this.profileRepository
-      .save(profile);
+    await this.profileRepository.save(profile);
 
     if (isVerified) {
-      await this.notificationsService
-        .createAndSend({
-          userId:
-            profile.user.id,
-
-          type:
-            NotificationType
-              .PROFESSIONAL_PROFILE_VERIFIED,
-
-          title:
-            'Profesionalni profil je odobren',
-
-          message:
-            'Tvoj profesionalni profil je verifikovan i sada je vidljiv klijentima.',
-        });
+      await this.notificationsService.createAndSend({
+        userId: profile.user.id,
+        type: NotificationType.PROFESSIONAL_PROFILE_VERIFIED,
+        title: 'Profesionalni profil je odobren',
+        message:
+          'Tvoj profesionalni profil je verifikovan i sada je vidljiv klijentima.',
+      });
     } else {
-      await this.notificationsService
-        .createAndSend({
-          userId:
-            profile.user.id,
-
-          type:
-            NotificationType
-              .PROFESSIONAL_PROFILE_REJECTED,
-
-          title:
-            'Profesionalni profil nije odobren',
-
-          message:
-            `Profil je potrebno dopuniti ili ispraviti. Razlog: ${normalizedNote}`,
-        });
+      await this.notificationsService.createAndSend({
+        userId: profile.user.id,
+        type: NotificationType.PROFESSIONAL_PROFILE_REJECTED,
+        title: 'Profesionalni profil nije odobren',
+        message:
+          `Profil je potrebno dopuniti ili ispraviti. Razlog: ${normalizedNote}`,
+      });
     }
 
-    return this.findProfileForAdmin(
-      id,
-    );
+    return this.findProfileForAdmin(id);
   }
 
   private async findProfileForAdmin(
     id: number,
   ): Promise<ProfessionalProfile> {
-    const profile =
-      await this.profileRepository
-        .createQueryBuilder('profile')
-        .addSelect(
-          'profile.credentialNumber',
-        )
-        .addSelect(
-          'profile.verificationNote',
-        )
-        .leftJoinAndSelect(
-          'profile.user',
-          'user',
-        )
-        .leftJoinAndSelect(
-          'user.city',
-          'city',
-        )
-        .leftJoinAndSelect(
-          'profile.verifiedBy',
-          'verifiedBy',
-        )
-        .where(
-          'profile.id = :id',
-          {
-            id,
-          },
-        )
-        .getOne();
+    const profile = await this.profileRepository
+      .createQueryBuilder('profile')
+      .addSelect('profile.credentialNumber')
+      .addSelect('profile.verificationNote')
+      .leftJoinAndSelect('profile.user', 'user')
+      .leftJoinAndSelect('user.city', 'city')
+      .leftJoinAndSelect('profile.verifiedBy', 'verifiedBy')
+      .where('profile.id = :id', {
+        id,
+      })
+      .getOne();
 
     if (!profile) {
       throw new NotFoundException(
@@ -686,13 +414,10 @@ export class ProfessionalsService {
     return profile;
   }
 
-  private validateProfessionalRole(
-    role: UserRole,
-  ): void {
+  private validateProfessionalRole(role: UserRole): void {
     if (
       role !== UserRole.TRAINER &&
-      role !==
-        UserRole.NUTRITIONIST
+      role !== UserRole.NUTRITIONIST
     ) {
       throw new ForbiddenException(
         'Profesionalni profil može imati samo trener ili nutricionista.',
@@ -700,31 +425,20 @@ export class ProfessionalsService {
     }
   }
 
-  private validateProfessionalData(
-    data: {
-      role: UserRole;
-      workplaceName:
-        string | null;
-      address:
-        string | null;
-      qualificationType:
-        string | null;
-      qualificationName:
-        string | null;
-      issuingInstitution:
-        string | null;
-      credentialNumber:
-        string | null;
-    },
-  ): void {
+  private validateProfessionalData(data: {
+    role: UserRole;
+    workplaceName: string | null;
+    address: string | null;
+    qualificationType: string | null;
+    qualificationName: string | null;
+    issuingInstitution: string | null;
+    credentialNumber: string | null;
+  }): void {
     if (
-      data.role ===
-        UserRole.TRAINER &&
+      data.role === UserRole.TRAINER &&
       (
         !data.workplaceName ||
-        data.workplaceName
-          .trim()
-          .length < 2
+        data.workplaceName.trim().length < 2
       )
     ) {
       throw new BadRequestException(
@@ -732,10 +446,7 @@ export class ProfessionalsService {
       );
     }
 
-    if (
-      !data.address ||
-      data.address.trim().length < 5
-    ) {
+    if (!data.address || data.address.trim().length < 5) {
       throw new BadRequestException(
         'Tačna adresa mesta rada je obavezna.',
       );
@@ -743,9 +454,7 @@ export class ProfessionalsService {
 
     if (
       !data.qualificationType ||
-      data.qualificationType
-        .trim()
-        .length < 2
+      data.qualificationType.trim().length < 2
     ) {
       throw new BadRequestException(
         'Vrsta kvalifikacije je obavezna.',
@@ -754,9 +463,7 @@ export class ProfessionalsService {
 
     if (
       !data.qualificationName ||
-      data.qualificationName
-        .trim()
-        .length < 2
+      data.qualificationName.trim().length < 2
     ) {
       throw new BadRequestException(
         'Naziv kvalifikacije je obavezan.',
@@ -765,9 +472,7 @@ export class ProfessionalsService {
 
     if (
       !data.issuingInstitution ||
-      data.issuingInstitution
-        .trim()
-        .length < 2
+      data.issuingInstitution.trim().length < 2
     ) {
       throw new BadRequestException(
         'Ustanova koja je izdala kvalifikaciju je obavezna.',
@@ -776,9 +481,7 @@ export class ProfessionalsService {
 
     if (
       !data.credentialNumber ||
-      data.credentialNumber
-        .trim()
-        .length < 2
+      data.credentialNumber.trim().length < 2
     ) {
       throw new BadRequestException(
         'Broj kvalifikacije ili sertifikata je obavezan.',
@@ -789,24 +492,15 @@ export class ProfessionalsService {
   private normalizeSpecialties(
     specialties: string[],
   ): string[] {
-    const normalized =
-      [
-        ...new Set(
-          specialties
-            .map(
-              (specialty) =>
-                specialty.trim(),
-            )
-            .filter(
-              (specialty) =>
-                specialty.length > 0,
-            ),
-        ),
-      ];
+    const normalized = [
+      ...new Set(
+        specialties
+          .map((specialty) => specialty.trim())
+          .filter((specialty) => specialty.length > 0),
+      ),
+    ];
 
-    if (
-      normalized.length === 0
-    ) {
+    if (normalized.length === 0) {
       throw new BadRequestException(
         'Potrebno je uneti najmanje jednu specijalnost.',
       );

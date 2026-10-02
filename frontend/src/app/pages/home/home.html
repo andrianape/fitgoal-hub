@@ -17,43 +17,28 @@
         minuta i prati plan napravljen baš za tebe.
       </p>
 
-      <form class="search">
-        <label class="search__field">
-          <span aria-hidden="true">⌕</span>
-
-          <input
-            type="search"
-            placeholder="Ime ili specijalnost"
-            aria-label="Ime ili specijalnost"
-          />
-        </label>
-
-        <label class="search__field search__field--city">
-          <span aria-hidden="true">⌖</span>
-
-          <select aria-label="Izaberite grad">
-            <option value="">
-              Svi gradovi
-            </option>
-
-            @for (
-              city of cities();
-              track city.id
-            ) {
-              <option [value]="city.id">
-                {{ city.name }}
-              </option>
-            }
-          </select>
-        </label>
-
-        <a
-          class="primary-button search__button"
-          routerLink="/professionals"
-        >
-          Pronađi stručnjaka
-        </a>
-      </form>
+      <a
+        class="primary-button"
+        routerLink="/professionals"
+        style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          max-width: 100%;
+          box-sizing: border-box;
+          margin-top: 32px;
+          min-height: 58px;
+          padding: 16px 28px;
+          border-radius: 14px;
+          font-size: 16px;
+          font-weight: 700;
+          box-shadow: var(--shadow-medium);
+        "
+      >
+        Pronađi stručnjaka
+        <span aria-hidden="true">→</span>
+      </a>
 
       <div class="hero__trust">
         <div class="hero__avatars">
