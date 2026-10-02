@@ -7,17 +7,15 @@
 
       <p>
         Pregledaj verifikovane trenere i nutricioniste,
-        istraži njihove specijalnosti i pronađi osobu koja
-        odgovara tvojim potrebama.
+        istraži njihove specijalnosti i pronađi osobu
+        koja odgovara tvojim potrebama.
       </p>
     </header>
 
     <div class="role-filter">
       <button
         type="button"
-        [class.role-filter__button--active]="
-          selectedRole === ''
-        "
+        [class.role-filter__button--active]="selectedRole === ''"
         (click)="selectRole('')"
       >
         Svi profesionalci
@@ -25,9 +23,7 @@
 
       <button
         type="button"
-        [class.role-filter__button--active]="
-          selectedRole === 'trainer'
-        "
+        [class.role-filter__button--active]="selectedRole === 'trainer'"
         (click)="selectRole('trainer')"
       >
         Treneri
@@ -35,19 +31,14 @@
 
       <button
         type="button"
-        [class.role-filter__button--active]="
-          selectedRole === 'nutritionist'
-        "
+        [class.role-filter__button--active]="selectedRole === 'nutritionist'"
         (click)="selectRole('nutritionist')"
       >
         Nutricionisti
       </button>
     </div>
 
-    <form
-      class="filters"
-      (ngSubmit)="applyFilters()"
-    >
+    <form class="filters" (ngSubmit)="applyFilters()">
       <label class="filters__field">
         <span>Ime ili prezime</span>
 
@@ -77,10 +68,7 @@
       </label>
 
       <div class="filters__actions">
-        <button
-          class="primary-button"
-          type="submit"
-        >
+        <button class="primary-button" type="submit">
           Primeni filtere
         </button>
 
@@ -115,6 +103,7 @@
     } @else if (error()) {
       <div class="status-message status-message--error">
         <h2>Došlo je do greške</h2>
+
         <p>{{ error() }}</p>
 
         <button
@@ -130,8 +119,7 @@
         <h2>Nema pronađenih profesionalaca</h2>
 
         <p>
-          Pokušaj da promeniš ili ukloniš izabrane
-          filtere.
+          Pokušaj da promeniš ili ukloniš izabrane filtere.
         </p>
 
         <button
@@ -159,20 +147,12 @@
                 ) {
                   <img
                     [src]="profileImageUrl"
-                    [alt]="
-                      'Profilna fotografija korisnika ' +
-                      professional.user.firstName +
-                      ' ' +
-                      professional.user.lastName
-                    "
+                    [alt]="'Profilna fotografija korisnika ' + professional.user.firstName + ' ' + professional.user.lastName"
                     (error)="handleImageError($event)"
                   />
 
                   <span
-                    class="
-                      professional-card__initials
-                      professional-card__initials--fallback
-                    "
+                    class="professional-card__initials professional-card__initials--fallback"
                   >
                     {{
                       getInitials(
@@ -182,9 +162,7 @@
                     }}
                   </span>
                 } @else {
-                  <span
-                    class="professional-card__initials"
-                  >
+                  <span class="professional-card__initials">
                     {{
                       getInitials(
                         professional.user.firstName,
@@ -197,11 +175,7 @@
 
               <div>
                 <span class="professional-card__role">
-                  {{
-                    getRoleLabel(
-                      professional.user.role
-                    )
-                  }}
+                  {{ getRoleLabel(professional.user.role) }}
                 </span>
 
                 <h2>
@@ -212,7 +186,7 @@
                 <p>
                   {{
                     professional.user.city?.name ??
-                      'Grad nije naveden'
+                    'Grad nije naveden'
                   }}
                 </p>
               </div>
@@ -222,9 +196,7 @@
               {{ professional.biography }}
             </p>
 
-            <div
-              class="professional-card__specialties"
-            >
+            <div class="professional-card__specialties">
               @for (
                 specialty of professional.specialties;
                 track specialty
@@ -234,14 +206,43 @@
             </div>
 
             <dl class="professional-card__details">
+              <div
+                style="min-width: 0; overflow-wrap: anywhere"
+              >
+                <dt>
+                  {{
+                    professional.user.role === 'trainer'
+                      ? 'Teretana'
+                      : 'Radno mesto'
+                  }}
+                </dt>
+
+                <dd>
+                  {{
+                    professional.workplaceName ||
+                    'Nije navedeno'
+                  }}
+                </dd>
+              </div>
+
+              <div
+                style="min-width: 0; overflow-wrap: anywhere"
+              >
+                <dt>Adresa</dt>
+
+                <dd>
+                  {{
+                    professional.address ||
+                    'Nije navedena'
+                  }}
+                </dd>
+              </div>
+
               <div>
                 <dt>Iskustvo</dt>
 
                 <dd>
-                  {{
-                    professional.yearsOfExperience
-                  }}
-                  god.
+                  {{ professional.yearsOfExperience }} god.
                 </dd>
               </div>
 
@@ -249,19 +250,13 @@
                 <dt>Cena termina</dt>
 
                 <dd>
-                  {{
-                    professional.pricePerSession
-                  }}
-                  RSD
+                  {{ professional.pricePerSession }} RSD
                 </dd>
               </div>
             </dl>
 
             <a
-              class="
-                primary-button
-                professional-card__link
-              "
+              class="primary-button professional-card__link"
               [routerLink]="[
                 '/professionals',
                 professional.id
@@ -281,9 +276,7 @@
           <button
             class="secondary-button"
             type="button"
-            [disabled]="
-              currentFilters().page === 1
-            "
+            [disabled]="currentFilters().page === 1"
             (click)="previousPage()"
           >
             ← Prethodna
@@ -291,25 +284,15 @@
 
           <span>
             Stranica
-
-            <strong>
-              {{ currentFilters().page }}
-            </strong>
-
+            <strong>{{ currentFilters().page }}</strong>
             od
-
-            <strong>
-              {{ totalPages() }}
-            </strong>
+            <strong>{{ totalPages() }}</strong>
           </span>
 
           <button
             class="secondary-button"
             type="button"
-            [disabled]="
-              currentFilters().page ===
-              totalPages()
-            "
+            [disabled]="currentFilters().page === totalPages()"
             (click)="nextPage()"
           >
             Sledeća →

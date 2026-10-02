@@ -12,6 +12,7 @@
     } @else if (error()) {
       <div class="profile-status">
         <h1>Profil nije dostupan</h1>
+
         <p>{{ error() }}</p>
 
         <div class="profile-status__actions">
@@ -146,7 +147,10 @@
             <h2>Specijalnosti</h2>
 
             <div class="specialties">
-              @for (specialty of profile.specialties; track specialty) {
+              @for (
+                specialty of profile.specialties;
+                track specialty
+              ) {
                 <span>{{ specialty }}</span>
               }
             </div>
@@ -220,6 +224,28 @@
             <h2>Informacije</h2>
 
             <dl>
+              <div style="overflow-wrap: anywhere">
+                <dt>
+                  {{
+                    profile.user.role === 'trainer'
+                      ? 'Teretana'
+                      : 'Radno mesto'
+                  }}
+                </dt>
+
+                <dd>
+                  {{ profile.workplaceName || 'Nije navedeno' }}
+                </dd>
+              </div>
+
+              <div style="overflow-wrap: anywhere">
+                <dt>Adresa</dt>
+
+                <dd>
+                  {{ profile.address || 'Nije navedena' }}
+                </dd>
+              </div>
+
               <div>
                 <dt>Uloga</dt>
                 <dd>{{ getRoleLabel(profile.user.role) }}</dd>
