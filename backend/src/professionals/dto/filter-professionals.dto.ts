@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { UserRole } from '../../users/enums/user-role.enum';
 
 export class FilterProfessionalsDto {
@@ -12,6 +19,10 @@ export class FilterProfessionalsDto {
   @IsInt()
   @Min(1)
   cityId?: number;
+
+  @IsOptional()
+  @IsString()
+  citySearch?: string;
 
   @IsOptional()
   @IsString()

@@ -53,6 +53,15 @@ export class ProfessionalsService {
       });
     }
 
+    if (filters.citySearch?.trim()) {
+      query.andWhere(
+        'LOWER("city"."name") LIKE LOWER(:citySearch)',
+        {
+          citySearch: `%${filters.citySearch.trim()}%`,
+        },
+      );
+    }
+
     if (filters.specialty !== undefined) {
       query.andWhere(
         `
@@ -214,7 +223,9 @@ export class ProfessionalsService {
 
     const workplaceName = dto.workplaceName?.trim() ?? null;
 
-    const specialties = this.normalizeSpecialties(dto.specialties);
+    const specialties = this.normalizeSpecialties(
+      dto.specialties,
+    );
 
     this.validateProfessionalData({
       role: user.role,
@@ -245,7 +256,9 @@ export class ProfessionalsService {
       verifiedBy: null,
     });
 
-    const savedProfile = await this.profileRepository.save(profile);
+    const savedProfile = await this.profileRepository.save(
+      profile,
+    );
 
     return this.findOwn(savedProfile.user.id);
   }
@@ -271,7 +284,9 @@ export class ProfessionalsService {
     }
 
     if (dto.specialties !== undefined) {
-      profile.specialties = this.normalizeSpecialties(dto.specialties);
+      profile.specialties = this.normalizeSpecialties(
+        dto.specialties,
+      );
     }
 
     if (dto.workplaceName !== undefined) {
